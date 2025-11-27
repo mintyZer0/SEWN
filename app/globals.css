@@ -1,17 +1,29 @@
 @import "tailwindcss";
+@plugin "daisyui";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #7b3b7b;
+  --secondary: #fff5cd;
+  --heading: #7b3b7b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-heading: var(--heading);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+@layer components {
+  .bg-orchid {
+    @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#CEA9D0];
+  }
+}
 /* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
