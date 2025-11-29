@@ -5,25 +5,27 @@ import Image from "next/image";
 export default function Header() {
   return (
     <header className="sticky top-0 bottom-0 left-0 right-0 z-50">
-      <div className="flex bg-secondary min-h-6 py-6 px-8 w-dvw">
+      <div className="flex bg-secondary min-h-6 py-4 px-4 sm:px-8 w-dvw">
         <div className="flex flex-1">
           <Link href="">
             <Image
-              src="/assets/placeholder-600x400.svg"
+              src="/assets/logo.png"
               alt="logo"
-              height={40}
-              width={40}
+              height={100}
+              width={100}
+              className="w-16 md:w-30 h-auto"
+              // fill={true}
             ></Image>
           </Link>
         </div>
-        <div className="flex align-center justify-center text-primary text-2x1 gap-x-8">
+        <div className="flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
           <Link href="">Home</Link>
           <Link href="">Shops</Link>
           <Link href="">Services</Link>
           <Link href="">Contacts</Link>
           <Link href="">About</Link>
         </div>
-        <div className="flex flex-1 justify-end gap-x-2">
+        <div className="flex flex-1 justify-end items-center gap-x-2">
           <Link href="">
             <Image
               src="/assets/placeholder-600x400.svg"
