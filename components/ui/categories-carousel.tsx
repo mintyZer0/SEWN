@@ -3,18 +3,17 @@ import Image from "next/image";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "react-feather";
 
-export interface CategoryItem {
+export interface CarouselItem {
   imageSrc: string;
   alt: string;
   category: string;
   id: string;
 }
-
-interface CarouselItemProps {
-  items: CategoryItem[];
+interface CategoriesCarouselProps {
+  items: CarouselItem[];
 }
 
-export default function CategoriesCarousel({ items }: CarouselItemProps) {
+export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -50,7 +49,7 @@ export default function CategoriesCarousel({ items }: CarouselItemProps) {
                   {item.category}
                 </p>
               </div>
-              <div className="absolute inset-0 bg-linear-to-t from-black/70 from-5% via-40% via-gray-300/30 to-100% to-white/5 "></div>
+              <div className="absolute inset-0 bg-linear-to-t from-black/70 from-5% via-40% via-gray-300/30 to-100% to-white/5 group-hover:scale-102 transform transition-transform duration-500"></div>
             </div>
           </div>
         ))}
