@@ -34,7 +34,7 @@ export default function Header() {
 
         <nav className="flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.name} href={link.href}>
               {link.name}
             </Link>
           ))}
@@ -45,7 +45,7 @@ export default function Header() {
             const Icon = button.icon;
             return (
               <Link
-                key={button.href}
+                key={button.label}
                 href={button.href}
                 className="text-primary hover:opacity-70 transition-opacity"
                 aria-label={button.label}
