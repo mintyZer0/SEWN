@@ -6,8 +6,8 @@ export default function NewProducts() {
       <div className="flex flex-col justify-center items-center p-4 m-4">
         <h2 className="text-5xl text-primary">newly added products</h2>
       </div>
-      <div className="w-full bg-gray-50">
-        <div className="grid grid-cols-3 gap-1 w-40 justify-content-center">
+      <div className="flex justify-center w-full h-auto bg-gray-50">
+        <div className="grid grid- grid-cols-3 gap-x-12">
           <NewProductCard
             productName="Urban Grace"
             seller="Aling Maria"
