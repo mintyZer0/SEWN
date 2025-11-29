@@ -45,9 +45,9 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
                 sizes="600px"
               />
               <div className="absolute left-1/2 bottom-4 -translate-x-1/2 z-10">
-                <p className="text-3xl text-white drop-shadow-lg">
+                <h3 className="text-3xl text-white drop-shadow-lg">
                   {item.category}
-                </p>
+                </h3>
               </div>
               <div className="absolute inset-0 bg-linear-to-t from-black/70 from-5% via-40% via-gray-300/30 to-100% to-white/5 group-hover:scale-102 transform transition-transform duration-500"></div>
             </div>
