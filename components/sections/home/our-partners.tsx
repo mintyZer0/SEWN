@@ -1,6 +1,16 @@
 import Image from "next/image";
 
 export default function OurPartners() {
+  const partners = [
+    { name: "LGU", logo: "/assets/lgu-logo.png", isImage: true },
+    { name: "DOST", logo: "/assets/dost-logo.png", isImage: true },
+    { name: "DTI", logo: "/assets/dti-logo.png", isImage: true },
+    { name: "KOICA", logo: "/assets/koica-logo.png", isImage: true },
+    { name: "PCCI", logo: "/assets/pcci-logo.png", isImage: true },
+    { name: "DICT", logo: "/assets/dict-logo.png", isImage: true },
+    { name: "NGO", isImage: false },
+  ];
+
   return (
     <div className="relative w-full h-120 flex items-center justify-center">
       <Image
@@ -16,44 +26,26 @@ export default function OurPartners() {
           Our Partners
         </h2>
 
-        <div className="flex items-center justify-center gap-8 bg-white/70  backdrop-blur-sm rounded-2xl px-12 py-8 w-full">
-          <div className="relative w-42 h-30">
-            <Image
-              src="/assets/lgu-logo.png"
-              alt="LGU"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="relative w-42 h-30">
-            <Image
-              src="/assets/dost-logo.png"
-              alt="DOST"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="relative w-42 h-30">
-            <Image
-              src="/assets/dti-logo.png"
-              alt="DTI"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="relative w-42 h-30">
-            <Image
-              src="/assets/koica-logo.png"
-              alt="KOICA"
-              fill
-              className="object-contain"
-            />
-          </div>
-          <div className="relative w-42 h-30 flex items-center justify-center">
-            <span className="text-6xl font-bold text-gray-700 select-none">
-              NGO
-            </span>
-          </div>
+        <div className="flex items-center justify-center gap-8 bg-white/70 backdrop-blur-sm rounded-2xl px-12 py-8 w-full">
+          {partners.map((partner) => (
+            <div
+              key={partner.name}
+              className="relative w-42 h-30 flex items-center justify-center"
+            >
+              {partner.isImage && partner.logo ? (
+                <Image
+                  src={partner.logo}
+                  alt={partner.name}
+                  fill
+                  className="object-contain"
+                />
+              ) : (
+                <span className="text-6xl font-bold text-gray-700 select-none">
+                  {partner.name}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
