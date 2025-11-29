@@ -2,31 +2,31 @@ import CategoriesCarousel from "../../ui/categories-carousel";
 export default function Categories() {
   const itemsList = [
     {
-      imageSrc: "/assets/categories1.jpg",
+      imageSrc: "/assets/categories-shirts.jpg",
       alt: "product",
       category: "shirts",
       id: "1",
     },
     {
-      imageSrc: "/assets/categories2.jpg",
+      imageSrc: "/assets/categories-skirts.jpg",
       alt: "product",
       category: "skirts",
       id: "2",
     },
     {
-      imageSrc: "/assets/categories3.jpg",
+      imageSrc: "/assets/categories-dresses.jpg",
       alt: "product",
       category: "dresses",
       id: "3",
     },
     {
-      imageSrc: "/assets/categories3.jpg",
+      imageSrc: "/assets/categories-skirts.jpg",
       alt: "product",
       category: "dresses",
       id: "4",
     },
     {
-      imageSrc: "/assets/categories3.jpg",
+      imageSrc: "/assets/categories-dresses.jpg",
       alt: "product",
       category: "dresses",
       id: "5",
