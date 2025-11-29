@@ -30,7 +30,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${jost.className} antialiased bg-secondary`}>
+      <body className={`${jost.className} antialiased overflow-x-hidden`}>
+        <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat" />
         {children}
       </body>
     </html>
