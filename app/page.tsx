@@ -11,7 +11,6 @@ import FollowUs from "@/components/sections/home/follow-us";
 export default function Home() {
   return (
     <>
-      <Header />
       <HomeHero />
       <NewProducts />
       <Categories />
