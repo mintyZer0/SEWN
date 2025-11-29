@@ -19,10 +19,10 @@ export default function MeetOurSewers() {
             with care.
           </p>
         </div>
-        <div className="flex items-center justify-center">
+        <div className="flex flex-1 items-center justify-center">
           <Link
             href=""
-            className="text-3xl text-white bg-primary px-60 py-4 rounded-2xl hover:cursor-pointer hover:bg-secondary hover:text-primary mt-10"
+            className="text-3xl text-white bg-primary px-12 sm:px-24 lg:px-60 py-4 rounded-2xl hover:cursor-pointer hover:opacity-90 transition-opacity mt-10 whitespace-nowrap"
           >
             {/* <button className="text-3xl text-white bg-primary px-60 py-4 rounded-2xl hover:cursor-pointer">
               Meet our Sewers
