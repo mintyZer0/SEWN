@@ -10,12 +10,12 @@ export default function NewProductCard({
   price,
 }: NewProductProps) {
   return (
-    <div className="card bg-base-100 w-120 shadow-sm h-[800px] overflow-hidden">
+    <div className="card bg-base-100 md:w-80 lg:w-80 shadow-sm md:h-[400px] lg:h-[600px] overflow-hidden">
       <figure className="w-full">
         <img
           src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
           alt="Product"
-          className="w-full h-[800px] object-cover rounded-md"
+          className="w-full md:h-[400px] object-cover rounded-md"
         />
       </figure>
 
