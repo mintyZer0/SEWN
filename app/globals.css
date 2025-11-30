@@ -23,6 +23,9 @@
   .bg-orchid {
     @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#CEA9D0];
   }
+  .bg-orchid-vertical {
+    @apply bg-gradient-to-b from-[#925FA6] from-70% to-[#CEA9D0];
+  }
 }
 /* @media (prefers-color-scheme: dark) {
   :root {
