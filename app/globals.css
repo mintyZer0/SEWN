@@ -28,9 +28,6 @@
   .bg-orchid-vertical {
     @apply bg-gradient-to-b from-[#925FA6] from-70% to-[#CEA9D0];
   }
-  .fill-primary {
-    fill: var(--primary);
-  }
 }
 /* @media (prefers-color-scheme: dark) {
   :root {
