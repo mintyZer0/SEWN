@@ -12,19 +12,19 @@ export default function NewProducts() {
         <div className="grid grid-cols-3 gap-x-30">
           <NewProductCard
             productName="Urban Grace"
-            src="/assets/newProduct1.jpg"
+            src="/assets/new-product-images/newProduct1.jpg"
             seller="Aling Maria"
             price="P2499.00"
           ></NewProductCard>
           <NewProductCard
             productName="Urban Grace"
-            src="/assets/newProduct2.jpg"
+            src="/assets/new-product-images/newProduct2.jpg"
             seller="Aling Maria"
             price="P2499.00"
           ></NewProductCard>
           <NewProductCard
             productName="Urban Grace"
-            src="/assets/newProduct3.jpg"
+            src="/assets/new-product-images/newProduct3.jpg"
             seller="Aling Maria"
             price="P2499.00"
           ></NewProductCard>
