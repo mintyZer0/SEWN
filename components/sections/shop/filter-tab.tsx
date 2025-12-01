@@ -40,7 +40,7 @@ const collapsibleLables = [
 
 export default function FilterTab() {
   return (
-    <div className="flex flex-col h-auto w-60 bg-orchid-vertical mx-10 my-20">
+    <div className="flex flex-col h-auto w-60 bg-orchid-vertical mx-10 ">
       <div className="flex-1">
         <h2 className="text-3xl text-center mt-4 font-semibold text-secondary">
           Filter
