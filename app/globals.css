@@ -6,6 +6,7 @@
   --foreground: #171717;
   --primary: #7b3b7b;
   --primary-light: #e1c8e7;
+  --primary-dark: #310043;
   --secondary: #fff5cd;
   --heading: #7b3b7b;
 }
@@ -15,6 +16,7 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-heading: var(--heading);
   --font-sans: var(--font-geist-sans);
@@ -25,8 +27,14 @@
   .bg-orchid {
     @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#CEA9D0];
   }
-  .bg-orchid-vertical {
+  .bg-orchid-vertical-b {
     @apply bg-gradient-to-b from-[#925FA6] from-70% to-[#CEA9D0];
+  }
+  .bg-orchid-vertical-t {
+    @apply bg-gradient-to-t from-[#925FA6] from-70% to-[#CEA9D0];
+  }
+  .bg-orchid-light {
+    @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#A685A6];
   }
 }
 /* @media (prefers-color-scheme: dark) {

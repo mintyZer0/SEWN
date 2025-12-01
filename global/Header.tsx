@@ -6,9 +6,8 @@ export default function Header() {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shops", href: "/shop" },
-    { name: "Services", href: "" },
     { name: "Contacts", href: "" },
-    { name: "About", href: "" },
+    { name: "About", href: "/about" },
   ];
 
   const iconButtons = [
