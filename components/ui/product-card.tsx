@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Star } from "react-feather";
 
 type Product = {
@@ -17,12 +18,14 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="flex flex-col h-160 w-80 bg-primary-light">
       <div className="flex-1 relative">
-        <Image
-          src={product.imgSrc}
-          alt={product.productName}
-          fill
-          className="object-cover"
-        />
+        <Link href="">
+          <Image
+            src={product.imgSrc}
+            alt={product.productName}
+            fill
+            className="object-cover"
+          />
+        </Link>
       </div>
       <div className="flex flex-col h-40">
         <div className="text-center">
