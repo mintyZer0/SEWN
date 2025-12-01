@@ -13,8 +13,8 @@ export default function Mission() {
         <div className="flex flex-col text-8xl text-center p-4 py-6 gap-4 h-40 w-140">
           <h2 className="text-primary">mission</h2>
           <p className=" text-3xl">
-            To elevate the lives of homemaker-artisans by bridging livelihood
-            and technology.
+            To uplift the lives of homemaker-artisans by bridging livelihood and
+            technology.
           </p>
         </div>
         <div className="flex flex-col text-8xl text-center p-4 py-6 gap-4 h-40 w-140 col-span-2">

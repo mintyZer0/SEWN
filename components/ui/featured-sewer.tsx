@@ -29,7 +29,7 @@ export default function FeaturedSewer({
         </p>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 text-primary">
-            <Star size={24} fill="currentColor" />
+            <Star size={24} fill="#7b3b7b" stroke="#7b3b7b" />
             <span className="text-2xl font-medium">{rating}</span>
           </div>
           <Link
