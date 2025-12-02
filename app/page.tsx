@@ -8,6 +8,7 @@ import TodaysFeaturedSewer from "@/components/sections/home/todays-featured-sewe
 import Mission from "@/components/ui/vision-mission";
 import OurPartners from "@/components/sections/home/our-partners";
 import FollowUs from "@/components/sections/home/follow-us";
+import ParterTestimonials from "@/components/sections/home/partner-testimonials";
 export default function Home() {
   return (
     <>
@@ -18,6 +19,7 @@ export default function Home() {
       <MeetOurSewers />
       <TodaysFeaturedSewer />
       <Mission />
+      <ParterTestimonials />
       <FollowUs />
       <OurPartners />
     </>

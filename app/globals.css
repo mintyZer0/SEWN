@@ -38,7 +38,7 @@
   }
 }
 .bg-secondary-gradient-b {
-  @apply bg-gradient-to-b from-[#Ffe375] from-40% to-[#FDF5CD];
+  @apply bg-gradient-to-b from-[#Ffe375] from-20% to-[#FDF5CD];
 }
 /* @media (prefers-color-scheme: dark) {
   :root {

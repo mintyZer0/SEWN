@@ -18,7 +18,7 @@ export default function FeaturedSewer({
   href,
 }: FeaturedSewerProps) {
   return (
-    <div className="flex items-center gap-8 bg-secondary p-8 rounded-lg max-w-4xl">
+    <div className="flex items-center gap-8 p-8 rounded-lg max-w-4xl">
       {/* Left side - Text content */}
       <div className="flex-1 flex flex-col items-end text-right">
         <h2 className="text-5xl text-primary font-medium mb-4 text-right">

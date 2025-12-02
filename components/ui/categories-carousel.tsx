@@ -31,7 +31,7 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
     <div className="rounded-box relative w-full py-2">
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-smooth"
+        className="flex gap-4 overflow-x-hidden overflow-y-hidden scroll-smooth"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((item) => (
