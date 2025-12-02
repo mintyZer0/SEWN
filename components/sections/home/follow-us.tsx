@@ -11,7 +11,7 @@ export default function FollowUs() {
   };
 
   return (
-    <div className="w-full bg-secondary py-16 px-8">
+    <div className="w-full py-16 px-8">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-5xl font-normal text-primary mb-4">
           follow our trail

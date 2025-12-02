@@ -37,6 +37,9 @@
     @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#A685A6];
   }
 }
+.bg-secondary-gradient-b {
+  @apply bg-gradient-to-b from-[#Ffe375] from-40% to-[#FDF5CD];
+}
 /* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

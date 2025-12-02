@@ -17,7 +17,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-secondary">
+    <header className="sticky top-0 left-0 right-0 z-50 bg-secondary-gradient-b">
       <div className="flex items-center py-4 px-4 sm:px-8 w-full">
         <div className="flex flex-1">
           <Link href="/">
