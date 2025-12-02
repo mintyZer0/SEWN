@@ -28,7 +28,7 @@ export default function Footer() {
   ];
   return (
     <footer>
-      <div className="grid grid-cols-5 h-150 bg-orchid place-items-center gap-2 ">
+      <div className="grid grid-cols-5 h-150 bg-primary place-items-center gap-2 ">
         <div className="relative h-70 w-70 col-span-2">
           <Image
             src="/assets/logo.png"

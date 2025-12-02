@@ -18,8 +18,8 @@ export default function Home() {
       <MeetOurSewers />
       <TodaysFeaturedSewer />
       <Mission />
-      <OurPartners />
       <FollowUs />
+      <OurPartners />
     </>
   );
 }

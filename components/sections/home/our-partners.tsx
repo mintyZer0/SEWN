@@ -46,15 +46,7 @@ export default function OurPartners() {
   ];
 
   return (
-    <div className="relative w-full h-120 flex items-center justify-center">
-      <Image
-        src="/assets/our-partners-background.jpg"
-        alt="Our Partners Background"
-        fill
-        className="object-cover"
-        priority
-      />
-
+    <div className="relative w-full h-120 flex items-center justify-center bg-linear-to-t from-40% from-[#7B3B7B] to-[#FFE063] ">
       <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-7xl px-8">
         <h2 className="text-6xl font-bold text-white text-center">
           Our Partners
