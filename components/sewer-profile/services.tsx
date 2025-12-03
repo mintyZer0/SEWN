@@ -1,25 +1,30 @@
 import ServiceCard from "@/components/ui/service-card";
 import CardBentoGrid from "@/components/ui/card-bento-grid";
-export default function Browse() {
+
+interface ServicesProps {
+  sewerId: string;
+}
+
+export default function Services({ sewerId }: ServicesProps) {
   const cardItems = [
     {
       imgSrc: "/assets/services-bento-bg/bento-shop.jpg",
       service: "Repair",
-      href: "",
+      href: `/sewer-profiles/${sewerId}/repair`,
       colSpan: 1,
       id: 1,
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-customize-fit.jpg",
       service: "Alteration",
-      href: "",
+      href: `/sewer-profiles/${sewerId}/alteration`,
       colSpan: 1,
       id: 2,
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
       service: "Commision",
-      href: "",
+      href: `/sewer-profiles/${sewerId}/commission`,
       colSpan: 2,
       id: 3,
     },

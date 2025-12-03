@@ -7,13 +7,13 @@ export default function Header() {
     { name: "Home", href: "/" },
     {
       name: "Browse",
-      href: "/shop",
+      href: "/browse/shop",
       dropdown: [
         { name: "Browse Products", href: "/browse/shop" },
         { name: "Browse Sellers", href: "/browse/sewers" },
       ],
     },
-    { name: "Contacts", href: "" },
+    { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
   ];
 
