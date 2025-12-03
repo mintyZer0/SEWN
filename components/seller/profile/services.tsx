@@ -4,18 +4,29 @@ export default function Browse() {
   const cardItems = [
     {
       imgSrc: "/assets/services-bento-bg/bento-shop.jpg",
-      service: "Shop",
+      service: "Repair",
       href: "",
-      colSpan: 2,
+      colSpan: 1,
       id: 1,
     },
     {
-      imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
-      service: "Commision a Sewer",
+      imgSrc: "/assets/services-bento-bg/bento-customize-fit.jpg",
+      service: "Alteration",
       href: "",
-      colSpan: 2,
+      colSpan: 1,
       id: 2,
     },
+    {
+      imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
+      service: "Commision",
+      href: "",
+      colSpan: 2,
+      id: 3,
+    },
   ];
-  return <CardBentoGrid items={cardItems} header="browse" />;
+  return (
+    <>
+      <CardBentoGrid items={cardItems} header="browse" />
+    </>
+  );
 }
