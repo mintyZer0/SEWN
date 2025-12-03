@@ -29,7 +29,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
   const serviceType = serviceMap[normalizedService];
 
-  if (!serviceType || !sewer.servicesOffered.includes(serviceType as any)) {
+  if (
+    !serviceType ||
+    !sewer.servicesOffered.includes(normalizedService as any)
+  ) {
     notFound();
   }
 

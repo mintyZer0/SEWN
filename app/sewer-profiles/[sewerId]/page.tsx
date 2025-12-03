@@ -32,7 +32,7 @@ export default async function SewerPage({ params }: PageProps) {
         rating={sewer.rating}
         location={sewer.location}
       />
-      <Services />
+      <Services sewerId={sewerId} />
       <Stats
         yearsOfExperience={sewer.yearsOfExperience}
         rating={sewer.rating}

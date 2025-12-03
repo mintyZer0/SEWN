@@ -29,7 +29,7 @@ export default function AchievementsServices({
           </h3>
           {servicesOffered.map((service, index) => (
             <ul key={index} className="text-2xl font-light ">
-              <li className="capitalize">{service}</li>
+              <li>{service}</li>
             </ul>
           ))}
         </div>
