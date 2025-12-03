@@ -10,7 +10,7 @@ export default function SDGSection() {
   ];
 
   return (
-    <div className="w-full bg-secondary py-16 px-8">
+    <div className="w-full bg-secondary-gradient-b py-16 px-8">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-6xl font-light  text-center mb-12">
           Sustainable Development Goals Addressed
