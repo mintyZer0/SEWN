@@ -37,6 +37,9 @@
   .bg-orchid-light {
     @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#A685A6];
   }
+  .bg-button-gradient {
+    @apply bg-gradient-to-b from-[#8A5D9A] to-[#A685A6];
+  }
 }
 .bg-secondary-gradient-b {
   @apply bg-gradient-to-b from-[#Ffe375] from-20% to-[#FDF5CD];
