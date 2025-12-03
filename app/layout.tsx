@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Jost } from "next/font/google";
 import "./globals.css";
 import Footer from "@/global/Footer";
 import Header from "@/global/Header";
+import { CartProvider } from "@/context/CartContext";
 
 const jost = Jost({
   variable: "--font-jost",
@@ -33,10 +34,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jost.className} antialiased overflow-x-hidden`}>
-        <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat" />
-        <Header />
-        {children}
-        <Footer />
+        <CartProvider>
+          <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat" />
+          <Header />
+          {children}
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
