@@ -10,6 +10,8 @@ export interface Sewer {
   productsSewed: number;
   achievements: string[];
   tesdaCertified: boolean;
+  mobileNumber: string;
+  email: string;
 }
 
 export const sewersData: Sewer[] = [
@@ -17,7 +19,7 @@ export const sewersData: Sewer[] = [
     id: "1",
     name: "Maria Santos",
     bio: "A dedicated Filipina artisan who blends tradition with modern design. With years of experience in tailoring and garment construction, she has become known for her precision, creativity, and ability to bring unique fashion concepts to life.",
-    location: "Manila, NCR",
+    location: "Tarlac City, Philippines",
     rating: 4.8,
     image: "/assets/sewer-photos/1.png",
     servicesOffered: ["Repair", "Alteration", "Commission"],
@@ -29,6 +31,8 @@ export const sewersData: Sewer[] = [
       "Supported 10 capsule collections for online stores and small brands",
     ],
     tesdaCertified: true,
+    mobileNumber: "+63 917 123 4567",
+    email: "maria.santos@gmail.com",
   },
   {
     id: "2",
@@ -45,6 +49,8 @@ export const sewersData: Sewer[] = [
       "Top Rated Sewer 2024",
     ],
     tesdaCertified: false,
+    mobileNumber: "+63 932 456 7890",
+    email: "ana.cruz@gmail.com",
   },
 ];
 

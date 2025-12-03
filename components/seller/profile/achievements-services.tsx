@@ -11,7 +11,7 @@ export default function AchievementsServices({
   servicesOffered,
 }: AchievementsServicesProps) {
   return (
-    <div className="flex flex-col max-w-dvw h-300 p-12 mx-20">
+    <div className="flex flex-col max-w-dvw h-auto p-12 mx-20">
       <div className="flex flex-col gap-6 mb-12">
         <h2 className="font-light text-6xl text-primary-dark">Achievements</h2>
         {achievements.map((achievement, index) => (

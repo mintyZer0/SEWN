@@ -6,6 +6,8 @@ import Stats from "@/components/seller/profile/stats";
 import Products from "@/components/seller/profile/products";
 import AchievementsServices from "@/components/seller/profile/achievements-services";
 import SeparatorX from "@/components/ui/separator-x";
+import Map from "@/components/seller/profile/map";
+import ContactSewer from "@/components/seller/profile/contact-sewer";
 interface PageProps {
   params: {
     sewerId: string;
@@ -43,6 +45,13 @@ export default async function SewerPage({ params }: PageProps) {
         tesdaCertified={sewer.tesdaCertified}
         servicesOffered={sewer.servicesOffered}
       />
+      <Map />
+      <ContactSewer
+        sewerName={sewer.name}
+        mobileNumber={sewer.mobileNumber}
+        email={sewer.email}
+        location={sewer.location}
+      ></ContactSewer>
     </div>
   );
 }
