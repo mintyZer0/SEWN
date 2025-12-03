@@ -1,6 +1,8 @@
 import Image from "next/image";
+import Link from "next/link";
 
 interface NewProductProps {
+  id: string;
   productName: string;
   src: string;
   seller: string;
@@ -8,13 +10,17 @@ interface NewProductProps {
 }
 
 export default function NewProductCard({
+  id,
   productName,
   src,
   seller,
   price,
 }: NewProductProps) {
   return (
-    <div className="card group overflow-hidden border border-transparent hover:border-primary transition-all duration-300 w-100">
+    <Link
+      href={`/checkout?id=${id}`}
+      className="card group overflow-hidden border border-transparent hover:border-primary transition-all duration-300 w-100"
+    >
       <figure className="relative w-full aspect-3/4">
         <Image
           src={src}
@@ -32,6 +38,6 @@ export default function NewProductCard({
         <p className="text-center text-muted text-lg sm:text-2xl">{seller}</p>
         <p className="text-center font-medium text-base">{price}</p>
       </div>
-    </div>
+    </Link>
   );
 }

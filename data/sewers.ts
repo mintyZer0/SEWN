@@ -41,7 +41,7 @@ export const sewersData: Sewer[] = [
     location: "Cebu, Visayas",
     rating: 4.9,
     image: "/assets/sewer-photos/1.png",
-    servicesOffered: ["Alteration", "Commission"],
+    servicesOffered: ["alteration", "commission"],
     yearsOfExperience: 10,
     productsSewed: 34,
     achievements: [
