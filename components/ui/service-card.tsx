@@ -5,20 +5,20 @@ export interface ServiceCardProps {
   imgSrc: string;
   service: string;
   href: string;
-  span: string;
+  colSpan: number;
   className?: string;
 }
 export default function ServiceCard({
   imgSrc,
   service,
   href,
-  span,
+  colSpan,
   className,
 }: ServiceCardProps) {
   return (
     <Link
       href={href}
-      className={`relative block w-fill h-100 ${className} ${span}`}
+      className={`relative block w-fill h-100 ${className} col-span-${colSpan}`}
     >
       <Image
         src={imgSrc}
