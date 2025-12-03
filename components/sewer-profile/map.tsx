@@ -8,7 +8,7 @@ export default function Map() {
 
   const MapComponent = useMemo(
     () =>
-      dynamic(() => import("../../ui/map-component"), {
+      dynamic(() => import("../ui/map-component"), {
         loading: () => (
           <div className="h-300 w-full bg-gray-200 animate-pulse rounded-lg" />
         ),

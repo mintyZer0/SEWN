@@ -1,4 +1,4 @@
-import ProductCard from "@/components/ui/product-card";
+import ProductCard from "@/components/sections/shop/product-card";
 
 export default function Products() {
   const products = [

@@ -16,7 +16,7 @@ export interface ProductCardProps {
 }
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div className="flex flex-col h-160 w-80 bg-primary-light">
+    <div className="flex flex-col h-160 w-80 bg-primary-light justify-center">
       <div className="flex-1 relative">
         <Link href="">
           <Image
