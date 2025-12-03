@@ -1,4 +1,4 @@
-import ProductCard from "@/components/ui/product-card";
+import ProductCard from "@/components/sections/shop/product-card";
 import { shopGridProducts } from "@/data/shop-grid-products";
 
 export default function ShopGrid() {

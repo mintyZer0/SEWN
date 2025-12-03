@@ -3,7 +3,7 @@ import TesdaCertified from "@/components/ui/tesda-certified";
 interface AchievementsServicesProps {
   achievements: string[];
   tesdaCertified: boolean;
-  servicesOffered: ("Repair" | "Alteration" | "Commission")[];
+  servicesOffered: ("repair" | "alteration" | "commission")[];
 }
 export default function AchievementsServices({
   achievements,
@@ -29,7 +29,7 @@ export default function AchievementsServices({
           </h3>
           {servicesOffered.map((service, index) => (
             <ul key={index} className="text-2xl font-light ">
-              <li>{service}</li>
+              <li className="capitalize">{service}</li>
             </ul>
           ))}
         </div>

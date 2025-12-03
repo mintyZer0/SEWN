@@ -5,7 +5,14 @@ import { Search, ShoppingBag, User } from "react-feather";
 export default function Header() {
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "Shops", href: "/shop" },
+    {
+      name: "Browse",
+      href: "/shop",
+      dropdown: [
+        { name: "Browse Products", href: "/browse/shop" },
+        { name: "Browse Sellers", href: "/browse/sewers" },
+      ],
+    },
     { name: "Contacts", href: "" },
     { name: "About", href: "/about" },
   ];
@@ -33,9 +40,30 @@ export default function Header() {
 
         <nav className="flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
           {navLinks.map((link) => (
-            <Link key={link.name} href={link.href}>
-              {link.name}
-            </Link>
+            <div key={link.name} className="relative group">
+              <Link
+                href={link.href}
+                className="hover:opacity-70 transition-opacity"
+              >
+                {link.name}
+              </Link>
+
+              {link.dropdown && (
+                <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="bg-secondary-gradient-b shadow-lg rounded-md py-2 min-w-[180px]">
+                    {link.dropdown.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="block px-4 py-2 text-sm text-primary hover:opacity-80 transition-colors"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 

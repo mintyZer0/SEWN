@@ -1,13 +1,13 @@
 import { getSewerById, sewersData } from "@/data/sewers";
 import { notFound } from "next/navigation";
-import SewerHeader from "@/components/seller/profile/sewer-header";
-import Services from "@/components/seller/profile/services";
-import Stats from "@/components/seller/profile/stats";
-import Products from "@/components/seller/profile/products";
-import AchievementsServices from "@/components/seller/profile/achievements-services";
+import SewerHeader from "@/components/sewer-profile/sewer-header";
+import Services from "@/components/sewer-profile/services";
+import Stats from "@/components/sewer-profile/stats";
+import Products from "@/components/sewer-profile/products";
+import AchievementsServices from "@/components/sewer-profile/achievements-services";
 import SeparatorX from "@/components/ui/separator-x";
-import Map from "@/components/seller/profile/map";
-import ContactSewer from "@/components/seller/profile/contact-sewer";
+import Map from "@/components/sewer-profile/map";
+import ContactSewer from "@/components/sewer-profile/contact-sewer";
 interface PageProps {
   params: {
     sewerId: string;
