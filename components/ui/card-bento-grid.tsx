@@ -19,12 +19,12 @@ export default function CardBentoGrid({
 }: CardBentoGridComponentProps) {
   return (
     <>
-      <div className="flex mx-8 mt-20 mb-4">
+      <div className="flex mx-4 sm:mx-8 mt-8 sm:mt-20 mb-4">
         <h2 className="lg:text-5xl sm:text-4xl text-3xl text-primary">
           {header}
         </h2>
       </div>
-      <div className="grid grid-cols-2 grid-rows-2 gap-12 m-20 mx-30">
+      <div className="grid grid-cols-1 md:grid-cols-2 grid-rows-2 gap-4 md:gap-12 my-8 sm:my-20 mx-4 sm:mx-8 md:mx-30">
         {items.map((item) => (
           <ServiceCard
             imgSrc={item.imgSrc}

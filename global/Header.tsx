@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingBag, User, X, Plus, Minus } from "react-feather";
+import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
 
@@ -38,7 +38,35 @@ export default function Header() {
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-secondary-gradient-b">
       <div className="flex items-center py-4 px-4 sm:px-8 w-full">
-        <div className="flex flex-1">
+        <div className="lg:hidden flex pr-4">
+          <div className="drawer">
+            <input id="my-drawer-1" type="checkbox" className="drawer-toggle" />
+            <div className="drawer-content">
+              {/* Page content here */}
+              <label htmlFor="my-drawer-1" className="drawer-button">
+                <Menu />
+              </label>
+            </div>
+            <div className="drawer-side">
+              <label
+                htmlFor="my-drawer-1"
+                aria-label="close sidebar"
+                className="drawer-overlay"
+              ></label>
+              <ul className="menu bg-base-200 min-h-full w-80 p-4">
+                {/* Sidebar content here */}
+                <li>
+                  <a>Sidebar Item 1</a>
+                </li>
+                <li>
+                  <a>Sidebar Item 2</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-1 relative">
           <Link href="/">
             <Image
               src="/assets/logo.png"
@@ -50,7 +78,7 @@ export default function Header() {
           </Link>
         </div>
 
-        <nav className="flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
+        <nav className="hidden md:flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
           {navLinks.map((link) => (
             <div key={link.name} className="relative group">
               <Link
@@ -87,7 +115,7 @@ export default function Header() {
               <button
                 key={button.label}
                 onClick={button.onClick}
-                className="text-primary hover:opacity-70 transition-opacity relative"
+                className="text-primary hover:opacity-80 hover:cursor-pointer transition-opacity relative"
                 aria-label={button.label}
               >
                 <Icon size={24} />

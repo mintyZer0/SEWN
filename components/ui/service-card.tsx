@@ -18,7 +18,7 @@ export default function ServiceCard({
   return (
     <Link
       href={href}
-      className={`relative block w-fill h-100 ${className} col-span-${colSpan}`}
+      className={`relative block w-full h-100 ${className} col-span-${colSpan}`}
     >
       <Image
         src={imgSrc}
