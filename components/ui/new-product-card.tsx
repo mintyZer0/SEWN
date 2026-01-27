@@ -7,6 +7,7 @@ interface NewProductProps {
   src: string;
   seller: string;
   price: string;
+  className?: string;
 }
 
 export default function NewProductCard({
@@ -15,11 +16,12 @@ export default function NewProductCard({
   src,
   seller,
   price,
+  className,
 }: NewProductProps) {
   return (
     <Link
       href={`/checkout?id=${id}`}
-      className="card group overflow-hidden border border-transparent hover:border-primary transition-all duration-300 w-100"
+      className={`${className} card group overflow-hidden border border-transparent hover:border-primary transition-all duration-300`}
     >
       <figure className="relative w-full aspect-3/4">
         <Image

@@ -12,7 +12,7 @@ export default function NewProducts() {
         </h2>
       </div>
       <div className="flex justify-center h-auto w-auto lg:mx-30 m-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-30">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-x-30">
           {newProducts.map((product) => (
             <NewProductCard
               key={product.id}
@@ -21,6 +21,7 @@ export default function NewProducts() {
               src={product.imgSrc}
               seller={product.sewerName}
               price={`₱${product.price.toFixed(2)}`}
+              className={"h-100"}
             />
           ))}
         </div>
