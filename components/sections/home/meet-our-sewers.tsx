@@ -2,13 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 export default function MeetOurSewers() {
   return (
-    <div className="flex flex-row">
-      <div className="flex flex-col w-dvw h-200 bg-orchid text-left justify-start p-8 px-16 text-9xl">
-        <h2 className="text-secondary font-extralight my-8 mb-16 tracking-wide">
+    <div className="flex flex-col md:flex-row w-full">
+      <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-orchid text-left justify-start p-8 px-8 md:px-16 text-5xl md:text-9xl">
+        <h2 className="text-secondary font-extralight my-8 mb-8 md:mb-16 tracking-wide">
           a way to <br />
           <span className="font-normal">represent</span>
         </h2>
-        <div className=" p-4 text-3xl text-secondary">
+        <div className=" p-4 text-xl md:text-3xl text-secondary">
           <p>
             Explore a wide variety of skilled local sewers ready to turn your
             ideas into beautiful, handcrafted creations.
@@ -31,7 +31,7 @@ export default function MeetOurSewers() {
           </Link>
         </div>
       </div>
-      <div className="relative w-300 h-200">
+      <div className="relative w-full md:w-1/3 min-h-[300px] md:min-h-full">
         <Image
           src="/assets/meet-our-sewers.png"
           fill
