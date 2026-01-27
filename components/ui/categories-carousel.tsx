@@ -31,12 +31,12 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
     <div className="rounded-box relative w-full py-2">
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-hidden overflow-y-hidden scroll-smooth"
+        className="flex gap-4 overflow-x-scroll overflow-y-hidden scroll-smooth"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((item) => (
-          <div className="relative shrink-0 w-155 group" key={item.id}>
-            <div className="relative w-full h-96">
+          <div className="relative shrink-0 w-80 lg:w-155 group" key={item.id}>
+            <div className="relative w-full h-60 lg:h-96">
               <Image
                 className="w-full h-full object-cover rounded-lg group-hover:scale-102 transform transition-transform duration-500 "
                 src={item.imageSrc}
