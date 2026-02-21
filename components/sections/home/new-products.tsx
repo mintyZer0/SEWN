@@ -21,7 +21,7 @@ export default function NewProducts() {
               src={product.imgSrc}
               seller={product.sewerName}
               price={`₱${product.price.toFixed(2)}`}
-              className={"h-100"}
+              className={"h-100 lg:h-150"}
             />
           ))}
         </div>
