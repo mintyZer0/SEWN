@@ -25,7 +25,7 @@ export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
                   ? "bg-primary text-white"
                   : currentStep === step.number
                   ? "bg-primary text-white"
-                  : "bg-white text-primary border-2 border-primary"
+                  : "bg-white text-heading border-2 border-primary"
               }`}
             >
               {currentStep > step.number ? (
@@ -37,7 +37,7 @@ export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
             <span
               className={`mt-2 text-sm ${
                 currentStep >= step.number
-                  ? "text-primary font-medium"
+                  ? "text-heading font-medium"
                   : "text-gray-500"
               }`}
             >

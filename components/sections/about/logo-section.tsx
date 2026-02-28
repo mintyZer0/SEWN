@@ -11,7 +11,7 @@ export default function LogoSection() {
           className="object-contain"
         />
       </div>
-      <p className="text-2xl text-primary text-center">
+      <p className="text-2xl text-heading text-center">
         SEWN-ulid ng Pilipino, Dangal ng Kababaihan
       </p>
     </div>

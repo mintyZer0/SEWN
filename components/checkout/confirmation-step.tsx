@@ -21,10 +21,10 @@ export default function ConfirmationStep({
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-white">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-light text-primary">Order Confirmation</h2>
+        <h2 className="text-4xl font-light text-heading">Order Confirmation</h2>
         <p className="text-xl text-gray-700">
           Order total:{" "}
-          <span className="text-primary font-medium">₱{orderTotal}</span>
+          <span className="text-heading font-medium">₱{orderTotal}</span>
         </p>
       </div>
 
@@ -76,7 +76,7 @@ export default function ConfirmationStep({
       </div>
 
       <div className="flex justify-between items-center p-6 rounded-lg border border-gray-200 mb-6">
-        <p className="text-xl font-medium text-primary">Total: ₱{orderTotal}</p>
+        <p className="text-xl font-medium text-heading">Total: ₱{orderTotal}</p>
         <button
           onClick={onPlaceOrder}
           className="bg-orchid text-white px-8 py-3 rounded-full font-medium hover:opacity-90 transition-opacity"

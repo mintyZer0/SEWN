@@ -13,7 +13,7 @@ export default function TodaysFeaturedSewer() {
   return (
     <div className="flex h-96 flex-col lg:flex-row w-full bg-secondary-gradient-b p-9 justify-between overflow-x-hidden">
       <div className="flex w-full lg:w-150">
-        <h2 className="text-7xl lg:text-8xl p-3 text-primary font-light">
+        <h2 className="text-7xl lg:text-8xl p-3 text-heading font-light">
           Today's <br /> Featured <br /> Sewer
         </h2>
       </div>

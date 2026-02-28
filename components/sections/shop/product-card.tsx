@@ -43,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
           <button
             onClick={handleAddToCart}
-            className="absolute top-2 right-2 bg-secondary hover:bg-primary hover:text-white text-primary p-2 rounded-full shadow-lg transition-colors z-10"
+            className="absolute top-2 right-2 bg-secondary hover:bg-primary hover:text-white text-heading p-2 rounded-full shadow-lg transition-colors z-10"
             aria-label="Add to cart"
           >
             <ShoppingCart size={20} />

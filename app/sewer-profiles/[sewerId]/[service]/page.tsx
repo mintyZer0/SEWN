@@ -88,7 +88,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </div>
 
             <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-primary mb-3">
+              <h2 className="text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
               <p className="text-2xl">
@@ -146,7 +146,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </div>
 
             <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-primary mb-3">
+              <h2 className="text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
               <p className="text-2xl">
@@ -210,7 +210,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </div>
 
             <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-primary mb-3">
+              <h2 className="text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
               <p className="text-2xl">

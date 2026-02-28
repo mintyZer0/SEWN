@@ -35,7 +35,7 @@ export default function Categories() {
   return (
     <>
       <div className="flex mx-8">
-        <h2 className="lg:text-5xl sm:text-4xl text-3xl text-primary">
+        <h2 className="lg:text-5xl sm:text-4xl text-3xl text-heading">
           categories
         </h2>
       </div>
