@@ -26,7 +26,7 @@ export default function SewerHeader({
         />
       </div>
       <div className="max-w-170  flex flex-col items-start justify-center">
-        <h1 className="text-7xl font-light text-primary mb-6">{name}</h1>
+        <h1 className="text-7xl font-light text-heading mb-6">{name}</h1>
         <p className="text-xl text-gray-800 leading-relaxed">{bio}</p>
       </div>
     </div>

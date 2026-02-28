@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "@/lib/auth-actions";
 import SignInWithGoogle from "./sign-in-with-google";
+import SignInWithFacebook from "./sign-in-with-facebook";
+import SignInWithX from "./sign-in-with-x";
+import { Sign } from "crypto";
 
 export function LoginForm({
   className,
@@ -18,12 +21,10 @@ export function LoginForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
-          </CardDescription>
+      <Card className="text-white">
+        <CardHeader className="flex-row justify-center items-baseline gap-4">
+          <CardTitle className="text-6xl font-light">Login</CardTitle>
+          <CardDescription>Please fill in your basic info</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -53,7 +54,11 @@ export function LoginForm({
               <Button type="submit" formAction={login} className="w-full">
                 Login
               </Button>
-              <SignInWithGoogle />
+              <div className="flex flex-row justify-around">
+                <SignInWithGoogle />
+                <SignInWithFacebook />
+                <SignInWithX />
+              </div>
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

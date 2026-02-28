@@ -36,7 +36,6 @@ export default function RootLayout({
       <body className={`${jost.className} antialiased overflow-x-hidden`}>
         <CartProvider>
           <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
-          <Header />
           {children}
           <Footer />
         </CartProvider>

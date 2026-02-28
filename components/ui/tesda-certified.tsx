@@ -11,7 +11,7 @@ export default function TesdaCertified() {
           className="object-contain"
         />
       </div>
-      <h3 className="text-6xl font-light text-primary-dark">TESDA Certified</h3>
+      <h3 className="text-6xl font-light text-heading-dark">TESDA Certified</h3>
     </div>
   );
 }

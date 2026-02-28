@@ -151,12 +151,12 @@ export default function Header() {
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-primary">
+                <h2 className="text-2xl font-semibold text-heading">
                   Shopping Cart
                 </h2>
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="text-primary hover:opacity-70"
+                  className="text-heading hover:opacity-70"
                 >
                   <X size={24} />
                 </button>
@@ -183,13 +183,13 @@ export default function Header() {
                           />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-primary">
+                          <h3 className="font-medium text-heading">
                             {item.productName}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {item.sewerName}
                           </p>
-                          <p className="text-primary font-semibold">
+                          <p className="text-heading font-semibold">
                             ₱{item.price.toFixed(2)}
                           </p>
                         </div>
@@ -205,7 +205,7 @@ export default function Header() {
                               onClick={() =>
                                 updateQuantity(item.id, item.quantity - 1)
                               }
-                              className="text-primary hover:opacity-70"
+                              className="text-heading hover:opacity-70"
                             >
                               <Minus size={16} />
                             </button>
@@ -216,7 +216,7 @@ export default function Header() {
                               onClick={() =>
                                 updateQuantity(item.id, item.quantity + 1)
                               }
-                              className="text-primary hover:opacity-70"
+                              className="text-heading hover:opacity-70"
                             >
                               <Plus size={16} />
                             </button>
@@ -228,10 +228,10 @@ export default function Header() {
 
                   <div className="border-t border-gray-300 pt-4">
                     <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold text-primary">
+                      <span className="text-lg font-semibold text-heading">
                         Total:
                       </span>
-                      <span className="text-2xl font-bold text-primary">
+                      <span className="text-2xl font-bold text-heading">
                         ₱{getCartTotal().toFixed(2)}
                       </span>
                     </div>

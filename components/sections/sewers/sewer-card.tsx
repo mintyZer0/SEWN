@@ -49,7 +49,7 @@ export default function SewerCard({
               </div>
               <h3 className="text-xl font-semibold">{name}</h3>
             </div>
-            <div className="flex items-center gap-1 bg-white text-primary px-3 py-1 rounded-full">
+            <div className="flex items-center gap-1 bg-white text-heading px-3 py-1 rounded-full">
               <Star size={16} fill="currentColor" />
               <span className="font-semibold">{rating}</span>
             </div>
