@@ -1,5 +1,3 @@
-import Footer from "@/global/Footer";
-
 export default function LoginLayout({
   children,
 }: Readonly<{

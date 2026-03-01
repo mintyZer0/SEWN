@@ -1,4 +1,5 @@
 import Header from "../global/Header";
+import Footer from "../global/Footer";
 import HomeHero from "@/components/sections/home/home-hero";
 import NewProducts from "@/components/sections/home/new-products";
 import Categories from "@/components/sections/home/categories";
@@ -12,6 +13,7 @@ import ParterTestimonials from "@/components/sections/home/partner-testimonials"
 export default function Home() {
   return (
     <>
+      <Header />
       <HomeHero />
       <NewProducts />
       <Categories />
@@ -22,6 +24,7 @@ export default function Home() {
       <ParterTestimonials />
       <FollowUs />
       <OurPartners />
+      <Footer />
     </>
   );
 }
