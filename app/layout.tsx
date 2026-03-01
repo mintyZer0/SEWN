@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jost } from "next/font/google";
 import "./globals.css";
-import Footer from "@/global/Footer";
-import Header from "@/global/Header";
 import { CartProvider } from "@/context/CartContext";
 
 const jost = Jost({

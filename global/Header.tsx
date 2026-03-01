@@ -176,18 +176,18 @@ export default function Header() {
                       >
                         <div className="relative w-20 h-20 flex-shrink-0">
                           <Image
-                            src={item.imgSrc}
-                            alt={item.productName}
+                            src={item.img_src}
+                            alt={item.product_name}
                             fill
                             className="object-cover rounded"
                           />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium text-heading">
-                            {item.productName}
+                            {item.product_name}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            {item.sewerName}
+                            {item.sewer_name}
                           </p>
                           <p className="text-heading font-semibold">
                             ₱{item.price.toFixed(2)}
