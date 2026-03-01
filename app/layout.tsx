@@ -37,7 +37,6 @@ export default function RootLayout({
         <CartProvider>
           <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
           {children}
-          <Footer />
         </CartProvider>
       </body>
     </html>

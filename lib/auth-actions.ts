@@ -37,15 +37,27 @@ export async function signup(formData: FormData) {
     password: formData.get("password") as string,
     options: {
       data: {
-        full_name: `${firstName + " " + lastName}`,
+        full_name: `${firstName} ${lastName}`,
         email: formData.get("email") as string,
       },
     },
   };
 
+  const { data: existingUser } = await supabase
+    .from("auth.users")
+    .select("email")
+    .eq("email", data.email)
+    .single();
+
+  if (existingUser) {
+    console.log(existingUser);
+    redirect("/error");
+  }
+
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
+    console.log(error);
     redirect("/error");
   }
 
