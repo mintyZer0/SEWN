@@ -1,6 +1,5 @@
 import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/sections/shop/product-card";
-import { products } from "@/data/products";
 
 export default async function ShopGrid() {
   const { data: products, error } = await supabase.from("products").select("*").order('sold', { ascending: false });
