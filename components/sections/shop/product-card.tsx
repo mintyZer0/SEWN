@@ -8,9 +8,9 @@ import { Product as ProductType } from "@/data/products";
 
 type Product = {
   id: string;
-  imgSrc: string;
-  productName: string;
-  sewerName: string;
+  img_src: string;
+  product_name: string;
+  sewer_name: string;
   price: number;
   rating: number;
   sold: number;
@@ -36,8 +36,8 @@ export default function ProductCard({ product }: ProductCardProps) {
       >
         <div className="flex-1 relative">
           <Image
-            src={product.imgSrc}
-            alt={product.productName}
+            src={product.img_src}
+            alt={product.product_name}
             fill
             className="object-cover"
           />
@@ -51,8 +51,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="flex flex-col h-40">
           <div className="text-center">
-            <h4 className="text-2xl font-medium ">{product.productName}</h4>
-            <h5 className="text-lg">{product.sewerName}</h5>
+            <h4 className="text-2xl font-medium ">{product.product_name}</h4>
+            <h5 className="text-lg">{product.sewer_name}</h5>
             <h6 className="text-md italic text-gray-400">
               ₱
               {typeof product.price === "number"
