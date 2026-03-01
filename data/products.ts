@@ -1,8 +1,8 @@
 export interface Product {
   id: string;
-  imgSrc: string;
-  productName: string;
-  sewerName: string;
+  img_src: string;
+  product_name: string;
+  sewer_name: string;
   price: number;
   rating: number;
   sold: number;
@@ -13,9 +13,9 @@ export interface Product {
 export const products: Product[] = [
   {
     id: "1",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product1.png",
-    productName: "Handmade Tote Bag",
-    sewerName: "Jane Smith",
+    img_src: "/assets/shop-grid-products/shop-grid-product1.png",
+    product_name: "Handmade Tote Bag",
+    sewer_name: "Jane Smith",
     price: 29.99,
     rating: 4.5,
     sold: 127,
@@ -30,9 +30,9 @@ export const products: Product[] = [
   },
   {
     id: "2",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product2.png",
-    productName: "Custom Dress",
-    sewerName: "Alice Brown",
+    img_src: "/assets/shop-grid-products/shop-grid-product2.png",
+    product_name: "Custom Dress",
+    sewer_name: "Alice Brown",
     price: 89.99,
     rating: 5.0,
     sold: 45,
@@ -48,15 +48,15 @@ export const products: Product[] = [
   },
   {
     id: "3",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product3.png",
-    productName: "Embroidered Pillow",
-    sewerName: "Maria Garcia",
+    img_src: "/assets/shop-grid-products/shop-grid-product3.png",
+    product_name: "Embroidered Pillow",
+    sewer_name: "Maria Garcia",
     price: 34.99,
     rating: 4.8,
     sold: 203,
     description:
       "Transform your living space with this exquisite embroidered decorative pillow, where centuries-old artisan traditions meet contemporary home design. Each piece is a labor of love, featuring intricate hand-stitched patterns that showcase traditional embroidery techniques carefully preserved and passed down through generations of skilled craftspeople. The delicate threadwork creates stunning visual texture and depth, catching the light beautifully from every angle and adding a sophisticated focal point to any room. Crafted on a luxurious linen blend base, this pillow seamlessly blends heritage craftsmanship with modern comfort. Whether gracing your sofa, adorning your bed, or accenting a favorite reading chair, this artisanal treasure brings warmth, character, and a story worth telling to your home.",
-    details: [
+      details: [
       "Material: Soft linen blend with hand embroidery",
       'Size: 18" x 18"',
       "Features: Hidden zipper, removable cover",
@@ -66,15 +66,16 @@ export const products: Product[] = [
   },
   {
     id: "4",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product4.png",
-    productName: "Quilted Blanket",
-    sewerName: "Sarah Johnson",
+    img_src: "/assets/shop-grid-products/shop-grid-product4.png",
+    product_name: "Quilted Blanket",
+    sewer_name: "Sarah Johnson",
     price: 79.99,
     rating: 4.9,
     sold: 89,
     description:
       "Wrap yourself in timeless warmth and comfort with this handcrafted quilted blanket, a true heirloom piece that celebrates the art of traditional quilting. Each quilt is meticulously constructed using authentic patchwork techniques, with every stitch placed by skilled hands to create a durable, beautiful textile that tells its own unique story. The carefully selected cotton fabrics are arranged in thoughtful patterns that create visual interest while maintaining perfect balance, and the plush polyester batting provides just the right weight for cozy comfort in any season. The reversible design offers two distinct looks in one, allowing you to refresh your bedroom's aesthetic with a simple flip. More than just a blanket, this quilted masterpiece becomes a cherished part of your home, ready to provide warmth during movie nights, add beauty to your bed, and eventually become a treasured family keepsake.",
-    details: [
+    
+      details: [
       "Material: 100% cotton with polyester batting",
       'Dimensions: 60" x 80" (Queen size)',
       "Features: Hand-quilted, reversible design",
@@ -84,9 +85,9 @@ export const products: Product[] = [
   },
   {
     id: "5",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product5.png",
-    productName: "Linen Apron",
-    sewerName: "Emma Davis",
+    img_src: "/assets/shop-grid-products/shop-grid-product5.png",
+    product_name: "Linen Apron",
+    sewer_name: "Emma Davis",
     price: 24.99,
     rating: 4.3,
     sold: 156,
@@ -102,9 +103,9 @@ export const products: Product[] = [
   },
   {
     id: "6",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product6.png",
-    productName: "Cotton Table Runner",
-    sewerName: "Michael Chen",
+    img_src: "/assets/shop-grid-products/shop-grid-product6.png",
+    product_name: "Cotton Table Runner",
+    sewer_name: "Michael Chen",
     price: 32.99,
     rating: 4.6,
     sold: 98,
@@ -120,9 +121,9 @@ export const products: Product[] = [
   },
   {
     id: "7",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product7.png",
-    productName: "Denim Jacket",
-    sewerName: "Lisa Martinez",
+    img_src: "/assets/shop-grid-products/shop-grid-product7.png",
+    product_name: "Denim Jacket",
+    sewer_name: "Lisa Martinez",
     price: 119.99,
     rating: 4.7,
     sold: 67,
@@ -138,9 +139,9 @@ export const products: Product[] = [
   },
   {
     id: "8",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product8.png",
-    productName: "Silk Scarf",
-    sewerName: "David Wilson",
+    img_src: "/assets/shop-grid-products/shop-grid-product8.png",
+    product_name: "Silk Scarf",
+    sewer_name: "David Wilson",
     price: 45.99,
     rating: 4.4,
     sold: 142,
@@ -156,9 +157,9 @@ export const products: Product[] = [
   },
   {
     id: "9",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product9.png",
-    productName: "Canvas Backpack",
-    sewerName: "Sophia Lee",
+    img_src: "/assets/shop-grid-products/shop-grid-product9.png",
+    product_name: "Canvas Backpack",
+    sewer_name: "Sophia Lee",
     price: 59.99,
     rating: 4.8,
     sold: 201,
@@ -174,9 +175,9 @@ export const products: Product[] = [
   },
   {
     id: "10",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product10.png",
-    productName: "Velvet Cushion Cover",
-    sewerName: "James Taylor",
+    img_src: "/assets/shop-grid-products/shop-grid-product10.png",
+    product_name: "Velvet Cushion Cover",
+    sewer_name: "James Taylor",
     price: 28.99,
     rating: 4.5,
     sold: 175,
@@ -192,9 +193,9 @@ export const products: Product[] = [
   },
   {
     id: "11",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product11.png",
-    productName: "Wool Coat",
-    sewerName: "Olivia Anderson",
+    img_src: "/assets/shop-grid-products/shop-grid-product11.png",
+    product_name: "Wool Coat",
+    sewer_name: "Olivia Anderson",
     price: 189.99,
     rating: 5.0,
     sold: 34,
@@ -210,9 +211,9 @@ export const products: Product[] = [
   },
   {
     id: "12",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product12.png",
-    productName: "Cotton Pajama Set",
-    sewerName: "Robert Thomas",
+    img_src: "/assets/shop-grid-products/shop-grid-product12.png",
+    product_name: "Cotton Pajama Set",
+    sewer_name: "Robert Thomas",
     price: 54.99,
     rating: 4.6,
     sold: 112,
@@ -228,9 +229,9 @@ export const products: Product[] = [
   },
   {
     id: "13",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product13.png",
-    productName: "Leather Wallet",
-    sewerName: "Emily White",
+    img_src: "/assets/shop-grid-products/shop-grid-product13.png",
+    product_name: "Leather Wallet",
+    sewer_name: "Emily White",
     price: 39.99,
     rating: 4.7,
     sold: 189,
@@ -246,9 +247,9 @@ export const products: Product[] = [
   },
   {
     id: "14",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product14.png",
-    productName: "Knit Sweater",
-    sewerName: "Daniel Harris",
+    img_src: "/assets/shop-grid-products/shop-grid-product14.png",
+    product_name: "Knit Sweater",
+    sewer_name: "Daniel Harris",
     price: 69.99,
     rating: 4.9,
     sold: 78,
@@ -264,9 +265,9 @@ export const products: Product[] = [
   },
   {
     id: "15",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product15.png",
-    productName: "Bohemian Maxi Skirt",
-    sewerName: "Ava Martin",
+    img_src: "/assets/shop-grid-products/shop-grid-product15.png",
+    product_name: "Bohemian Maxi Skirt",
+    sewer_name: "Ava Martin",
     price: 64.99,
     rating: 4.4,
     sold: 145,
@@ -282,9 +283,9 @@ export const products: Product[] = [
   },
   {
     id: "16",
-    imgSrc: "/assets/shop-grid-products/shop-grid-product16.png",
-    productName: "Corduroy Pants",
-    sewerName: "William Garcia",
+    img_src: "/assets/shop-grid-products/shop-grid-product16.png",
+    product_name: "Corduroy Pants",
+    sewer_name: "William Garcia",
     price: 74.99,
     rating: 4.6,
     sold: 93,

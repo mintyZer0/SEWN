@@ -1,11 +1,15 @@
+import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/sections/shop/product-card";
-import { products } from "@/data/products";
 
-export default function ShopGrid() {
+export default async function ShopGrid() {
+  const { data: products, error } = await supabase.from("products").select("*").order('sold', { ascending: false });
+
+  if (error) return <div>Error loading products</div>;
+
   return (
     <div className="w-full p-2">
       <div className="flex justify-between ">
-        <span className=" text-2xl mx-5">{products.length} Products</span>
+        <span className=" text-2xl mx-5">{products?.length || 0} Products</span>
         <div className="mb-4 mx-4">
           <select className="px-4 py-2 bg-primary-light rounded-lg border-none text-lg">
             <option>Filter by most sold</option>
