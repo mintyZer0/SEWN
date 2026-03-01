@@ -16,8 +16,8 @@ export default function SuccessPage() {
           />
         </div>
 
-        <p className="text-primary text-2xl mb-2">Success!</p>
-        <h1 className="text-5xl md:text-6xl font-light text-primary text-center mb-8">
+        <p className="text-heading text-2xl mb-2">Success!</p>
+        <h1 className="text-5xl md:text-6xl font-light text-heading text-center mb-8">
           Product is on the way!
         </h1>
 

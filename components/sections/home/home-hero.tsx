@@ -14,14 +14,14 @@ export default function HomeHero() {
             SEWNulid ng Pilipino, <br /> Dangal ng Kababaihan
           </h1>
         </div>
-        <button className="btn btn-outline border-white text-white border-2 hover:bg-white hover:text-primary absolute bottom-20 rounded-2xl z-1 px-18 py-4 text-2xl sm:text-4xl h-auto font-normal">
+        <button className="btn btn-outline border-white text-white border-2 hover:bg-white hover:text-heading absolute bottom-20 rounded-2xl z-1 px-18 py-4 text-2xl sm:text-4xl h-auto font-normal">
           BROWSE
         </button>
       </div>
       <div className="flex flex-row h-fit w-full align-middle justify-start bg-transparent gap-2 overflow-hidden">
         <div className="bg-orchid h-auto w-20 md:w-40 lg:w-150 shrink-0"></div>
         <div className="flex flex-col w-full max-w-lg md:max-w-2xl gap-2 p-4 px-8">
-          <p className="text-3xl sm:text-5xl text-primary ">our purpose.</p>
+          <p className="text-3xl sm:text-5xl text-heading ">our purpose.</p>
           <p className="text-black text-lg sm:text-2xl">
             we celebrate the beauty and strength of womanhood by honoring the
             local heritage craftsmanship of homemaker-artisans, showcasing

@@ -7,7 +7,7 @@ export default function NewProducts() {
   return (
     <>
       <div className="flex flex-col justify-center items-center p-4 m-4">
-        <h2 className="text-3xl sm:text-5xl text-primary">
+        <h2 className="text-3xl sm:text-5xl text-heading">
           newly added products
         </h2>
       </div>
@@ -21,7 +21,7 @@ export default function NewProducts() {
               src={product.imgSrc}
               seller={product.sewerName}
               price={`₱${product.price.toFixed(2)}`}
-              className={"h-100"}
+              className={"h-100 lg:h-150"}
             />
           ))}
         </div>

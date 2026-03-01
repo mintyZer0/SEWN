@@ -41,12 +41,12 @@ export default function PaymentStep({
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-light text-primary">
+        <h2 className="text-4xl font-light text-heading">
           Select Payment Method
         </h2>
         <p className="text-xl text-gray-700">
           Order total:{" "}
-          <span className="text-primary font-medium">₱{orderTotal}</span>
+          <span className="text-heading font-medium">₱{orderTotal}</span>
         </p>
       </div>
 
@@ -56,7 +56,7 @@ export default function PaymentStep({
           onClick={() => setPaymentMethod("credit")}
           className={`px-6 py-2 font-medium transition-colors ${
             paymentMethod === "credit"
-              ? "text-primary border-b-2 border-primary"
+              ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
           }`}
         >
@@ -67,7 +67,7 @@ export default function PaymentStep({
           onClick={() => setPaymentMethod("paymaya")}
           className={`px-6 py-2 font-medium transition-colors ${
             paymentMethod === "paymaya"
-              ? "text-primary border-b-2 border-primary"
+              ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
           }`}
         >
@@ -78,7 +78,7 @@ export default function PaymentStep({
           onClick={() => setPaymentMethod("gcash")}
           className={`px-6 py-2 font-medium transition-colors ${
             paymentMethod === "gcash"
-              ? "text-primary border-b-2 border-primary"
+              ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
           }`}
         >
@@ -89,7 +89,7 @@ export default function PaymentStep({
           onClick={() => setPaymentMethod("other")}
           className={`px-6 py-2 font-medium transition-colors ${
             paymentMethod === "other"
-              ? "text-primary border-b-2 border-primary"
+              ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
           }`}
         >
@@ -99,7 +99,7 @@ export default function PaymentStep({
 
       {paymentMethod === "credit" && (
         <form onSubmit={handleSubmit} className="space-y-6">
-          <p className="text-center text-lg font-medium text-primary mb-6">
+          <p className="text-center text-lg font-medium text-heading mb-6">
             Pay using credit cards
           </p>
 
@@ -177,7 +177,7 @@ export default function PaymentStep({
               type="checkbox"
               id="saveCard"
               name="saveCard"
-              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+              className="w-4 h-4 text-heading border-gray-300 rounded focus:ring-primary"
             />
             <label htmlFor="saveCard" className="ml-2 text-sm text-gray-700">
               Save Card
@@ -202,8 +202,8 @@ export default function PaymentStep({
                 </p>
               </div>
               <div className="text-right border-l border-gray-400 pl-8 ml-8">
-                <p className="text-lg text-primary mb-2">Order total:</p>
-                <p className="text-5xl text-primary font-light">
+                <p className="text-lg text-heading mb-2">Order total:</p>
+                <p className="text-5xl text-heading font-light">
                   ₱{orderTotal}
                 </p>
               </div>

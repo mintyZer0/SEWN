@@ -32,7 +32,7 @@ export default function SDGSection() {
 
         {/* Description */}
         <div className="max-w-4xl mx-auto">
-          <h3 className="text-5xl font-light text-primary-dark text-center mb-6">
+          <h3 className="text-5xl font-light text-heading-dark text-center mb-6">
             Sustainable and Ethical Considerations
           </h3>
           <p className="text-2xl text-center leading-relaxed">

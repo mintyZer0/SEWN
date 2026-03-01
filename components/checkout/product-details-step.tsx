@@ -21,7 +21,7 @@ export default function ProductDetailsStep({
 }: ProductDetailsStepProps) {
   return (
     <div className="py-8 max-w-dvw">
-      <h2 className="text-6xl font-light text-primary mb-8 max-w-7xl px-10">
+      <h2 className="text-6xl font-light text-heading mb-8 max-w-7xl px-10">
         Product Details
       </h2>
 
@@ -46,7 +46,7 @@ export default function ProductDetailsStep({
 
         <div className="flex-1 flex flex-col justify-between space-y-6 max-w-dvw px-4 mx-10 mr-30">
           <div className="flex flex-col justify-center text-left ">
-            <h3 className="text-6xl font-semi text-primary mb-1">
+            <h3 className="text-6xl font-semi text-heading mb-1">
               {productName}
             </h3>
             <p className="text-3xl font-semibold mb-6">by Ysabelle Santiago</p>
@@ -59,7 +59,7 @@ export default function ProductDetailsStep({
       </div>
 
       <div className="flex flex-col mb-6 px-10 mx-30">
-        <h4 className="text-4xl font-semibold text-primary mb-3">Details:</h4>
+        <h4 className="text-4xl font-semibold text-heading mb-3">Details:</h4>
         <ul className="space-y-2">
           {details.map((detail, index) => (
             <li
@@ -88,7 +88,7 @@ export default function ProductDetailsStep({
       </div>
 
       <div className="mt-8 text-center">
-        <p className="text-2xl italic text-primary underline cursor-pointer hover:opacity-80">
+        <p className="text-2xl italic text-heading underline cursor-pointer hover:opacity-80">
           More about Ysabelle
         </p>
       </div>

@@ -95,7 +95,7 @@ export default function CommissionForm({
 
   return (
     <div className="max-w-dvw mx-30 rounded-lg p-10 my-10">
-      <h2 className="text-6xl font-regular text-primary mb-4">
+      <h2 className="text-6xl font-regular text-heading mb-4">
         <span className="text-black">Commision</span> {sewerName}
       </h2>
 

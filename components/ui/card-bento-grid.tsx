@@ -20,7 +20,7 @@ export default function CardBentoGrid({
   return (
     <>
       <div className="flex mx-4 sm:mx-8 mt-8 sm:mt-20 mb-4">
-        <h2 className="lg:text-5xl sm:text-4xl text-3xl text-primary">
+        <h2 className="lg:text-5xl sm:text-4xl text-3xl text-heading">
           {header}
         </h2>
       </div>

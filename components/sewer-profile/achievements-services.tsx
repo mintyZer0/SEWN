@@ -13,7 +13,7 @@ export default function AchievementsServices({
   return (
     <div className="flex flex-col max-w-dvw h-auto p-12 mx-20">
       <div className="flex flex-col gap-6 mb-12">
-        <h2 className="font-light text-6xl text-primary-dark">Achievements</h2>
+        <h2 className="font-light text-6xl text-heading-dark">Achievements</h2>
         {achievements.map((achievement, index) => (
           <li key={index} className="text-xl font-light ">
             {achievement}
@@ -23,7 +23,7 @@ export default function AchievementsServices({
       <div className="flex flex-row max-w-dvw justify-between py-8">
         {tesdaCertified ? <TesdaCertified /> : null}
         <div className="flex flex-col ml-20 gap-4 items-end ">
-          <h3 className="text-5xl font-light text-primary-dark">
+          <h3 className="text-5xl font-light text-heading-dark">
             {" "}
             Services Offered
           </h3>

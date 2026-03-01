@@ -15,7 +15,7 @@ export default function ContactSewer({
 }: ContactSewerProps) {
   return (
     <div className="flex flex-col max-w-dvw rounded-lg p-8 mx-10 my-6">
-      <h2 className="text-6xl font-light mb-6 text-center text-primary-dark">
+      <h2 className="text-6xl font-light mb-6 text-center text-heading-dark">
         Contact {sewerName}
       </h2>
       <div className="flex flex-row items-center justify-center gap-8 flex-wrap text-2xl font-light">

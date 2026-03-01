@@ -21,7 +21,7 @@ export default function ContactCard({
       <div className="flex-1 flex flex-col  mb-8">{children}</div>
       <button
         onClick={onButtonClick}
-        className="bg-[#FFE374] text-primary text-4xl px-8 py-4 rounded-2xl hover:opacity-90 transition-opacity"
+        className="bg-[#FFE374] text-heading text-4xl px-8 py-4 rounded-2xl hover:opacity-90 transition-opacity"
       >
         {buttonText}
       </button>

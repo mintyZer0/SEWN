@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
+import SearchBar from "@/components/ui/search-bar";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -12,16 +13,19 @@ export default function Header() {
     useCart();
   const navLinks = [
     { name: "Home", href: "/" },
-    {
-      name: "Browse",
-      href: "/browse/shop",
-      dropdown: [
-        { name: "Browse Products", href: "/browse/shop" },
-        { name: "Browse Sellers", href: "/browse/sewers" },
-      ],
-    },
+    // {
+    //   name: "Browse",
+    //   href: "/browse/shop",
+    //   dropdown: [
+    //     { name: "Browse Products", href: "/browse/shop" },
+    //     { name: "Browse Sellers", href: "/browse/sewers" },
+    //   ],
+    // },
+    { name: "Shop", href: "/browse/shop" },
+    { name: "Services", href: "/services" },
     { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
+    { name: "Seller Center", href: "/browse/sewers" },
   ];
 
   const iconButtons = [
@@ -36,8 +40,9 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-secondary-gradient-b">
-      <div className="flex items-center py-4 px-4 sm:px-8 w-full">
+    <header className="sticky top-0 left-0 right-0 z-50 bg-orchid-light shadow">
+      <div className="grid items-center py-4 px-4 sm:px-8 w-full grid-cols-6 grid-rows-2">
+        {/* Hamburger menu for mobile */}
         <div className="lg:hidden flex pr-4">
           <div className="drawer">
             <input id="my-drawer-1" type="checkbox" className="drawer-toggle" />
@@ -66,19 +71,19 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="flex flex-1 relative">
+        <div className="flex flex-1 relative col-start-1 col-end-1 row-start-1 row-end-3 gap-0">
           <Link href="/">
             <Image
               src="/assets/logo.png"
               alt="SEWN Logo"
-              height={100}
-              width={100}
-              className="w-16 md:w-30 h-auto"
+              height={200}
+              width={200}
+              className="w-30 md:w-55 h-auto"
             />
           </Link>
         </div>
-
-        <nav className="hidden md:flex items-center justify-center text-primary text-xs sm:text-lg gap-x-2 sm:gap-x-8">
+        {/* Centered nav links on desktop, hidden on mobile */}
+        <nav className="hidden md:flex items-center justify-baseline text-white text-xs sm:text-2xl gap-x-2 sm:gap-x-20 col-start-2 col-end-6 row-start-1 row-end-1">
           {navLinks.map((link) => (
             <div key={link.name} className="relative group">
               <Link
@@ -88,26 +93,31 @@ export default function Header() {
                 {link.name}
               </Link>
 
-              {link.dropdown && (
+              {/* {link.dropdown && (
                 <div className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <div className="bg-secondary-gradient-b shadow-lg rounded-md py-2 min-w-[180px]">
+                  <div className="bg-orchid-light shadow-lg rounded-md py-2 min-w-[180px]">
                     {link.dropdown.map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
-                        className="block px-4 py-2 text-sm text-primary hover:opacity-80 transition-colors"
+                        className="block px-4 py-2 text-sm hover:opacity-80 transition-colors"
                       >
                         {item.name}
                       </Link>
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           ))}
         </nav>
+        {/*search bar on the second row, hidden on mobile */}
+        <div className="col-start-2 col-end-6 row-start-2 row-end-2 mt-2 ">
+          <SearchBar />
+        </div>
 
-        <div className="flex flex-1 justify-end items-center gap-x-8">
+        {/* Icon buttons on the right */}
+        <div className="flex flex-1 justify-end items-center gap-x-8 col-start-6 col-end-6 row-start-1 row-end-1">
           {iconButtons.map((button) => {
             const Icon = button.icon;
             const isCart = button.label === "Cart";
@@ -115,10 +125,10 @@ export default function Header() {
               <button
                 key={button.label}
                 onClick={button.onClick}
-                className="text-primary hover:opacity-80 hover:cursor-pointer transition-opacity relative"
+                className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
                 aria-label={button.label}
               >
-                <Icon size={24} />
+                <Icon size={32} />
                 {isCart && getCartCount() > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {getCartCount()}
@@ -141,12 +151,12 @@ export default function Header() {
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-primary">
+                <h2 className="text-2xl font-semibold text-heading">
                   Shopping Cart
                 </h2>
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="text-primary hover:opacity-70"
+                  className="text-heading hover:opacity-70"
                 >
                   <X size={24} />
                 </button>
@@ -173,13 +183,13 @@ export default function Header() {
                           />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-primary">
+                          <h3 className="font-medium text-heading">
                             {item.productName}
                           </h3>
                           <p className="text-sm text-gray-600">
                             {item.sewerName}
                           </p>
-                          <p className="text-primary font-semibold">
+                          <p className="text-heading font-semibold">
                             ₱{item.price.toFixed(2)}
                           </p>
                         </div>
@@ -195,7 +205,7 @@ export default function Header() {
                               onClick={() =>
                                 updateQuantity(item.id, item.quantity - 1)
                               }
-                              className="text-primary hover:opacity-70"
+                              className="text-heading hover:opacity-70"
                             >
                               <Minus size={16} />
                             </button>
@@ -206,7 +216,7 @@ export default function Header() {
                               onClick={() =>
                                 updateQuantity(item.id, item.quantity + 1)
                               }
-                              className="text-primary hover:opacity-70"
+                              className="text-heading hover:opacity-70"
                             >
                               <Plus size={16} />
                             </button>
@@ -218,10 +228,10 @@ export default function Header() {
 
                   <div className="border-t border-gray-300 pt-4">
                     <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold text-primary">
+                      <span className="text-lg font-semibold text-heading">
                         Total:
                       </span>
-                      <span className="text-2xl font-bold text-primary">
+                      <span className="text-2xl font-bold text-heading">
                         ₱{getCartTotal().toFixed(2)}
                       </span>
                     </div>
