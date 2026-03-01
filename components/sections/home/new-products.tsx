@@ -17,9 +17,9 @@ export default function NewProducts() {
             <NewProductCard
               key={product.id}
               id={product.id}
-              productName={product.productName}
-              src={product.imgSrc}
-              seller={product.sewerName}
+              productName={product.product_name}
+              src={product.img_src}
+              seller={product.sewer_name}
               price={`₱${product.price.toFixed(2)}`}
               className={"h-100 lg:h-150"}
             />
