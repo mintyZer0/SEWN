@@ -5,7 +5,7 @@ import SearchBar from "@/components/ui/search-bar";
 export default function Shop() {
   return (
     <>
-      <h1 className="flex justify-center mx-20 text-9xl text-primary p-4">
+      <h1 className="flex justify-center mx-20 text-9xl text-heading p-4">
         Order
       </h1>
       <div className="flex flex-row my-20">

@@ -22,7 +22,7 @@ export default function ManagementTeam() {
   return (
     <div className="w-full bg-white py-16 px-8">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-primary text-center mb-12">
+        <h2 className="text-4xl font-bold text-heading text-center mb-12">
           Management Team
         </h2>
 

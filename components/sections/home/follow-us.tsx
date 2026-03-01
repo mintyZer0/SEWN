@@ -13,7 +13,7 @@ export default function FollowUs() {
   return (
     <div className="w-full py-16 px-8 bg-linear-to-t from-5% from-[#FFE063] to-transparent">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-5xl font-normal text-primary mb-4">
+        <h2 className="text-5xl font-normal text-heading mb-4">
           follow our trail
         </h2>
         <p className="text-lg text-gray-700 mb-8">
@@ -31,12 +31,12 @@ export default function FollowUs() {
             placeholder="enter your email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 px-6 py-4 rounded-full bg-white text-gray-600 placeholder:text-primary/60 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex-1 px-6 py-4 rounded-full bg-white text-gray-600 placeholder:text-heading/60 focus:outline-none focus:ring-2 focus:ring-primary"
             required
           />
           <button
             type="submit"
-            className="absolute right-0 px-12 py-4 bg-[#F8E597] text-primary font-semibold rounded-full hover:cursor-pointer hover:bg-opacity/90 transition-colors"
+            className="absolute right-0 px-12 py-4 bg-[#F8E597] text-heading font-semibold rounded-full hover:cursor-pointer hover:bg-opacity/90 transition-colors"
           >
             Subscribe
           </button>

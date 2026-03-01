@@ -5,10 +5,10 @@ export default function ContactsPage() {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-8 py-16">
         <div className="text-center mb-12">
-          <h1 className="text-6xl font-semi-bold text-primary mb-2">
+          <h1 className="text-6xl font-semi-bold text-heading mb-2">
             Contacts
           </h1>
-          <p className="text-2xl text-primary">Contact our Representatives</p>
+          <p className="text-2xl text-heading">Contact our Representatives</p>
         </div>
 
         <div className="grid grid-cols-3 gap-8 mb-16 h-150">

@@ -21,14 +21,14 @@ export default function FeaturedSewer({
     <div className="flex items-center gap-8 p-8 rounded-lg max-w-4xl">
       {/* Left side - Text content */}
       <div className="flex-1 flex flex-col items-end text-right">
-        <h2 className="text-5xl text-primary font-medium mb-4 text-right">
+        <h2 className="text-5xl text-heading font-medium mb-4 text-right">
           {sewerName}
         </h2>
         <p className="text-lg text-foreground mb-6 leading-relaxed text-right">
           {description}
         </p>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-primary">
+          <div className="flex items-center gap-2 text-heading">
             <Star size={24} fill="#7b3b7b" stroke="#7b3b7b" />
             <span className="text-2xl font-medium">{rating}</span>
           </div>
