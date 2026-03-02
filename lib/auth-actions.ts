@@ -25,7 +25,9 @@ export async function login(formData: FormData) {
   redirect("/");
 }
 
-export async function signup(formData: FormData) {
+export async function signup(
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -51,18 +53,21 @@ export async function signup(formData: FormData) {
 
   if (existingUser) {
     console.log(existingUser);
-    redirect("/error");
+    return {
+      success: false,
+      error: "An account with this email already exists.",
+    };
   }
 
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
     console.log(error);
-    redirect("/error");
+    return { success: false, error: error.message };
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  return { success: true };
 }
 
 export async function signout() {
