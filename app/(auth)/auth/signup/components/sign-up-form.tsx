@@ -29,6 +29,14 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     password: string;
   } | null>(null);
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [province, setProvince] = useState("Tarlac");
+  const [city, setCity] = useState("Tarlac City");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [landline, setLandline] = useState("");
+
   const openRegisterModal = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
@@ -225,6 +233,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     name="first-name"
                     placeholder="Ethan Mathew"
                     className="rounded-2xl border-heading"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                     required
                   />
                 </div>
@@ -237,6 +247,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     name="last-name"
                     placeholder="Malonzo"
                     className="rounded-2xl border-heading"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                     required
                   />
                 </div>
@@ -251,7 +263,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     id="province"
                     name="province"
                     className="h-10 rounded-2xl border border-heading px-3 text-sm"
-                    defaultValue="Tarlac"
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
                   >
                     <option value="Tarlac">Tarlac</option>
                   </select>
@@ -264,7 +277,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     id="city"
                     name="city"
                     className="h-10 rounded-2xl border border-heading px-3 text-sm"
-                    defaultValue="Tarlac City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                   >
                     <option value="Tarlac City">Tarlac City</option>
                   </select>
@@ -283,6 +297,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                   name="customer-address"
                   placeholder="Sitio Diyan Lang, Sa tabi tabi, Tarlac City, Tarlac"
                   className="rounded-2xl border-heading"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
                 />
               </div>
 
@@ -299,6 +315,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     name="phone-number"
                     placeholder="0967 676 7676"
                     className="rounded-2xl border-heading"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
                 <div className="grid gap-1">
@@ -310,6 +328,8 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
                     name="landline"
                     placeholder="N/A"
                     className="rounded-2xl border-heading"
+                    value={landline}
+                    onChange={(e) => setLandline(e.target.value)}
                   />
                 </div>
               </div>
@@ -357,10 +377,14 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </div>
 
             <h2 className="text-4xl font-bold text-heading">
-              Successfully Created Account!
+              Check Your Email!
             </h2>
             <p className="mt-2 text-sm text-gray-500">
-              Click anywhere to close the window
+              We sent a confirmation link to your email. Please verify your
+              account before logging in.
+            </p>
+            <p className="mt-4 text-xs text-gray-400">
+              Click anywhere to close
             </p>
           </div>
         </div>

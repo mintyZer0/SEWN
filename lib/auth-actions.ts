@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
+import { format } from "path";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -18,6 +19,9 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
+    if (error.message === "Email not confirmed") {
+      redirect("/auth/login?error=email_not_confirmed");
+    }
     redirect("/error");
   }
 
@@ -39,14 +43,20 @@ export async function signup(
     password: formData.get("password") as string,
     options: {
       data: {
-        full_name: `${firstName} ${lastName}`,
+        first_name: firstName,
+        last_name: lastName,
         email: formData.get("email") as string,
+        phone_number: formData.get("phone-number") as string,
+        landline_number: formData.get("landline") as string,
+        address_line: formData.get("customer-address") as string,
+        province: formData.get("province") as string,
+        city: formData.get("city") as string,
       },
     },
   };
 
   const { data: existingUser } = await supabase
-    .from("auth.users")
+    .from("public.profiles")
     .select("email")
     .eq("email", data.email)
     .single();
@@ -75,10 +85,17 @@ export async function signout() {
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.log(error);
+    console.log(error.message);
+    console.log(error.status);
+    console.log(error.code);
     redirect("/error");
   }
 
   redirect("/logout");
+}
+
+export async function signUpAsSewer(formData: FormData) {
+  const supabase = await createClient();
 }
 
 export async function signInWithGoogle() {
@@ -90,6 +107,7 @@ export async function signInWithGoogle() {
         access_type: "offline",
         prompt: "consent",
       },
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   });
 

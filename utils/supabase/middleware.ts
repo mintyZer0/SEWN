@@ -54,7 +54,28 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Public routes that don't require authentication
+  const publicRoutes = [
+    "/auth/login",
+    "/auth/signup",
+    "/auth/confirm",
+    "/auth/callback",
+    "/auth/logout",
+    "/error",
+  ];
+  const isPublicRoute = publicRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  );
+
+  if (!isPublicRoute && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/auth/login";
+    return NextResponse.redirect(loginUrl);
+  }
 
   return response;
 }
