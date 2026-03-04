@@ -12,8 +12,9 @@ import { Label } from "@/components/ui/label";
 import { signup } from "@/lib/auth-actions";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { createClient } from "@/utils/supabase/client";
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,6 +37,22 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
   const [customerAddress, setCustomerAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [landline, setLandline] = useState("");
+
+  // Listen for email confirmation across tabs and auto-redirect
+  useEffect(() => {
+    if (!showSuccess) return;
+
+    const supabase = createClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") {
+        router.push("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [showSuccess, router]);
 
   const openRegisterModal = (e: React.FormEvent) => {
     e.preventDefault();
@@ -358,15 +375,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
           <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-2xl">
-            <button
-              type="button"
-              onClick={() => router.push("/")}
-              className="absolute right-4 top-4 text-2xl text-heading cursor-pointer"
-              aria-label="Close"
-            >
-              &times;
-            </button>
-
             <div className="mx-auto mb-4 flex h-40 w-40 items-center justify-center">
               <Image
                 src="/assets/signup-page/success.png"
@@ -382,9 +390,6 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             <p className="mt-2 text-sm text-gray-500">
               We sent a confirmation link to your email. Please verify your
               account before logging in.
-            </p>
-            <p className="mt-4 text-xs text-gray-400">
-              Click anywhere to close
             </p>
           </div>
         </div>
