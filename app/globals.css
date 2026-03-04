@@ -9,6 +9,7 @@
   --primary-light: #e1c8e7;
   --primary-dark: #310043;
   --secondary: #fff5cd;
+  --third: #ff975e;
   --heading: #7b3b7b;
 }
 
@@ -19,6 +20,7 @@
   --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
+  --color-third: var(--third);
   --color-heading: var(--heading);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
