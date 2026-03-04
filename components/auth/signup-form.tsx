@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -21,7 +22,7 @@ const variants = {
   customer: {
     style: "text-white",
     subtitle: "Please fill in your basic info",
-    submitButtonClass: "bg-background",
+    submitButtonClass: "bg-primary text-white hover:text-primary/90",
   },
   sewer: {
     style: "text-third",
@@ -195,11 +196,28 @@ export function SignupForm({
             </Button>
           </form>
 
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
-            <a href="/auth/login" className="underline underline-offset-4">
-              Sign in
-            </a>
+          <div className="flex mt-4 text-center text-sm justify-between ">
+            <Link
+              href="/auth/login"
+              className="hover:underline underline-offset-4"
+            >
+              or Login
+            </Link>
+            {variant === "customer" ? (
+              <Link
+                href="/auth/signup-sewer"
+                className="hover:underline underline-offset-4"
+              >
+                Sign up as a seller
+              </Link>
+            ) : (
+              <Link
+                href="/auth/signup"
+                className="hover:underline underline-offset-4"
+              >
+                Sign up as a customer
+              </Link>
+            )}
           </div>
         </CardContent>
       </Card>
