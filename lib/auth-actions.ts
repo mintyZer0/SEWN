@@ -94,8 +94,59 @@ export async function signout() {
   redirect("/logout");
 }
 
-export async function signUpAsSewer(formData: FormData) {
+export async function signUpAsSewer(
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
+
+  const firstName = formData.get("first-name") as string;
+  const lastName = formData.get("last-name") as string;
+
+  const data = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+    options: {
+      data: {
+        role: "sewer",
+        first_name: firstName,
+        last_name: lastName,
+        email: formData.get("email") as string,
+        phone_number: formData.get("phone-number") as string,
+        landline_number: formData.get("landline") as string,
+        address_line: formData.get("customer-address") as string,
+        province: formData.get("province") as string,
+        city: formData.get("city") as string,
+        company_name: formData.get("company-name") as string,
+        company_email: formData.get("company-email") as string,
+        tax_id: formData.get("tax-id") as string,
+        social_link: formData.get("social-link") as string,
+        dti_sec_number: formData.get("dti-sec-number") as string,
+      },
+    },
+  };
+
+  const { data: existingUser } = await supabase
+    .from("public.profiles")
+    .select("email")
+    .eq("email", data.email)
+    .single();
+
+  if (existingUser) {
+    return {
+      success: false,
+      error: "An account with this email already exists.",
+    };
+  }
+
+  const { error } = await supabase.auth.signUp(data);
+
+  if (error) {
+    console.log(error);
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
 }
 
 export async function signInWithGoogle() {
