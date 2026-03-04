@@ -11,12 +11,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RegisterModal } from "@/components/modals/register-modal";
 import { SuccessModal } from "@/components/modals/success-modal";
+import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
-export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+const variants = {
+  customer: {
+    style: "text-white",
+    subtitle: "Please fill in your basic info",
+    submitButtonClass: "bg-background",
+  },
+  sewer: {
+    style: "text-third",
+    subtitle: "as a SEWN sewer",
+    submitButtonClass: "bg-secondary-gradient-b text-white",
+  },
+} as const;
+
+interface SignupFormProps extends React.ComponentProps<typeof Card> {
+  variant?: keyof typeof variants;
+}
+
+export function SignupForm({
+  className,
+  variant = "customer",
+  ...props
+}: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -72,11 +94,18 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
   return (
     <>
-      <Card {...props} className="text-white h-200 w-170 border-0 shadow-none">
+      <Card
+        {...props}
+        className={cn(
+          "h-200 w-170 border-0 shadow-none",
+          variants[variant].style,
+          className,
+        )}
+      >
         <CardHeader className="flex-row justify-center items-baseline gap-4 caret-transparent">
           <CardTitle className="text-8xl font-normal">Sign Up</CardTitle>
           <CardDescription className="text-2xl">
-            Please fill in your basic info
+            {variants[variant].subtitle}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -160,7 +189,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
             <Button
               type="submit"
-              className="w-full h-20 rounded-3xl bg-background text-heading text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer"
+              className={`w-full h-20 rounded-3xl ${variants[variant].submitButtonClass} text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer`}
             >
               Register
             </Button>
@@ -177,6 +206,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       {showRegisterModal && capturedData ? (
         <RegisterModal
+          variant={variant}
           capturedData={capturedData}
           onClose={() => setShowRegisterModal(false)}
           onSuccess={() => {
