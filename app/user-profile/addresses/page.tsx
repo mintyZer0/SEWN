@@ -10,7 +10,6 @@ export default function MyAddressesPage() {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch user addresses from the database
   useEffect(() => {
     async function fetchAddresses() {
       try {
@@ -26,7 +25,6 @@ export default function MyAddressesPage() {
     fetchAddresses();
   }, [supabase]);
 
-  // Handle new address submission
   const handleSaveAddress = async (addressData: any) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
