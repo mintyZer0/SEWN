@@ -72,7 +72,7 @@ export default function UserProfileSidebar() {
                         href={sub.href}
                         className={`text-sm block transition-all ${
                           isActive
-                            ? "text-white bg-third px-2 py-1 rounded w-fit"
+                            ? "text-white bg-third px-2 py-1 rounded-lg w-fit"
                             : "text-gray-500 hover:text-third"
                         }`}
                       >
