@@ -1,0 +1,48 @@
+"use client";
+
+import React from "react";
+import Image from "next/image";
+
+interface OrderUpdateProps {
+  productName: string;
+  sewerName: string;
+  statusMessage: string;
+  date: string;
+  imageSrc: string;
+}
+
+export default function OrderUpdateCard({
+  productName,
+  sewerName,
+  statusMessage,
+  date,
+  imageSrc,
+}: OrderUpdateProps) {
+  return (
+    <div className="bg-white rounded-[30px] p-6 flex gap-6 shadow-lg border border-white/20 transition-all hover:shadow-xl relative overflow-hidden">
+      <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 rounded-2xl overflow-hidden shadow-sm">
+        <Image
+          src={imageSrc}
+          alt={productName}
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center pr-4">
+        <h3 className="text-xl md:text-2xl font-bold text-third mb-1">
+          {productName}, {sewerName}
+        </h3>
+        <p className="text-gray-700 text-base md:text-lg leading-snug">
+          {statusMessage}
+        </p>
+      </div>
+
+      <div className="absolute bottom-4 right-6">
+        <span className="text-xs md:text-sm text-gray-500 font-medium italic">
+          {date}
+        </span>
+      </div>
+    </div>
+  );
+}
