@@ -3,12 +3,33 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showDelay = 100; // ms before showing
+  const hideDelay = 100; // ms before hiding
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    };
+  }, []);
+
+  const handleProfileMouseEnter = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setIsProfileOpen(true), showDelay);
+  };
+
+  const handleProfileMouseLeave = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setIsProfileOpen(false), hideDelay);
+  };
   const { cart, getCartCount, getCartTotal, updateQuantity, removeFromCart } =
     useCart();
   const navLinks = [
@@ -27,16 +48,19 @@ export default function Header() {
     { name: "About", href: "/about" },
     { name: "Seller Center", href: "/browse/sewers" },
   ];
+  const router = useRouter();
 
   const iconButtons = [
-    { icon: Search, href: "", label: "Search", onClick: undefined },
     {
       icon: ShoppingBag,
-      href: "",
       label: "Cart",
       onClick: () => setIsCartOpen(!isCartOpen),
     },
-    { icon: User, href: "", label: "Profile", onClick: undefined },
+    {
+      icon: User,
+      label: "Profile",
+      onClick: () => router.push("/user-profile"),
+    },
   ];
 
   return (
@@ -120,19 +144,49 @@ export default function Header() {
         <div className="flex flex-1 justify-end items-center gap-x-8 col-start-6 col-end-6 row-start-1 row-end-1">
           {iconButtons.map((button) => {
             const Icon = button.icon;
-            const isCart = button.label === "Cart";
+            const Label = button.label;
             return (
               <button
                 key={button.label}
+                onMouseEnter={
+                  Label === "Profile" ? handleProfileMouseEnter : undefined
+                }
+                onMouseLeave={
+                  Label === "Profile" ? handleProfileMouseLeave : undefined
+                }
                 onClick={button.onClick}
                 className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
                 aria-label={button.label}
               >
                 <Icon size={32} />
-                {isCart && getCartCount() > 0 && (
+                {Label === "Cart" && getCartCount() > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {getCartCount()}
                   </span>
+                )}
+                {Label === "Profile" && (
+                  <div
+                    className={`absolute right-0 mt-2 w-48 bg-secondary rounded-md shadow-lg py-2 z-10 transform transition-all duration-100 ease-out origin-top-right ${
+                      isProfileOpen
+                        ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
+                        : "opacity-0 scale-60 pointer-events-none -translate-y-1"
+                    }`}
+                    onMouseEnter={handleProfileMouseEnter}
+                    onMouseLeave={handleProfileMouseLeave}
+                  >
+                    <div className="px-2 text-sm text-black">
+                      <ul className="text-primary text-lg">
+                        <li>
+                          <Link
+                            href="/user-profile"
+                            className="block px-4 py-2 hover:bg-gray-100"
+                          >
+                            User Profile
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 )}
               </button>
             );
