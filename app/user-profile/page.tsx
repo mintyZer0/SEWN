@@ -19,7 +19,7 @@ export default function UserProfilePage() {
     dob: "",
   });
 
-  // Fetches the user's profile information from the Supabase 'profiles' table on mount
+  // Fetch profile info from Supabase on mount
   useEffect(() => {
     async function getProfile() {
       try {
@@ -56,7 +56,7 @@ export default function UserProfilePage() {
     getProfile();
   }, [supabase]);
 
-  // Updates the local form state as the user types
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -65,7 +65,7 @@ export default function UserProfilePage() {
     }));
   };
 
-  // Toggles edit mode or saves changes to the Supabase 'profiles' table
+  // Toggle edit mode or save changes to 'profiles' table
   const handleConfirmChanges = async () => {
     if (!isEditing) {
       setIsEditing(true);
