@@ -19,6 +19,7 @@ export default function UserProfilePage() {
     dob: "",
   });
 
+  // Fetches the user's profile information from the Supabase 'profiles' table on mount
   useEffect(() => {
     async function getProfile() {
       try {
@@ -55,6 +56,7 @@ export default function UserProfilePage() {
     getProfile();
   }, [supabase]);
 
+  // Updates the local form state as the user types
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -63,6 +65,7 @@ export default function UserProfilePage() {
     }));
   };
 
+  // Toggles edit mode or saves changes to the Supabase 'profiles' table
   const handleConfirmChanges = async () => {
     if (!isEditing) {
       setIsEditing(true);
@@ -109,10 +112,7 @@ export default function UserProfilePage() {
         <p className="text-white/80 text-xl font-medium">Manage and protect your account</p>
       </header>
 
-      {/* Inner White Display Card */}
       <div className="bg-white rounded-[30px] p-10 flex flex-col lg:flex-row gap-16 shadow-lg border border-white/20">
-        
-        {/* Form Fields Section */}
         <div className="flex-1 space-y-8">
           <div className="flex justify-between items-center">
             <h2 className="text-third text-2xl font-bold tracking-tight">Display Card</h2>
@@ -204,10 +204,8 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        {/* Vertical Divider */}
         <div className="hidden lg:block w-px bg-gray-200 self-stretch"></div>
 
-        {/* Profile Image Section */}
         <div className="flex flex-col items-center justify-center gap-8 lg:px-12">
           <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner">
             <User className="w-32 h-32 text-gray-400" />
@@ -221,7 +219,6 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* Confirm Changes / Edit Button */}
       <div className="flex justify-end mt-12 pr-4">
           <button 
             onClick={handleConfirmChanges}

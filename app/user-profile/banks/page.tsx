@@ -12,7 +12,6 @@ export default function BanksAndCardsPage() {
       </header>
 
       <div className="space-y-6">
-        {/* Credit / Debit Card Section */}
         <div className="bg-white rounded-[30px] p-10 shadow-lg border border-white/20">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-third text-2xl font-bold tracking-tight">Credit / Debit Card</h2>
@@ -27,7 +26,6 @@ export default function BanksAndCardsPage() {
           </div>
         </div>
 
-        {/* Bank Accounts Section */}
         <div className="bg-white rounded-[30px] p-10 shadow-lg border border-white/20">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-third text-2xl font-bold tracking-tight">Bank Accounts</h2>
