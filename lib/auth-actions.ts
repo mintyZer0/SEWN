@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 import { createClient } from "@/utils/supabase/server";
-import { format } from "path";
 
 export async function login(formData: FormData) {
   const supabase = await createClient();
@@ -149,8 +149,25 @@ export async function signUpAsSewer(
   return { success: true };
 }
 
+async function getRedirectTo() {
+  // If NEXT_PUBLIC_SITE_URL is set, use it.
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
+  }
+
+  // Otherwise, construct it dynamically from headers for environmental-agnosticism.
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+  
+  return `${protocol}://${host}/auth/callback`;
+}
+
 export async function signInWithGoogle() {
   const supabase = await createClient();
+  const redirectTo = await getRedirectTo();
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
@@ -158,7 +175,7 @@ export async function signInWithGoogle() {
         access_type: "offline",
         prompt: "consent",
       },
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      redirectTo,
     },
   });
 
