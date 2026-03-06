@@ -4,40 +4,51 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star, ShoppingCart } from "react-feather";
 import { useCart } from "@/context/CartContext";
-import { Product as ProductType } from "@/data/products";
 
 type Product = {
   id: string;
-  img_src: string;
-  product_name: string;
-  sewer_name: string;
+  user_id: string;
+  name: string; 
   price: number;
-  rating: number;
-  sold: number;
+  img_src: string;
+  location: string; 
+  type: string;
+  created_at: string;
+  is_active: boolean;
+  rating?: number; 
+  sold?: number;   
 };
 
 export interface ProductCardProps {
   product: Product;
 }
-export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addToCart(product as ProductType);
+export default function ProductCard({ product }: ProductCardProps) {
+const handleAddToCart = (e: React.MouseEvent) => {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  // Map ONLY needed fields for cart (no type assertion needed)
+  const cartItem = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    img_src: product.img_src,
   };
+  
+  useCart().addToCart(cartItem as any);
+};
 
   return (
     <div className="relative flex flex-col h-160 w-80 bg-primary-light hover:shadow-lg transition-shadow">
-      <Link
-        href={`/checkout?id=${product.id}`}
-        className="flex flex-col h-full"
-      >
+      <Link href={`/checkout?id=${product.id}`} className="flex flex-col h-full">
         <div className="flex-1 relative">
           <Image
-            src={product.img_src}
-            alt={product.product_name}
+            src={product.img_src.startsWith('http') 
+            ? product.img_src 
+            : `https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/${product.img_src}`
+            }
+            alt={product.name}
             fill
             className="object-cover"
           />
@@ -51,22 +62,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
         <div className="flex flex-col h-40">
           <div className="text-center">
-            <h4 className="text-2xl font-medium ">{product.product_name}</h4>
-            <h5 className="text-lg">{product.sewer_name}</h5>
+            <h4 className="text-2xl font-medium">{product.name}</h4>
+            <h5 className="text-lg">{product.location || product.type}</h5>
             <h6 className="text-md italic text-gray-400">
-              ₱
-              {typeof product.price === "number"
-                ? product.price.toFixed(2)
-                : product.price}
+              ₱{typeof product.price === "number" ? product.price.toFixed(2) : product.price}
             </h6>
           </div>
           <div className="flex flex-1 p-4 gap-2 align-bottom items-end justify-between">
             <div className="flex gap-2">
               <Star fill="fill-primary" stroke="#7b3b7b" />
-              <span>{product.rating}</span>
+              <span>{product.rating ? product.rating.toFixed(1) : 'N/A'}</span>  
             </div>
             <div>
-              <span>{product.sold} sold</span>
+              <span>{product.sold || 0} sold</span> 
             </div>
           </div>
         </div>

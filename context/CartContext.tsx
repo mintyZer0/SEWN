@@ -1,7 +1,21 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
-import { Product } from "@/data/products";
+
+// ✅ YOUR SUPABASE PRODUCT TYPE
+type Product = {
+  id: string;
+  user_id: string;
+  name: string;
+  price: number;
+  img_src: string;
+  location: string;
+  type: string;
+  created_at: string;
+  is_active: boolean;
+  rating?: number;
+  sold?: number;
+};
 
 interface CartItem extends Product {
   quantity: number;
