@@ -56,27 +56,30 @@ export const useImageUpload = () => {
 
         const fileExt = image.file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
-        const filePath = `public/images/${fileName}`;
+        const filePath = `${fileName}`;
 
-        const { data, error } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, image.file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: image.file.type
-          });
+      const { data, error } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, image.file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: image.file.type
+        });
 
-        if (error) throw error;
+      console.log('Upload result:', data, error);
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(filePath);
+      if (error) throw error;
 
-        setImages(prev => prev.map(img => 
-          img.id === image.id 
-            ? { ...img, status: 'complete', publicUrl, filePath }
-            : img
-        ));
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+
+      setImages(prev => prev.map(img => 
+        img.id === image.id 
+          ? { ...img, status: 'complete', publicUrl, filePath }
+          : img
+      ));
 
       } catch (error) {
         console.error('Upload error:', error);
