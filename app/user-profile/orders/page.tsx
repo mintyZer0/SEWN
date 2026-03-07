@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import ProfileSection from "@/components/user-profile/profile-section";
 import OrderCard, { OrderItem } from "@/components/user-profile/order-card";
+import { OrderTabButton } from "@/components/user-profile/order-buttons";
 
 const TABS = [
   "All",
@@ -16,7 +17,8 @@ const TABS = [
 
 const MOCK_ORDERS: OrderItem[] = [
   {
-    id: "1",
+    id: "260211A7XBKLY1",
+    sewerId: "550e8400-e29b-41d4-a716-446655440000",
     sewerName: "Ysabel Santiago",
     productName: "Mint Muse",
     variant: "Premade Small 1x",
@@ -26,7 +28,8 @@ const MOCK_ORDERS: OrderItem[] = [
     imageSrc: "/assets/shop-grid-products/shop-grid-product8.png",
   },
   {
-    id: "2",
+    id: "260212G9VCMFY0",
+    sewerId: "678e8400-e29b-41d4-a716-446655440000",
     sewerName: "Chini De Bertha",
     productName: "Charcoal Night",
     variant: "Measurement Profile #1",
@@ -46,17 +49,13 @@ export default function OrdersPage() {
     <div className="flex flex-col max-w-[75svw] mx-auto space-y-10">
       <div className="flex flex-wrap justify-between bg-orchid gap-2 pr-10 p-4 rounded-4xl w-full">
         {TABS.map((tab) => (
-          <button
+          <OrderTabButton
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-full font-bold text-2xl transition-all ${
-              activeTab === tab
-                ? "bg-white text-third shadow-sm"
-                : "text-white hover:bg-white/10"
-            }`}
+            isActive={activeTab === tab}
           >
             {tab}
-          </button>
+          </OrderTabButton>
         ))}
       </div>
 
