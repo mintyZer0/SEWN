@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import ProfileSection from "@/components/user-profile/profile-section";
 import OrderCard, { OrderItem } from "@/components/user-profile/order-card";
-import { OrderTabButton } from "@/components/user-profile/order-buttons";
+import { OrderTabButton } from "@/components/user-profile/profile-buttons";
 
 const TABS = [
   "All",

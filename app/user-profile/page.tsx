@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { User, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { cn } from "@/lib/utils";
 import ProfileSection from "@/components/user-profile/profile-section";
+import { ProfileButton } from "@/components/user-profile/profile-buttons";
 
 export default function UserProfilePage() {
   const supabase = createClient();
@@ -125,12 +127,9 @@ export default function UserProfilePage() {
               Display Card
             </h2>
             {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="text-third hover:underline font-semibold"
-              >
+              <ProfileButton variant="ghost" onClick={() => setIsEditing(true)}>
                 Edit Profile
-              </button>
+              </ProfileButton>
             )}
           </div>
 
@@ -216,12 +215,17 @@ export default function UserProfilePage() {
             <label className="text-xl font-medium text-gray-800">
               Addresses:
             </label>
-            <button
+            <ProfileButton
+              variant="orange"
+              size="md"
               disabled={!isEditing}
-              className={`bg-third text-white px-8 py-2.5 rounded-xl font-bold w-fit transition-all transform ${isEditing ? "hover:opacity-90 hover:scale-105 active:scale-95 shadow-md" : "opacity-50 cursor-not-allowed"}`}
+              className={cn(
+                "max-w-60",
+                !isEditing && "opacity-50 cursor-not-allowed",
+              )}
             >
               Change Address
-            </button>
+            </ProfileButton>
           </div>
         </div>
 
@@ -231,24 +235,30 @@ export default function UserProfilePage() {
           <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner">
             <User className="w-32 h-32 text-gray-400" />
           </div>
-          <button
+          <ProfileButton
+            variant="ghost"
             disabled={!isEditing}
-            className={`border-2 border-gray-300 text-gray-600 px-8 py-2 rounded-full transition-all font-medium text-lg ${isEditing ? "hover:bg-gray-50 hover:border-gray-400 shadow-sm" : "opacity-50 cursor-not-allowed"}`}
+            className={cn(
+              "border-2 border-gray-300 text-gray-600 px-8 py-2 rounded-full hover:bg-gray-50 hover:border-gray-400 shadow-sm",
+              !isEditing && "opacity-50 cursor-not-allowed",
+            )}
           >
             Select Image
-          </button>
+          </ProfileButton>
         </div>
       </div>
 
       <div className="flex justify-end mt-6 pr-4">
-        <button
+        <ProfileButton
+          variant="white"
+          size="xl"
           onClick={handleConfirmChanges}
           disabled={isSaving}
-          className="bg-white text-third px-12 py-3.5 rounded-[20px] font-black text-2xl shadow-[0_10px_20px_rgba(0,0,0,0.1)] hover:shadow-[0_15px_25px_rgba(0,0,0,0.15)] hover:-translate-y-1 transition-all active:translate-y-0 flex items-center gap-3 disabled:opacity-70"
+          className="flex items-center gap-3"
         >
           {isSaving && <Loader2 className="w-6 h-6 animate-spin" />}
           {isEditing ? "Confirm Changes" : "Edit Profile"}
-        </button>
+        </ProfileButton>
       </div>
     </ProfileSection>
   );
