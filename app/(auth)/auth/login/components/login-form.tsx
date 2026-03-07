@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { login } from "@/lib/auth-actions";
+import { login, signInWithGoogle, signInWithFacebook, signInWithTwitter } from "@/lib/auth-actions";
 import SocialSignInButton from "./social-sign-in-button";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
@@ -88,14 +88,17 @@ export function LoginForm({
                 <SocialSignInButton
                   imageSrc="/assets/login-page/gmail.png"
                   altText="Google Icon"
+                  onSignIn={signInWithGoogle}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="Facebook Icon"
+                  onSignIn={signInWithFacebook}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="X Icon"
+                  onSignIn={signInWithTwitter}
                 />
               </div>
             </div>

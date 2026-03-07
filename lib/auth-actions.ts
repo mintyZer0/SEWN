@@ -164,25 +164,40 @@ async function getRedirectTo() {
   return `${protocol}://${host}/auth/callback`;
 }
 
-export async function signInWithGoogle() {
+export async function signInWithOAuth(provider: "google" | "facebook" | "twitter") {
   const supabase = await createClient();
   const redirectTo = await getRedirectTo();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
+    provider,
     options: {
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
-      },
+      queryParams:
+        provider === "google"
+          ? {
+              access_type: "offline",
+              prompt: "consent",
+            }
+          : {},
       redirectTo,
     },
   });
 
   if (error) {
-    console.log(error);
+    console.error(error);
     redirect("/error");
   }
 
   redirect(data.url);
+}
+
+export async function signInWithGoogle() {
+  return signInWithOAuth("google");
+}
+
+export async function signInWithFacebook() {
+  return signInWithOAuth("facebook");
+}
+
+export async function signInWithTwitter() {
+  return signInWithOAuth("twitter");
 }
