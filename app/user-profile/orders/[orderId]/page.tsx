@@ -8,7 +8,7 @@ import {
   ChatWithSewerButton,
   ViewSewerButton,
   ConfirmDeliveryButton,
-} from "@/components/user-profile/order-buttons";
+} from "@/components/user-profile/profile-buttons";
 
 export default function OrderDetailsPage() {
   const params = useParams();

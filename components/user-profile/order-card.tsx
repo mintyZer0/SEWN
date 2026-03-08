@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { ChatWithSewerButton, ViewSewerButton, ConfirmDeliveryButton } from "./order-buttons";
+import { ChatWithSewerButton, ViewSewerButton, ConfirmDeliveryButton } from "./profile-buttons";
 
 export interface OrderItem {
   id: string;
