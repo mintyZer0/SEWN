@@ -10,6 +10,7 @@
   --primary-dark: #310043;
   --secondary: #fff5cd;
   --third: #ff975e;
+  --third-light: #ffb88c;
   --heading: #7b3b7b;
 }
 
@@ -21,6 +22,7 @@
   --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-third: var(--third);
+  --color-third-light: var(--third-light);
   --color-heading: var(--heading);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -41,6 +43,9 @@
   }
   .bg-button-gradient {
     @apply bg-gradient-to-b from-[#8A5D9A] to-[#A685A6];
+  }
+  .third-gradient {
+    @apply bg-gradient-to-b from-[#FF8D28] to-[#FFCFB1];
   }
 }
 .bg-secondary-gradient-b {
