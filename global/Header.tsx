@@ -7,13 +7,23 @@ import { useRef, useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
-export default function Header() {
+interface HeaderProps {
+  variant?: "default" | "seller";
+}
+
+export default function Header({ variant = "default" }: HeaderProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showDelay = 100; // ms before showing
   const hideDelay = 100; // ms before hiding
+
+  const bgStyles = {
+    default: "bg-orchid-light",
+    seller: "third-gradient",
+  };
 
   useEffect(() => {
     return () => {
@@ -43,10 +53,10 @@ export default function Header() {
     //   ],
     // },
     { name: "Shop", href: "/browse/shop" },
-    { name: "Services", href: "/services" },
+    { name: "Sewers", href: "/browse/sewers" },
     { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
-    { name: "Seller Center", href: "/browse/sewers" },
+    { name: "Sewer Center", href: "/sewer-center" },
   ];
   const router = useRouter();
 
@@ -64,7 +74,12 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-orchid-light shadow">
+    <header
+      className={cn(
+        "sticky top-0 left-0 right-0 z-[1001] shadow",
+        bgStyles[variant],
+      )}
+    >
       <div className="grid items-center py-4 px-4 sm:px-8 w-full grid-cols-6 grid-rows-2">
         {/* Hamburger menu for mobile */}
         <div className="lg:hidden flex pr-4">
