@@ -15,8 +15,9 @@ type Product = {
   type: string;
   created_at: string;
   is_active: boolean;
-  rating?: number; 
-  sold?: number;   
+  rating: number; 
+  sold: number;   
+  description?: string;
 };
 
 export interface ProductCardProps {

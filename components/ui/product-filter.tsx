@@ -14,6 +14,7 @@ type Product = {
   is_active: boolean;
   rating: number;
   sold: number;
+  description?: string;
 };
 
 interface ProductFilterProps {
