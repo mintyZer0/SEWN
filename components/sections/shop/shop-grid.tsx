@@ -17,6 +17,7 @@ interface Product {
   is_active: boolean;
   rating: number;
   sold: number;
+  description?: string;
 }
 
 export default function ShopGrid() {
