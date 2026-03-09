@@ -25,18 +25,20 @@ export const DeleteConfirmationModal = ({
   return (
     <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Modal */}
-      <div className="relative bg-white rounded-[40px] p-10 max-w-md w-full shadow-2xl transform transition-all animate-in fade-in zoom-in duration-300">
+      <div className="relative bg-white rounded-[30px] p-10 max-w-md w-full shadow-2xl transform transition-all animate-in fade-in zoom-in duration-300">
         <h3 className="text-3xl font-bold text-primary mb-4">{title}</h3>
         <p className="text-xl text-gray-600 mb-8">
-          Are you sure you want to delete <span className="font-bold text-third">"{itemName}"</span>? This action cannot be undone.
+          Are you sure you want to delete{" "}
+          <span className="font-bold text-third">"{itemName}"</span>? This
+          action cannot be undone.
         </p>
-        
+
         <div className="flex gap-4 justify-end">
           <button
             onClick={onClose}

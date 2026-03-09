@@ -19,6 +19,7 @@ interface CollapsibleProductSectionProps {
   items: SectionItem[];
   variant: "product" | "order" | "commission" | "appointment";
   onItemDelete?: (id: string) => Promise<void>;
+  onItemEdit?: (item: SectionItem) => void;
 }
 
 export const CollapsibleProductSection = ({
@@ -28,6 +29,7 @@ export const CollapsibleProductSection = ({
   items,
   variant,
   onItemDelete,
+  onItemEdit,
 }: CollapsibleProductSectionProps) => {
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; item?: SectionItem }>({
     isOpen: false,
@@ -101,7 +103,7 @@ export const CollapsibleProductSection = ({
               name={item.name}
               type={variant === "commission" ? item.type : undefined}
               showEdit={variant === "product"}
-              onEdit={() => console.log(`Editing ${variant}:`, item.name)}
+              onEdit={() => onItemEdit?.(item)}
               onDelete={() => handleDeleteClick(item)}
             />
           ))}

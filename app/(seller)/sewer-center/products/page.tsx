@@ -102,6 +102,7 @@ export default function ProductsPage() {
           onToggle={() => toggleSection("products")}
           items={products}
           onItemDelete={(id) => handleDelete(id, 'product')}
+          onItemEdit={() => setIsAddProductOpen(true)}
         />
 
         {/* Active Orders Section */}
