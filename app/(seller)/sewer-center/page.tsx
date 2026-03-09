@@ -194,12 +194,9 @@ export default function SewerCenterPage() {
 
         {/* Action Buttons */}
         <div className="mt-16 flex justify-end gap-6 pb-20">
-          <button
-            type="button"
-            className="px-12 py-3 rounded-full bg-red-500 text-white text-xl font-bold hover:bg-red-600 transition-colors shadow-lg cursor-pointer"
-          >
+          <ProfileButton type="button" variant="white" size="xl">
             Discard
-          </button>
+          </ProfileButton>
           <ProfileButton type="submit" variant="orange" size="xl">
             Confirm Changes
           </ProfileButton>

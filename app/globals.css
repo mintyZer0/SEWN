@@ -27,8 +27,16 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
 @layer components {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-third/20 rounded-full hover:bg-third/40 transition-colors;
+  }
   .bg-orchid {
     @apply bg-gradient-to-r from-[#925FA6] from-70% to-[#CEA9D0];
   }
