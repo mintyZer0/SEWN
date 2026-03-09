@@ -14,6 +14,8 @@ interface AddProductModalProps {
 }
 
 export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
+  if (!isOpen) return null;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
