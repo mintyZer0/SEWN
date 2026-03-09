@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { ProfileButton } from "@/components/user-profile/profile-buttons";
 
 // Dynamically import map component to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
@@ -13,7 +14,7 @@ const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
 export default function SewerCenterPage() {
   return (
     <div className="p-12">
-      <div className="max-w-7xl mx-auto">
+      <form className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-primary mb-8 ">Profile</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -25,6 +26,7 @@ export default function SewerCenterPage() {
               </label>
               <input
                 type="text"
+                name="name"
                 placeholder="Renerie"
                 className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
               />
@@ -35,6 +37,7 @@ export default function SewerCenterPage() {
                 Profile Description
               </label>
               <textarea
+                name="description"
                 rows={4}
                 placeholder="Talented and hardworking sewer, dedicated to crafting you the best of the best sews ever"
                 className="w-full p-4 rounded-3xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none resize-none"
@@ -48,6 +51,7 @@ export default function SewerCenterPage() {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   placeholder="ren@gmail.com"
                   className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                 />
@@ -58,6 +62,7 @@ export default function SewerCenterPage() {
                 </label>
                 <input
                   type="text"
+                  name="address"
                   placeholder="Ren Avenue, Manila"
                   className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                 />
@@ -71,6 +76,7 @@ export default function SewerCenterPage() {
                 </label>
                 <input
                   type="text"
+                  name="social_link"
                   placeholder="https://fb.ren.com"
                   className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                 />
@@ -81,6 +87,7 @@ export default function SewerCenterPage() {
                 </label>
                 <input
                   type="text"
+                  name="phone"
                   placeholder="091961494946"
                   className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                 />
@@ -96,6 +103,7 @@ export default function SewerCenterPage() {
                   <span className="text-xl text-primary font-medium">1.</span>
                   <input
                     type="text"
+                    name="achievement_1"
                     placeholder="Best sewer"
                     className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                   />
@@ -104,6 +112,7 @@ export default function SewerCenterPage() {
                   <span className="text-xl text-primary font-medium">2.</span>
                   <input
                     type="text"
+                    name="achievement_2"
                     className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                   />
                 </div>
@@ -111,6 +120,7 @@ export default function SewerCenterPage() {
                   <span className="text-xl text-primary font-medium">3.</span>
                   <input
                     type="text"
+                    name="achievement_3"
                     className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                   />
                 </div>
@@ -126,6 +136,7 @@ export default function SewerCenterPage() {
               </span>
               <input
                 type="file"
+                name="profile_image"
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
             </div>
@@ -140,21 +151,27 @@ export default function SewerCenterPage() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-8 h-8 rounded border-none bg-secondary shadow-sm checked:bg-third focus:ring-third"
+                  name="services"
+                  value="alterations"
+                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
                 />
                 <span>Alterations</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-8 h-8 rounded border-none bg-secondary shadow-sm checked:bg-third focus:ring-third"
+                  name="services"
+                  value="repair"
+                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
                 />
                 <span>Repair</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-8 h-8 rounded border-none bg-secondary shadow-sm checked:bg-third focus:ring-third"
+                  name="services"
+                  value="commissions"
+                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
                 />
                 <span>Commissions</span>
               </label>
@@ -177,14 +194,17 @@ export default function SewerCenterPage() {
 
         {/* Action Buttons */}
         <div className="mt-16 flex justify-end gap-6 pb-20">
-          <button className="px-12 py-3 rounded-full bg-red-500 text-white text-xl font-bold hover:bg-red-600 transition-colors shadow-lg">
+          <button
+            type="button"
+            className="px-12 py-3 rounded-full bg-red-500 text-white text-xl font-bold hover:bg-red-600 transition-colors shadow-lg cursor-pointer"
+          >
             Discard
           </button>
-          <button className="px-12 py-3 rounded-full bg-third text-white text-xl font-bold hover:bg-third/90 transition-colors shadow-lg">
+          <ProfileButton type="submit" variant="orange" size="xl">
             Confirm Changes
-          </button>
+          </ProfileButton>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
