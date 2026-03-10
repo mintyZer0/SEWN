@@ -14,27 +14,30 @@ interface MapComponentProps {
   className?: string;
 }
 
-export default function MapComponent({ 
-  position, 
-  height = "100%", 
+export default function MapComponent({
+  position,
+  height = "100%",
   width = "100%",
-  className 
+  className,
 }: MapComponentProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsMounted(true);
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
 
   if (!isMounted) {
     return (
-      <div 
+      <div
         style={{ height, width }}
-        className={cn("bg-gray-200 animate-pulse rounded-lg flex items-center justify-center text-gray-400", className)}
+        className={cn(
+          "bg-gray-200 animate-pulse rounded-lg flex items-center justify-center text-gray-400",
+          className,
+        )}
       >
         Loading Map...
       </div>
@@ -42,7 +45,7 @@ export default function MapComponent({
   }
 
   return (
-    <div 
+    <div
       className={cn("relative overflow-hidden rounded-lg", className)}
       style={{ height, width }}
     >
