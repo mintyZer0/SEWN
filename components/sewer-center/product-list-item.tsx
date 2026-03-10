@@ -26,28 +26,27 @@ export const ProductListItem = ({
       <span>{name}</span>
     </div>
 
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4">
       {type && (
-        <span className="text-gray-400 text-lg border-l border-gray-200 pl-6 h-8 flex items-center">
+        <span className="text-gray-400 text-lg border-l border-gray-200 pl-6 h-8 w-24 flex items-center">
           {type}
         </span>
       )}
-      <div className="flex items-center gap-4">
-        {showEdit && (
-          <button 
-            onClick={onEdit}
-            className="text-gray-600 hover:text-primary transition-colors cursor-pointer"
-          >
-            <Pencil className="w-6 h-6" />
-          </button>
-        )}
-        <button 
-          onClick={onDelete}
-          className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
+
+      {showEdit && (
+        <button
+          onClick={onEdit}
+          className="text-gray-600 hover:text-primary transition-colors cursor-pointer"
         >
-          <Trash2 className="w-6 h-6" />
+          <Pencil className="w-6 h-6" />
         </button>
-      </div>
+      )}
+      <button
+        onClick={onDelete}
+        className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
+      >
+        <Trash2 className="w-6 h-6" />
+      </button>
     </div>
   </div>
 );
