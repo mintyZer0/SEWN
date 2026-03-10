@@ -11,21 +11,15 @@ import SuccessPage from "@/components/checkout/success-page";
 interface Product {
   id: string;
   user_id: string;
-  name: string; 
+  name: string;
   price: number;
   img_src: string;
+  seller_name: string; 
   location: string;
   type: string;
-  created_at: string;
-  is_active: boolean;
-  rating?: number;
-  sold?: number;
   description?: string;
-  seller?: {
-    first_name: string;
-    last_name: string;
-  } | null;
 }
+
 
 export default function CheckoutClient({ 
   initialProduct 
@@ -57,10 +51,7 @@ export default function CheckoutClient({
 
   if (orderPlaced) return <SuccessPage />;
 
-const sellerName = initialProduct.seller
-  ? `${initialProduct.seller.first_name} ${initialProduct.seller.last_name}`
-  : "Unknown Seller";
-
+const sellerName = initialProduct.seller_name || 'Unknown Seller';
   return (
     <div className="min-h-dvw">
       <CheckoutStepper currentStep={currentStep} />

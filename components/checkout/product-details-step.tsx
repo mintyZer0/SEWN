@@ -50,7 +50,6 @@ export default function ProductDetailsStep({
             <h3 className="text-6xl font-semi text-heading mb-1">
               {productName}
             </h3>
-            {/* ✅ REAL SELLER FROM DATABASE */}
             <p className="text-3xl font-semibold mb-6">
               by {seller || 'Unknown Seller'}
             </p>
