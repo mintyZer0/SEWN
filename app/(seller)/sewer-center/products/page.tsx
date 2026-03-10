@@ -7,6 +7,7 @@ import {
   SectionItem 
 } from "@/components/sewer-center/collapsible-product-section";
 import { ProductModal } from "@/components/modals/product-modal";
+import { CommissionsModal } from "@/components/modals/commissions-modal";
 
 // Mock data with IDs
 const INITIAL_PRODUCTS: SectionItem[] = [
@@ -45,6 +46,7 @@ export default function ProductsPage() {
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
 
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isCommissionsModalOpen, setIsCommissionsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
   const [openSections, setOpenSections] = useState({
     products: true,
@@ -108,7 +110,11 @@ export default function ProductsPage() {
             >
               Add Product
             </ProfileButton>
-            <ProfileButton variant="orange" size="xl">
+            <ProfileButton 
+              variant="orange" 
+              size="xl"
+              onClick={() => setIsCommissionsModalOpen(true)}
+            >
               Commissions
             </ProfileButton>
             <ProfileButton variant="orange" size="xl">
@@ -168,6 +174,11 @@ export default function ProductsPage() {
         product={editingProduct}
         onSave={handleSaveProduct}
         onClose={() => setIsProductModalOpen(false)} 
+      />
+
+      <CommissionsModal
+        isOpen={isCommissionsModalOpen}
+        onClose={() => setIsCommissionsModalOpen(false)}
       />
     </div>
   );

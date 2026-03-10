@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
+import { CustomCheckbox } from "@/components/ui/custom-checkbox";
 
 // Dynamically import map component to avoid SSR issues with Leaflet
 const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
@@ -147,34 +148,25 @@ export default function SewerCenterPage() {
         <div className="mt-12">
           <h3 className="text-2xl font-medium text-primary mb-6 flex items-center gap-8">
             Services Offered:
-            <div className="flex items-center gap-12 font-normal text-xl">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="services"
-                  value="alterations"
-                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
-                />
-                <span>Alterations</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="services"
-                  value="repair"
-                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
-                />
-                <span>Repair</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="services"
-                  value="commissions"
-                  className="w-8 h-8 appearance-none rounded border-none bg-third shadow-sm checked:bg-third focus:ring-third"
-                />
-                <span>Commissions</span>
-              </label>
+            <div className="flex items-center gap-12 font-normal text-xl text-primary">
+              <CustomCheckbox
+                label="Alterations"
+                name="services"
+                value="alterations"
+                size="md"
+              />
+              <CustomCheckbox
+                label="Repair"
+                name="services"
+                value="repair"
+                size="md"
+              />
+              <CustomCheckbox
+                label="Commissions"
+                name="services"
+                value="commissions"
+                size="md"
+              />
             </div>
           </h3>
         </div>
