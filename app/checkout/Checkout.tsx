@@ -63,7 +63,7 @@ const sellerName = initialProduct.seller_name || 'Unknown Seller';
             productDescription={initialProduct.description || ""}
             price={initialProduct.price || 0}
             seller={sellerName}
-            details={[]}  // Add details table later
+            details={[]}
             onNext={() => setCurrentStep(2)}
           />
         )}
