@@ -8,6 +8,7 @@ import {
 } from "@/components/sewer-center/collapsible-product-section";
 import { ProductModal } from "@/components/modals/product-modal";
 import { CommissionsModal } from "@/components/modals/commissions-modal";
+import { ViewPendingsModal } from "@/components/modals/view-pendings-modal";
 
 // Mock data with IDs
 const INITIAL_PRODUCTS: SectionItem[] = [
@@ -47,6 +48,7 @@ export default function ProductsPage() {
 
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCommissionsModalOpen, setIsCommissionsModalOpen] = useState(false);
+  const [isViewPendingsModalOpen, setIsViewPendingsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
   const [openSections, setOpenSections] = useState({
     products: true,
@@ -117,7 +119,11 @@ export default function ProductsPage() {
             >
               Commissions
             </ProfileButton>
-            <ProfileButton variant="orange" size="xl">
+            <ProfileButton 
+              variant="orange" 
+              size="xl"
+              onClick={() => setIsViewPendingsModalOpen(true)}
+            >
               View Pendings
             </ProfileButton>
           </div>
@@ -179,6 +185,11 @@ export default function ProductsPage() {
       <CommissionsModal
         isOpen={isCommissionsModalOpen}
         onClose={() => setIsCommissionsModalOpen(false)}
+      />
+
+      <ViewPendingsModal
+        isOpen={isViewPendingsModalOpen}
+        onClose={() => setIsViewPendingsModalOpen(false)}
       />
     </div>
   );
