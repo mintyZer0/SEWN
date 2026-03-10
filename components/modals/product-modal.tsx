@@ -1,29 +1,83 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { Plus, Image as ImageIcon, X, ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, X } from "lucide-react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
-import { cn } from "@/lib/utils";
 import { CustomField } from "@/components/ui/custom-field";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { VariationRow } from "@/components/sewer-center/variation-row";
+import { SectionItem } from "@/components/sewer-center/collapsible-product-section";
 
-interface AddProductModalProps {
+interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
+  product?: SectionItem | null;
+  onSave?: (product: Partial<SectionItem>) => Promise<void>;
 }
 
-export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
+export const ProductModal = ({
+  isOpen,
+  onClose,
+  product,
+  onSave,
+}: ProductModalProps) => {
+  const [formData, setFormData] = useState({
+    productName: "",
+    description: "",
+    price: "",
+    stock: "",
+    category: "tops",
+    subCategory: "formal",
+    shippingTime: "",
+    weight: "",
+    fabric: "cotton",
+    careInstructions: "hand-wash",
+  });
+
+  useEffect(() => {
+    if (product) {
+      setFormData((prev) => ({
+        ...prev,
+        productName: product.name,
+      }));
+    } else {
+      setFormData({
+        productName: "",
+        description: "",
+        price: "",
+        stock: "",
+        category: "tops",
+        subCategory: "formal",
+        shippingTime: "",
+        weight: "",
+        fabric: "cotton",
+        careInstructions: "hand-wash",
+      });
+    }
+  }, [product, isOpen]);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    console.log("Form Data:", Object.fromEntries(formData.entries()));
+    const data = new FormData(e.target as HTMLFormElement);
+    const formValues = Object.fromEntries(data.entries());
+
+    if (onSave) {
+      await onSave({
+        id: product?.id,
+        name: formValues.productName as string,
+      });
+    }
+
+    console.log(product ? "Editing Product:" : "Adding Product:", formValues);
+    onClose();
   };
 
+  const isEdit = !!product;
+
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-1100 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
@@ -32,7 +86,9 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
       <div className="relative bg-white rounded-[30px] w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl custom-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-white z-20 px-10 py-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-primary">Add Product</h2>
+          <h2 className="text-3xl font-bold text-primary">
+            {isEdit ? "Edit Product" : "Add Product"}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -62,22 +118,35 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
               label="Product Name"
               name="productName"
               placeholder="SEWN TShirt"
+              defaultValue={formData.productName}
             />
             <CustomField
               label="Description"
               name="description"
               placeholder="Best Design"
               isTextArea
+              defaultValue={formData.description}
             />
 
             <div className="grid grid-cols-2 gap-6">
-              <CustomField label="Price" name="price" placeholder="PHP67676" />
-              <CustomField label="Stock" name="stock" placeholder="67" />
+              <CustomField
+                label="Price"
+                name="price"
+                placeholder="PHP67676"
+                defaultValue={formData.price}
+              />
+              <CustomField
+                label="Stock"
+                name="stock"
+                placeholder="67"
+                defaultValue={formData.stock}
+              />
               <CustomField
                 label="Category"
                 name="category"
                 isSelect
                 placeholder="Tops"
+                defaultValue={formData.category}
                 options={[
                   { value: "tops", label: "Tops" },
                   { value: "bottoms", label: "Bottoms" },
@@ -89,6 +158,7 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
                 name="subCategory"
                 isSelect
                 placeholder="Formal"
+                defaultValue={formData.subCategory}
                 options={[
                   { value: "formal", label: "Formal" },
                   { value: "casual", label: "Casual" },
@@ -99,17 +169,20 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
                 label="Est. time of shipping"
                 name="shippingTime"
                 placeholder="15 days"
+                defaultValue={formData.shippingTime}
               />
               <CustomField
                 label="Weight in grams"
                 name="weight"
                 placeholder="Cotton"
+                defaultValue={formData.weight}
               />
               <CustomField
                 label="Fabric"
                 name="fabric"
                 isSelect
                 placeholder="Cotton"
+                defaultValue={formData.fabric}
                 options={[
                   { value: "cotton", label: "Cotton" },
                   { value: "linen", label: "Linen" },
@@ -122,6 +195,7 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
                 name="careInstructions"
                 isSelect
                 placeholder="Hand wash only"
+                defaultValue={formData.careInstructions}
                 options={[
                   { value: "hand-wash", label: "Hand wash only" },
                   { value: "dry-clean", label: "Dry clean" },
@@ -174,7 +248,7 @@ export const AddProductModal = ({ isOpen, onClose }: AddProductModalProps) => {
               Discard
             </button>
             <ProfileButton type="submit" variant="orange" size="xl">
-              Confirm Product
+              {isEdit ? "Confirm Changes" : "Confirm Product"}
             </ProfileButton>
           </div>
         </form>

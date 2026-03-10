@@ -6,7 +6,7 @@ import {
   CollapsibleProductSection, 
   SectionItem 
 } from "@/components/sewer-center/collapsible-product-section";
-import { AddProductModal } from "@/components/modals/add-product-modal";
+import { ProductModal } from "@/components/modals/product-modal";
 
 // Mock data with IDs
 const INITIAL_PRODUCTS: SectionItem[] = [
@@ -44,7 +44,8 @@ export default function ProductsPage() {
   const [commissions, setCommissions] = useState(INITIAL_COMMISSIONS);
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
 
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
   const [openSections, setOpenSections] = useState({
     products: true,
     orders: true,
@@ -54,6 +55,32 @@ export default function ProductsPage() {
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const handleEditProduct = (item: SectionItem) => {
+    setEditingProduct(item);
+    setIsProductModalOpen(true);
+  };
+
+  const handleAddProduct = () => {
+    setEditingProduct(null);
+    setIsProductModalOpen(true);
+  };
+
+  const handleSaveProduct = async (productData: Partial<SectionItem>) => {
+    if (editingProduct) {
+      // Update existing product
+      setProducts(prev => prev.map(p => 
+        p.id === editingProduct.id ? { ...p, ...productData } as SectionItem : p
+      ));
+    } else {
+      // Add new product
+      const newProduct: SectionItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: productData.name || "New Product",
+      };
+      setProducts(prev => [...prev, newProduct]);
+    }
   };
 
   const handleDelete = async (id: string, variant: string) => {
@@ -77,7 +104,7 @@ export default function ProductsPage() {
             <ProfileButton 
               variant="orange" 
               size="xl"
-              onClick={() => setIsAddProductOpen(true)}
+              onClick={handleAddProduct}
             >
               Add Product
             </ProfileButton>
@@ -102,7 +129,7 @@ export default function ProductsPage() {
           onToggle={() => toggleSection("products")}
           items={products}
           onItemDelete={(id) => handleDelete(id, 'product')}
-          onItemEdit={() => setIsAddProductOpen(true)}
+          onItemEdit={handleEditProduct}
         />
 
         {/* Active Orders Section */}
@@ -136,9 +163,11 @@ export default function ProductsPage() {
         />
       </div>
 
-      <AddProductModal 
-        isOpen={isAddProductOpen} 
-        onClose={() => setIsAddProductOpen(false)} 
+      <ProductModal 
+        isOpen={isProductModalOpen} 
+        product={editingProduct}
+        onSave={handleSaveProduct}
+        onClose={() => setIsProductModalOpen(false)} 
       />
     </div>
   );
