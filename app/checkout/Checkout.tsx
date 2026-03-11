@@ -8,17 +8,17 @@ import PaymentStep, { PaymentFormData } from "@/components/checkout/payment-step
 import ConfirmationStep from "@/components/checkout/confirmation-step";
 import SuccessPage from "@/components/checkout/success-page";
 
-type Product = {
+interface Product {
   id: string;
-  img_src: string;
-  product_name: string;
-  sewer_name: string;
+  user_id: string;
+  name: string;
   price: number;
-  rating: number;
-  sold: number;
+  img_src: string;
+  seller_name: string; 
+  location: string;
+  type: string;
   description?: string;
-  details?: any[];
-};
+}
 
 
 export default function CheckoutClient({ 
@@ -51,36 +51,28 @@ export default function CheckoutClient({
 
   if (orderPlaced) return <SuccessPage />;
 
+const sellerName = initialProduct.seller_name || 'Unknown Seller';
   return (
     <div className="min-h-dvw">
       <CheckoutStepper currentStep={currentStep} />
       <div className="pb-12">
         {currentStep === 1 && (
           <ProductDetailsStep
-            productName={initialProduct.product_name || 'Unknown Product'}
+            productName={initialProduct.name || 'Unknown Product'}
             productImage={initialProduct.img_src || '/placeholder.jpg'}
             productDescription={initialProduct.description || ""}
             price={initialProduct.price || 0}
-            details={
-
-              Array.isArray(initialProduct.details)
-              ? initialProduct.details
-              : typeof initialProduct.details === 'string'
-              ? JSON.parse(initialProduct.details || '[]')
-              : Array.isArray(initialProduct.details)
-            ? initialProduct.details
-            : []
-  }
-  onNext={() => setCurrentStep(2)}
-/>
-
+            seller={sellerName}
+            details={[]}
+            onNext={() => setCurrentStep(2)}
+          />
         )}
 
         {currentStep === 2 && <AddressStep onSubmit={handleAddressSubmit} />}
 
         {currentStep === 3 && (
           <PaymentStep
-            orderTotal={initialProduct.price}
+            orderTotal={initialProduct.price || 0}
             onSubmit={handlePaymentSubmit}
           />
         )}
@@ -89,8 +81,8 @@ export default function CheckoutClient({
           <ConfirmationStep
             addressData={addressData}
             paymentData={paymentData}
-            orderTotal={initialProduct.price}
-            productName={initialProduct.product_name}
+            orderTotal={initialProduct.price || 0}
+            productName={initialProduct.name || 'Unknown Product'}
             onPlaceOrder={handlePlaceOrder}
           />
         )}

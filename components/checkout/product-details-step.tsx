@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 
 interface ProductDetailsStepProps {
@@ -7,6 +6,7 @@ interface ProductDetailsStepProps {
   productImage: string;
   productDescription: string;
   price: number;
+  seller?: string;     
   details: string[];
   onNext: () => void;
 }
@@ -16,6 +16,7 @@ export default function ProductDetailsStep({
   productImage,
   productDescription,
   price,
+  seller,
   details,
   onNext,
 }: ProductDetailsStepProps) {
@@ -49,7 +50,9 @@ export default function ProductDetailsStep({
             <h3 className="text-6xl font-semi text-heading mb-1">
               {productName}
             </h3>
-            <p className="text-3xl font-semibold mb-6">by Ysabelle Santiago</p>
+            <p className="text-3xl font-semibold mb-6">
+              by {seller || 'Unknown Seller'}
+            </p>
 
             <p className="text-2xl leading-relaxed mb-6 text-gray-700">
               {productDescription}
@@ -89,7 +92,7 @@ export default function ProductDetailsStep({
 
       <div className="mt-8 text-center">
         <p className="text-2xl italic text-heading underline cursor-pointer hover:opacity-80">
-          More about Ysabelle
+          More about {seller || 'Seller'}
         </p>
       </div>
     </div>
