@@ -1,26 +1,35 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import ProductCard from "./product-card"; 
-import ProductFilter from "@/components/ui/product-filter"; 
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import ProductCard from "./product-card";
+import ProductFilter from "@/components/ui/product-filter";
 
 interface Product {
-  id: string;
-  user_id: string;
-  name: string; 
-  price: number;
-  img_src: string;
-  location: string;
-  type: string;
-  created_at: string;
-  is_active: boolean;
-  rating: number;
-  sold: number;
-  description?: string;
+  id: string
+  user_id: string
+  name: string
+  price: number
+  img_src: string
+  location: string
+  type: string
+  created_at: string
+  is_active: boolean
+  rating: number
+  sold: number
+  description?: string
+
+  product_categories?: { category: string }[]
+  product_colors?: { color: string }[]
+  product_materials?: { material: string }[]
+  product_sizes?: { size: string; stock_quantity: number }[]
 }
 
-export default function ShopGrid() {
+interface Props {
+  filters: Record<string, string[]>;
+}
+
+export default function ShopGrid({ filters }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,19 +39,20 @@ export default function ShopGrid() {
     async function fetchProducts() {
       try {
         setIsLoading(true);
-        setErrorState(null);
-        console.log('Fetching products...');
-        
-        const { data, error } = await supabase
-          .from('seller_products')
-          .select('*')
-          .eq('is_active', true)
-          .order('sold', { ascending: false });
 
-        console.log('Products:', data, 'Error:', error);
+        const { data, error } = await supabase
+          .from("seller_products")
+          .select(`
+            *,
+            product_categories (category),
+            product_colors (color),
+            product_materials (material),
+            product_sizes (size, stock_quantity)
+          `)
+          .eq("is_active", true)
+          .order("sold", { ascending: false });
 
         if (error) {
-          console.error('Error fetching products:', error);
           setErrorState(error.message);
           return;
         }
@@ -52,14 +62,70 @@ export default function ShopGrid() {
           setFilteredProducts(data);
         }
       } catch (err: any) {
-        console.error('Unexpected error:', err);
-        setErrorState(err.message || 'An unexpected error occurred');
+        setErrorState(err.message);
       } finally {
         setIsLoading(false);
       }
     }
+
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+  let result = [...products];
+
+  if (filters["Sewer Location"]?.length) {
+    result = result.filter(p =>
+      filters["Sewer Location"].includes(p.location)
+    );
+  }
+
+  if (filters["Type"]?.length) {
+    result = result.filter(p =>
+      filters["Type"].includes(p.type)
+    );
+  }
+
+  if (filters["Categories"]?.length) {
+  result = result.filter((p) => {
+    const categories = Array.isArray(p.product_categories)
+      ? p.product_categories
+      : [p.product_categories];
+
+    return categories.some((c) => {
+      if (!c?.category) return false;
+      return filters["Categories"].includes(c.category);
+    });
+  });
+}
+
+  if (filters["Color"]?.length) {
+    result = result.filter(p =>
+      p.product_colors?.some(c =>
+        filters["Color"].includes(c.color)
+      )
+    );
+  }
+
+  if (filters["Material"]?.length) {
+    result = result.filter(p =>
+      p.product_materials?.some(m =>
+        filters["Material"].includes(m.material)
+      )
+    );
+  }
+
+  if (filters["Size"]?.length) {
+    result = result.filter(p =>
+      p.product_sizes?.some(s =>
+        filters["Size"].includes(s.size)
+      )
+    );
+  }
+
+  setFilteredProducts(result);
+
+}, [filters, products]);
 
   const handleFilterChange = (sortedProducts: Product[]) => {
     setFilteredProducts(sortedProducts);
@@ -78,21 +144,16 @@ export default function ShopGrid() {
     );
   }
 
-  if (products.length === 0) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-3xl font-bold text-gray-400">No products found</p>
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <span className="text-2xl mx-5 font-bold text-gray-700">{filteredProducts.length} Products</span>
+        <span className="text-2xl mx-5 font-bold text-gray-700">
+          {filteredProducts.length} Products
+        </span>
+
         <ProductFilter products={products} onFilterChange={handleFilterChange} />
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
