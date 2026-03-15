@@ -1,6 +1,8 @@
-import FilterCheckBoxGroup from "@/components/ui/filter-checkbox-group";
+"use client";
+
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
+
 const collapsibleLables = [
   {
     label: "Categories",
@@ -8,7 +10,7 @@ const collapsibleLables = [
   },
   {
     label: "Size",
-    options: ["Extra Small", "Small", "Medium", "Large", "XL", "2XL", "3XL"],
+    options: ["XSmall", "Small", "Medium", "Large", "XL", "2XL", "3XL"],
   },
   {
     label: "Material",
@@ -38,18 +40,36 @@ const collapsibleLables = [
   { label: "Type", options: ["Kids", "Men", "Women"] },
 ];
 
-export default function FilterTab() {
+interface FilterTabProps {
+  setFilters: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+}
+
+export default function FilterTab({ setFilters }: FilterTabProps) {
+
+  const handleFilterChange = (section: string, values: string[]) => {
+  setFilters((prev) => ({
+    ...prev,
+    [section]: values,
+  }));
+};
+
   return (
-    <div className="flex flex-col h-auto w-60 bg-orchid-vertical-b mx-10 rounded-2xl ">
-      <div className="flex-1">
-        <h2 className="text-3xl text-center mt-4 font-semibold text-secondary">
-          Filter
-        </h2>
-        <PriceRange />
-        {collapsibleLables.map((section) => (
-          <FilterCollapsibleSection key={section.label} section={section} />
-        ))}
-      </div>
+    <div className="flex flex-col h-auto w-60 bg-orchid-vertical-b mx-10 rounded-2xl">
+
+      <h2 className="text-3xl text-center mt-4 font-semibold text-secondary">
+        Filter
+      </h2>
+
+      <PriceRange />
+
+      {collapsibleLables.map((section) => (
+        <FilterCollapsibleSection
+        key={section.label}
+        section={section}
+        onFilterChange={handleFilterChange}
+      />
+      ))}
+
     </div>
   );
 }
