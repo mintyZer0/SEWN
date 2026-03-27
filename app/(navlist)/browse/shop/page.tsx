@@ -8,6 +8,13 @@ import SearchBar from "@/components/ui/search-bar";
 export default function Shop() {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
 
+  const handleSearchChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      search: [value],
+    }));
+  };
+
   return (
     <>
       <h1 className="flex justify-center mx-20 text-9xl text-heading p-4">
@@ -18,7 +25,7 @@ export default function Shop() {
         <FilterTab setFilters={setFilters} />
 
         <div className="flex flex-1 flex-col m-4 gap-4">
-          <SearchBar />
+          <SearchBar value={filters.search?.[0] || ""} onChange={handleSearchChange} />
           <ShopGrid filters={filters} />
         </div>
       </div>

@@ -3,6 +3,8 @@
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
 
+
+
 const collapsibleLables = [
   {
     label: "Categories",
@@ -30,7 +32,7 @@ const collapsibleLables = [
       "Orange",
       "Brown",
       "Gray",
-      "Pink",
+      "Pink"
     ],
   },
   {
@@ -53,6 +55,14 @@ export default function FilterTab({ setFilters }: FilterTabProps) {
   }));
 };
 
+  const handlePriceChange = (min: number | null, max: number | null) => {
+    setFilters((prev) => ({
+      ...prev,
+      minPrice: min !== null ? [min.toString()] : [],
+      maxPrice: max !== null ? [max.toString()] : [],
+    }));
+  };
+
   return (
     <div className="flex flex-col h-auto w-60 bg-orchid-vertical-b mx-10 rounded-2xl">
 
@@ -60,7 +70,7 @@ export default function FilterTab({ setFilters }: FilterTabProps) {
         Filter
       </h2>
 
-      <PriceRange />
+      <PriceRange onPriceChange={handlePriceChange} />
 
       {collapsibleLables.map((section) => (
         <FilterCollapsibleSection

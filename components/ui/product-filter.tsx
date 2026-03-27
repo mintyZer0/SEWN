@@ -18,40 +18,16 @@ type Product = {
 };
 
 interface ProductFilterProps {
-  products: Product[]; 
-  onFilterChange: (sortedProducts: Product[]) => void;
+  onSortChange: (sortBy: string) => void;
 }
 
-export default function ProductFilter({ products, onFilterChange }: ProductFilterProps) {
+export default function ProductFilter({ onSortChange }: ProductFilterProps) {
   const [sortBy, setSortBy] = useState('most-sold');
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setSortBy(value); 
-    let sortedProducts = [...products];
-
-    switch (value) {
-      case 'most-sold':
-        // Use created_at since no 'sold' field
-        sortedProducts.sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        break;
-      case 'highest-rated':
-        sortedProducts.sort((a, b) => {
-          const ratingA = a.rating || 0;
-          const ratingB = b.rating || 0;
-          return ratingB - ratingA;
-        });
-    break;
-      case 'price-low-high':
-        sortedProducts.sort((a, b) => (a.price || 0) - (b.price || 0));
-        break;
-      case 'price-high-low':
-        sortedProducts.sort((a, b) => (b.price || 0) - (a.price || 0));
-        break;
-    }
-    onFilterChange(sortedProducts);
+    setSortBy(value);
+    onSortChange(value);
   };
 
   return (

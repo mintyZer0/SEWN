@@ -22,7 +22,8 @@ interface Product {
   product_categories?: { category: string }[]
   product_colors?: { color: string }[]
   product_materials?: { material: string }[]
-  product_sizes?: { size: string; stock_quantity: number }[]
+  product_sizes?: { size: string; }[]
+  product_variants?: { stock_quantity: number }[]
 }
 
 interface Props {
@@ -34,6 +35,7 @@ export default function ShopGrid({ filters }: Props) {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState("most-sold");
 
   useEffect(() => {
     async function fetchProducts() {
@@ -47,7 +49,8 @@ export default function ShopGrid({ filters }: Props) {
             product_categories (category),
             product_colors (color),
             product_materials (material),
-            product_sizes (size, stock_quantity)
+            product_sizes (size),
+            product_variants (stock_quantity)
           `)
           .eq("is_active", true)
           .order("sold", { ascending: false });
@@ -123,13 +126,40 @@ export default function ShopGrid({ filters }: Props) {
     );
   }
 
+  if (filters["minPrice"]?.[0]) {
+    const min = Number(filters["minPrice"][0]);
+    result = result.filter(p => p.price >= min);
+  }
+
+  if (filters["maxPrice"]?.[0]) {
+    const max = Number(filters["maxPrice"][0]);
+    result = result.filter(p => p.price <= max);
+  }
+
+  if (filters["search"]?.[0]) {
+    const query = filters["search"][0].toLowerCase();
+    result = result.filter((p) => p.name.toLowerCase().includes(query));
+  }
+
+  // Sorting logic
+  switch (sortBy) {
+    case "most-sold":
+      result.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+      break;
+    case "highest-rated":
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case "price-low-high":
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+      break;
+    case "price-high-low":
+      result.sort((a, b) => (b.price || 0) - (a.price || 0));
+      break;
+  }
+
   setFilteredProducts(result);
 
-}, [filters, products]);
-
-  const handleFilterChange = (sortedProducts: Product[]) => {
-    setFilteredProducts(sortedProducts);
-  };
+}, [filters, products, sortBy]);
 
   if (isLoading) {
     return <div className="text-center py-20 text-3xl font-bold text-gray-500">Loading products...</div>;
@@ -151,7 +181,7 @@ export default function ShopGrid({ filters }: Props) {
           {filteredProducts.length} Products
         </span>
 
-        <ProductFilter products={products} onFilterChange={handleFilterChange} />
+        <ProductFilter onSortChange={setSortBy} />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
