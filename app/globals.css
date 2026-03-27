@@ -55,6 +55,15 @@
   .third-gradient {
     @apply bg-gradient-to-b from-[#FF8D28] to-[#FFCFB1];
   }
+  /* Remove number input spinners */
+  .no-spinner::-webkit-inner-spin-button,
+  .no-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
 }
 .bg-secondary-gradient-b {
   @apply bg-gradient-to-b from-[#FF8D28] from-20% to-[#FFCFB1];
