@@ -1,97 +1,73 @@
 # SEWN Database Documentation
 
-This document serves as a guide for developers working with the SEWN database schema. The system is built on **Supabase (PostgreSQL)** and follows a relational structure optimized for a multi-role marketplace (Customers and Sewers).
+This document serves as a guide for developers working with the SEWN database schema on **Supabase (PostgreSQL)**.
 
 ---
 
 ## 1. Core Identity & User Management
 
-These tables handle user authentication profiles, contact information, and specific user attributes.
-
 ### `users`
-The central identity table. All other tables link back here via `user_id`.
-- **Role System:** `user_type` determines if a user is a Customer or a Sewer.
-- **Fields:** `id`, `first_name`, `last_name`, `email`, `birthday`, `gender`, `created_at`.
+The central identity table.
+- **Fields:** `id` (UUID), `first_name`, `last_name`, `email` (Unique), `user_type` (USER-DEFINED), `birthday` (Date), `gender` (USER-DEFINED), `created_at`.
 
-### User Metadata Tables
-- **`user_avatars`**: Stores URLs for profile pictures.
-- **`user_phones`**: Handles multiple phone numbers; use `is_primary` for default contact.
-- **`user_addresses`**: Stores shipping/service locations. Linked to orders and service requests.
-- **`user_socials`**: Links to external profiles (Instagram, Facebook, etc.).
-- **`user_measurements`**: A specialized table for tailoring. Allows users to save multiple "Measurement Profiles" (e.g., "My Suit", "Prom Dress").
+### User Metadata
+- **`user_avatars`**: `id`, `user_id`, `avatar_url`, `uploaded_at`.
+- **`user_phones`**: `id`, `user_id`, `phone`, `landline`, `is_primary` (Boolean).
+- **`user_addresses`**: `id`, `user_id`, `full_address`, `barangay`, `city`, `zip_code` (Integer), `is_primary`.
+- **`user_socials`**: `id`, `user_id`, `platform`, `handle`.
+- **`user_measurements`**: Detailed tailoring profiles.
+  - **Fields:** `id`, `user_id`, `profile_name`, `unit` (e.g., 'in'), and 20+ numeric measurement fields (e.g., `chest`, `waist_pants`, `hips`, `inseam`).
 
 ---
 
-## 2. Marketplace & Products
-
-Managed primarily by **Sellers (Sewers)**.
+## 2. Marketplace & Products (Sewer-Owned)
 
 ### `seller_products`
-The main catalog table.
-- **Filtering:** Includes `location` (NCR, Luzon, etc.) and `type` (Men, Women, Kids).
-- **Stats:** Tracks `rating` and `sold` count for discovery algorithms.
+The main product catalog.
+- **Constraints:**
+  - `location`: NCR, Luzon, Visayas, Mindanao.
+  - `type`: Kids, Men, Women.
+- **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `seller_name`.
 
-### Product Attributes (Normalization)
-To support complex filtering and variations, product details are split:
-- **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Multi-select attributes for each product.
-- **`product_variants`**: Specific stock-keeping units (SKUs). This is where `stock_quantity` lives.
-- **`variant_attribute_values`**: Maps specific variants to their attributes (e.g., "Size: M, Color: Blue").
+### Product Attributes & Variants
+- **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Specific attributes linked to `product_id`.
+- **`product_variants`**: Handles SKUs and stock.
+  - **Fields:** `id`, `product_id`, `sku` (Unique), `stock_quantity`, `price_override`.
+- **`variant_attribute_values`**: Maps specific variant attributes (e.g., `attribute_type`: 'Size', `attribute_value`: 'Large').
 
 ---
 
 ## 3. Orders & Transactions
 
-Handles the lifecycle of a purchase from the marketplace.
-
 ### `orders`
-The header for a transaction.
-- **Status:** `pending`, `completed`, `cancelled`, etc.
-- **Total:** Denormalized sum of all items for quick reporting.
+- **Fields:** `id`, `user_id`, `total`, `status` (Default: 'pending'), `created_at`.
 
 ### `order_items`
-Line items for each order.
-- **Snapshotting:** Stores `price_at_purchase` to ensure historical accuracy even if the product price changes later.
-- **Linking:** Connects to both the base `product_id` and the specific `variant_id`.
+- **Fields:** `id`, `order_id`, `product_id`, `quantity`, `price_at_purchase`, `variant_id` (Optional).
 
 ---
 
 ## 4. Tailoring Services (Sewing & Repairs)
 
-Specialized workflow for custom commissions, repairs, and alterations.
-
 ### `service_requests`
-The "Order" equivalent for services.
-- **Types:** `commission`, `repair`, or `alteration`.
-- **Integration:** Links to `user_measurements` (the specs) and `sewer_fabrics` (the material).
-- **Lifecycle:** `pending` → `accepted` → `in_progress` → `completed`.
+The workflow for custom work.
+- **Service Types:** `commission`, `repair`, `alteration`.
+- **Status:** `pending`, `accepted`, `in_progress`, `completed`, `cancelled`.
+- **Fields:** Includes contact info, `request_details`, `appointment_date`, `fabric_id`, and `measurement_profile_id`.
 
 ### Sewer-Specific Config
-- **`sewer_settings`**: A toggle-heavy table where sewers define what they offer (e.g., `accepting_commissions: true`).
-- **`sewer_fabrics`**: A catalog of materials a sewer has in stock for custom commissions.
+- **`sewer_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
+- **`sewer_fabrics`**: A catalog of fabrics a sewer offers for commissions. Includes `name`, `description`, `image_url`, and `is_available`.
 
 ---
 
-## 5. Developer Implementation Guide
+## 5. Implementation Notes
 
-### Backend (Supabase/Postgres)
-1. **RLS (Row Level Security):** 
-   - Users should only be able to `UPDATE` their own records.
-   - Products are `READ` for everyone but `WRITE` only for the owner (`user_id`).
-2. **Foreign Keys:** Ensure `ON DELETE CASCADE` is set where appropriate (e.g., deleting a user should cleanup their phone numbers/socials).
-3. **Timestamps:** Most tables use `DEFAULT CURRENT_TIMESTAMP`. Ensure `updated_at` triggers are set up in Supabase.
+### Relational Mapping
+- All tables use `uuid` for primary keys with `gen_random_uuid()` defaults.
+- Most tables include `user_id` or `product_id` foreign keys with standard relational constraints.
 
-### Frontend (Next.js/TypeScript)
-1. **UUIDs:** All IDs are `uuid`. Use a library like `crypto.randomUUID()` for optimistic UI updates, but let Postgres handle generation on insert.
-2. **Types:** Generate TypeScript definitions from the Supabase CLI to ensure type safety across the app:
-   ```bash
-   supabase gen types typescript --project-id your-project-id > lib/database.types.ts
-   ```
-3. **Relational Queries:** Leverage Supabase's `.select('*, product_variants(*)')` syntax to fetch nested data in a single request.
-
----
-
-## Entity Relationship Summary (High Level)
-- `users` 1:N `seller_products`
-- `seller_products` 1:N `product_variants`
-- `users` 1:N `orders` 1:N `order_items`
-- `users` (Client) 1:N `service_requests` N:1 `users` (Sewer)
+### For Frontend Developers
+- Use the `user_measurements` table to populate the "Measurements" section of the user profile.
+- When creating a `service_request`, ensure a `measurement_profile_id` is linked if the service type is `commission`.
+- Filter `seller_products` using the `location` and `type` fields for the marketplace browse pages.
