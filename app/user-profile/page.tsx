@@ -32,8 +32,14 @@ export default function UserProfilePage() {
 
         if (user) {
           const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
+            .from("users")
+            .select(
+              `*,
+              user_phones(
+              phone
+              )
+              `,
+            )
             .eq("id", user.id)
             .single();
 
@@ -85,19 +91,28 @@ export default function UserProfilePage() {
       const lastName = lastNameParts.join(" ");
 
       // Need to update database
-      const { error } = await supabase
-        .from("profiles")
+      const { error: userError } = await supabase
+        .from("users")
         .update({
           first_name: firstName,
           last_name: lastName,
-          phone_number: formData.phone,
-          // not added in table yet
-          // gender: formData.gender,
-          // dob: formData.dob,
+          gender: formData.gender,
+          birthday: formData.dob,
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      const { error: phoneError } = await supabase
+        .from("user_phones")
+        .update({
+          phone: formData.phone,
+        })
+        .eq("id", user.id);
+
+      if (userError || phoneError) {
+        throw new Error(
+          userError?.message || phoneError?.message || "Unknown error",
+        );
+      }
 
       setIsEditing(false);
     } catch (error: any) {
