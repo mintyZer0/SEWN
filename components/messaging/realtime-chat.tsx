@@ -19,7 +19,8 @@ interface RealtimeChatProps {
   targetUser?: {
     name: string;
     avatar?: string;
-  }
+  };
+  variant?: "default" | "compact";
 }
 
 export const RealtimeChat = ({
@@ -27,9 +28,11 @@ export const RealtimeChat = ({
   username,
   onMessage,
   messages: initialMessages = [],
-  targetUser = { name: "Chini De Bertha" }
+  targetUser = { name: "Chini De Bertha" },
+  variant = "default",
 }: RealtimeChatProps) => {
   const { containerRef, scrollToBottom } = useChatScroll()
+  const isCompact = variant === "compact";
 
   const {
     messages: realtimeMessages,
@@ -72,18 +75,24 @@ export const RealtimeChat = ({
 
   return (
     <div className="flex flex-col h-full w-full bg-background antialiased">
-      {/* Header */}
-      <div className="p-8 flex items-center gap-6">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex-shrink-0 shadow-sm" />
-        <h3 className="text-2xl font-black text-primary">{targetUser.name}</h3>
-      </div>
-      
-      <div className="mx-8 border-b border-primary/10" />
+      {/* Header - Hidden in compact view as the Widget has its own header */}
+      {!isCompact && (
+        <>
+          <div className="p-8 flex items-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex-shrink-0 shadow-sm" />
+            <h3 className="text-2xl font-black text-primary">{targetUser.name}</h3>
+          </div>
+          <div className="mx-8 border-b border-primary/10" />
+        </>
+      )}
 
       {/* Messages */}
       <div 
         ref={containerRef} 
-        className="flex-1 overflow-y-auto px-12 py-8 space-y-2 custom-scrollbar"
+        className={cn(
+          "flex-1 overflow-y-auto custom-scrollbar",
+          isCompact ? "px-4 py-4 space-y-1" : "px-12 py-8 space-y-2"
+        )}
       >
         {allMessages.length === 0 ? (
           <div className="text-center text-sm text-primary/40 mt-10">
@@ -96,18 +105,22 @@ export const RealtimeChat = ({
             key={message.id}
             message={message}
             isOwnMessage={message.user.name === username}
+            variant={variant}
           />
         ))}
       </div>
 
       {/* Input Area */}
-      <div className="p-8 space-y-4">
+      <div className={cn(!isCompact ? "p-8 space-y-4" : "p-4 space-y-2")}>
         <form 
           onSubmit={handleSendMessage} 
           className="relative group"
         >
           <input
-            className="w-full bg-secondary/20 border-2 border-primary/5 rounded-full py-4 px-8 pr-16 text-lg focus:outline-none focus:border-third/30 transition-all placeholder:text-primary/20 text-primary"
+            className={cn(
+              "w-full bg-secondary/20 border-2 border-primary/5 rounded-full transition-all placeholder:text-primary/20 text-primary",
+              isCompact ? "py-2 px-4 text-sm pr-10" : "py-4 px-8 text-lg pr-16"
+            )}
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -117,18 +130,18 @@ export const RealtimeChat = ({
           <button
             type="submit"
             disabled={!isConnected || !newMessage.trim()}
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-third hover:scale-110 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-third hover:scale-110 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100"
           >
-            <SendHorizontal className="size-8" />
+
+            <SendHorizontal className={cn(isCompact ? "size-6 text-primary" : "size-8")} />
           </button>
         </form>
 
         {/* Action Icons */}
-        {/* Placeholder icons for future features like emojis, attachments, etc. Currently does nothing */}
-        <div className="flex gap-4 px-2 pl-4">
+        <div className={cn("flex gap-4", isCompact ? "px-1" : "px-2 pl-4")}>
           {[Smile, ImageIcon, Play, FileText, Mail, Copy].map((Icon, idx) => (
             <button key={idx} className="text-primary/40 hover:text-third transition-colors">
-              <Icon className="size-6" />
+              <Icon className={cn(isCompact ? "size-4" : "size-5")} />
             </button>
           ))}
         </div>

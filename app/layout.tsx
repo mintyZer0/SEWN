@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jost } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { ChatWidget } from "@/components/messaging/chat-widget";
 
 const jost = Jost({
   variable: "--font-jost",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <CartProvider>
           <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
           {children}
+          <ChatWidget />
         </CartProvider>
       </body>
     </html>
