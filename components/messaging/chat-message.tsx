@@ -5,16 +5,19 @@ interface ChatMessageItemProps {
   message: ChatMessage
   isOwnMessage: boolean
   showHeader?: boolean
+  variant?: "default" | "compact"
 }
 
-export const ChatMessageItem = ({ message, isOwnMessage }: ChatMessageItemProps) => {
+export const ChatMessageItem = ({ message, isOwnMessage, variant = "default" }: ChatMessageItemProps) => {
+  const isCompact = variant === "compact";
+  
   return (
-    <div className={`flex w-full ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex w-full ${isOwnMessage ? 'justify-end' : 'justify-start'} ${isCompact ? 'mb-2' : 'mb-4'}`}>
       <div
         className={cn(
-          'max-w-[70%] px-8 py-4 rounded-3xl shadow-sm text-white font-medium text-lg',
-          'third-gradient', // Using the defined gradient from globals.css
-          isOwnMessage ? 'rounded-tr-none' : 'rounded-tl-none'
+          'max-w-[80%] shadow-sm text-white font-medium',
+          isCompact ? 'px-4 py-2 rounded-2xl text-sm bg-primary' : 'px-8 py-4 rounded-3xl text-lg third-gradient',
+          isOwnMessage ? (isCompact ? 'rounded-tr-none' : 'rounded-tr-none') : (isCompact ? 'rounded-tl-none' : 'rounded-tl-none')
         )}
       >
         {message.content}
