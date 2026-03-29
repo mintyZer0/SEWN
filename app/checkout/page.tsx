@@ -18,6 +18,5 @@ export default async function CheckoutPage({
     
   if (!product) return <div>No product found</div>;
 
-  console.log('Fetched product for checkout:', product.Description);
   return <CheckoutClient initialProduct={product} />;
 }

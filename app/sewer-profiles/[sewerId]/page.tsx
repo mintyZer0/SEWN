@@ -1,4 +1,4 @@
-import { getSewerById, sewersData } from "@/data/sewers";
+
 import { notFound } from "next/navigation";
 import SewerHeader from "@/components/sewer-profile/sewer-header";
 import Services from "@/components/sewer-profile/services";
@@ -19,7 +19,6 @@ export default async function SewerPage({ params }: PageProps) {
   const sewer = getSewerById(sewerId);
 
   if (!sewer) {
-    console.log(sewer);
     return notFound();
   }
 

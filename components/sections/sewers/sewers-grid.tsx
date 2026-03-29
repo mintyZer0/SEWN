@@ -1,18 +1,31 @@
+// components/sections/sewers/sewer-grid.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import SewerCard, { Sewer } from "./sewer-card";
+import SewerCard, { type Sewer } from "./sewer-card";
 import { createClient } from "@/utils/supabase/client";
 
-interface Props {
-  filters: Record<string, string[]>;
+type Filters = Record<string, string[]>;
+
+interface SewersGridProps {
+  filters: Filters;
+  setIsChatWidgetOpen: (open: boolean) => void;
+  setSelectedConversationId: (id: string | null) => void;
+  setChatView: (view: "list" | "chat") => void;
 }
 
-export default function SewersGrid({ filters }: Props) {
+export default function SewersGrid({
+  filters,
+  setIsChatWidgetOpen,
+  setSelectedConversationId,
+  setChatView,
+}: SewersGridProps) {
   const [allSewers, setAllSewers] = useState<Sewer[]>([]);
   const [filteredSewers, setFilteredSewers] = useState<Sewer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<"most-sold" | "highest-rated" | "most-experienced">("most-sold");
+  const [sortBy, setSortBy] = useState<"most-sold" | "highest-rated" | "most-experienced">(
+    "most-sold"
+  );
 
   const supabase = createClient();
 
@@ -21,7 +34,6 @@ export default function SewersGrid({ filters }: Props) {
       try {
         setIsLoading(true);
 
-        // IMPORTANT: tweak "Sewer" to match your actual enum value
         const { data, error } = await supabase
           .from("users")
           .select(`
@@ -33,10 +45,6 @@ export default function SewersGrid({ filters }: Props) {
             user_addresses (province, city, is_primary)
           `)
           .eq("user_type", "seller");
-
-        console.log("Supabase data:", data);
-        console.log("Supabase error:", error);
-        
 
         if (error) {
           console.error("Database fetch error:", error.message);
@@ -50,22 +58,17 @@ export default function SewersGrid({ filters }: Props) {
           setFilteredSewers([]);
           return;
         }
-        
+
         const sewersToSet: Sewer[] = data.map((user: any) => {
-          console.log("User from DB:", user);
 
           const primaryAddress =
             user.user_addresses?.find((addr: any) => addr.is_primary) ||
             user.user_addresses?.[0];
 
-          console.log("Primary address:", primaryAddress);
-
           const location =
             primaryAddress
               ? `${primaryAddress.city}${primaryAddress.province ? `, ${primaryAddress.province}` : ""}`
               : user.location || "Location not set";
-
-          console.log("Computed location:", location);
 
           const avatar = user.user_avatars?.[0]?.avatar_url;
 
@@ -79,7 +82,7 @@ export default function SewersGrid({ filters }: Props) {
             services: [],
             years_of_experience: 0,
           };
-      });
+        });
 
         setAllSewers(sewersToSet);
         setFilteredSewers(sewersToSet);
@@ -164,7 +167,13 @@ export default function SewersGrid({ filters }: Props) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto justify-items-center">
         {filteredSewers.map((sewer) => (
-          <SewerCard key={sewer.id} sewer={sewer} />
+          <SewerCard
+            key={sewer.id}
+            sewer={sewer}
+            setIsChatWidgetOpen={setIsChatWidgetOpen}
+            setSelectedConversationId={setSelectedConversationId}
+            setChatView={setChatView}
+          />
         ))}
       </div>
     </div>
