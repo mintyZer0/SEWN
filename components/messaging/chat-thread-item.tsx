@@ -1,3 +1,4 @@
+// components/messaging/chat-thread-item.tsx
 "use client";
 
 import React from "react";
@@ -20,13 +21,12 @@ interface ChatThreadItemProps {
 export const ChatThreadItem = ({ thread, isSelected }: ChatThreadItemProps) => {
   return (
     <Link
-      href={`?userId=${thread.id}`}
+      href={`?conversationId=${thread.id}`}
       className={cn(
         "p-5 flex gap-4 cursor-pointer transition-all hover:bg-secondary/80",
         isSelected ? "bg-third/20 shadow-inner" : ""
       )}
     >
-      {/* Image avatar placeholder, fetch image from database*/}
       <div className="w-14 h-14 rounded-full bg-white/60 shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">

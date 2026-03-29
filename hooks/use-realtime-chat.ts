@@ -1,77 +1,158 @@
-'use client'
-
-import { useCallback, useEffect, useState } from 'react'
-
-import { createClient } from '@/lib/supabase/client'
-
-interface UseRealtimeChatProps {
-  roomName: string
-  username: string
-}
+// hooks/useRealtimeChat.ts
+import { useEffect, useState } from "react";
+import { RealtimeChannel, RealtimePostgresInsertPayload } from "@supabase/supabase-js";
+import { createClient } from "@/utils/supabase/client";
 
 export interface ChatMessage {
-  id: string
-  content: string
+  id: string;
+  content: string;
+  createdAt: string;
   user: {
-    name: string
-  }
-  createdAt: string
+    name: string;
+    id: string;
+  };
 }
 
-const EVENT_MESSAGE_TYPE = 'message'
+interface UseRealtimeChatOptions {
+  roomName: string;
+  username: string;
+}
 
-export function useRealtimeChat({ roomName, username }: UseRealtimeChatProps) {
-  const supabase = createClient()
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [channel, setChannel] = useState<ReturnType<typeof supabase.channel> | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
+export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) {
+  const supabase = createClient();
 
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  let channel: RealtimeChannel | null = null;
+
+  // Load existing messages from DB
   useEffect(() => {
-    const newChannel = supabase.channel(roomName)
+    const loadMessages = async () => {
+      const match = roomName.match(/^chat:(.*)$/);
+      if (!match) return;
+      const conversationId = match[1];
 
-    newChannel
-      .on('broadcast', { event: EVENT_MESSAGE_TYPE }, (payload) => {
-        setMessages((current) => [...current, payload.payload as ChatMessage])
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          setIsConnected(true)
-        } else {
-          setIsConnected(false)
-        }
-      })
+      const { data: dbMessages, error } = await supabase
+        .from("chat_messages")
+        .select("id, content, created_at, from_user_id")
+        .eq("conversation_id", conversationId)
+        .order("created_at", { ascending: true });
 
-    setChannel(newChannel)
-
-    return () => {
-      supabase.removeChannel(newChannel)
-    }
-  }, [roomName, username, supabase])
-
-  const sendMessage = useCallback(
-    async (content: string) => {
-      if (!channel || !isConnected) return
-
-      const message: ChatMessage = {
-        id: crypto.randomUUID(),
-        content,
-        user: {
-          name: username,
-        },
-        createdAt: new Date().toISOString(),
+      if (error) {
+        console.error("Failed to load chat history:", error);
+        return;
       }
 
-      // Update local state immediately for the sender
-      setMessages((current) => [...current, message])
+      const { data: { user } } = await supabase.auth.getUser();
+      const myUserId = user?.id;
 
-      await channel.send({
-        type: 'broadcast',
-        event: EVENT_MESSAGE_TYPE,
-        payload: message,
+      const mapped: ChatMessage[] = dbMessages.map((msg) => ({
+        id: msg.id,
+        content: msg.content,
+        createdAt: msg.created_at,
+        user: {
+          name: msg.from_user_id === myUserId ? username : "Seller",
+          id: msg.from_user_id,
+        },
+      }));
+
+      setMessages(mapped);
+    };
+
+    loadMessages();
+  }, [roomName, username]);
+
+  const sendMessage = async (text: string) => {
+    if (!text.trim()) return;
+
+    const match = roomName.match(/^chat:(.*)$/);
+    if (!match) return;
+    const conversationId = match[1];
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: messageData, error } = await supabase
+      .from("chat_messages")
+      .insert({
+        conversation_id: conversationId,
+        from_user_id: user.id,
+        to_user_id: "placeholder", // you can fill this later from DB
+        content: text,
       })
-    },
-    [channel, isConnected, username]
-  )
+      .select("id, content, created_at, from_user_id");
 
-  return { messages, sendMessage, isConnected }
+    if (error) {
+      console.error("Failed to send message:", error);
+      return;
+    }
+
+    const msg = messageData[0];
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: msg.id,
+        content: msg.content,
+        createdAt: msg.created_at,
+        user: {
+          name: username,
+          id: msg.from_user_id,
+        },
+      },
+    ]);
+  };
+
+  // Realtime subscription
+  useEffect(() => {
+    const init = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const match = roomName.match(/^chat:(.*)$/);
+      if (!match) return;
+      const conversationId = match[1];
+
+      channel = supabase
+        .channel(`chat:${conversationId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload: RealtimePostgresInsertPayload<any>) => {
+            const record = payload.new;
+            const isOwn = record.from_user_id === user.id;
+
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: record.id,
+                content: record.content,
+                createdAt: record.created_at,
+                user: {
+                  name: isOwn ? username : "Seller",
+                  id: record.from_user_id,
+                },
+              },
+            ]);
+          }
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") setIsConnected(true);
+        });
+    };
+
+    init();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [roomName, username, supabase]);
+
+  return { messages, sendMessage, isConnected };
 }

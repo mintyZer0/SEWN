@@ -1,27 +1,32 @@
+// components/messaging/chat-list.tsx
 "use client";
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import { ChatThreadItem, type ChatThread } from "./chat-thread-item";
-
-const mockThreads: ChatThread[] = [
-  { id: "chini-1", name: "Chini De Bertha", lastMessage: "Ano po yun?", time: "Yesterday" },
-  { id: "chini-2", name: "Renerie Sews", lastMessage: "Available po ba?", time: "Yesterday" },
-  { id: "chini-3", name: "Maria Clara", lastMessage: "Thank you!", time: "2 days ago" },
-  { id: "chini-4", name: "Juan Dela Cruz", lastMessage: "Magkano po?", time: "3 days ago" },
-];
+import { useChatThreads } from "@/hooks/use-chat-thread"; // ← real threads hook
 
 export function ChatList() {
+  const { threads, loading } = useChatThreads();
   const searchParams = useSearchParams();
-  const selectedId = searchParams.get("userId") || mockThreads[0].id;
+  const selectedId = searchParams.get("conversationId") || threads[0]?.id;
+
+  if (loading) {
+    return (
+      <div className="w-80 flex flex-col overflow-y-auto border-r border-white/10 p-4">
+        <div className="h-16 w-full bg-gray-200 animate-pulse rounded mb-2" />
+        <div className="h-16 w-full bg-gray-200 animate-pulse rounded mb-2" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-80 bg-secondary/60 flex flex-col overflow-y-auto border-r border-white/10">
-      {mockThreads.map((thread) => (
-        <ChatThreadItem 
-          key={thread.id} 
-          thread={thread} 
-          isSelected={selectedId === thread.id} 
+      {threads.map((thread) => (
+        <ChatThreadItem
+          key={thread.id}
+          thread={thread}
+          isSelected={selectedId === thread.id}
         />
       ))}
     </div>

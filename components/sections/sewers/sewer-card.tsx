@@ -1,9 +1,11 @@
+// components/sewer-card.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp } from "react-feather";
-
+import { supabase } from "@/utils/supabase/client";
 
 export type Sewer = {
   id: string;
@@ -18,21 +20,102 @@ export type Sewer = {
 
 export interface SewerCardProps {
   sewer: Sewer;
+  setIsChatWidgetOpen: (open: boolean) => void;
+  setSelectedConversationId: (id: string | null) => void;
+  setChatView: (view: "list" | "chat") => void;
 }
 
-export default function SewerCard({ sewer }: SewerCardProps) {
+export default function SewerCard({
+  sewer,
+  setIsChatWidgetOpen,
+  setSelectedConversationId,
+  setChatView,
+}: SewerCardProps) {
+  const router = useRouter();
 
   const getImageUrl = (path: string | undefined) => {
-    if (!path) return "/assets/sewer-photos/1.jpg"; // Fallback
+    if (!path) return "/assets/sewer-photos/1.jpg";
     if (path.startsWith("http") || path.startsWith("/")) return path;
     const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
     if (!projectUrl) return path;
     return `${projectUrl}/storage/v1/object/public/${path}`;
   };
 
+  const openChatWithSeller = async (sellerId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      const redirect = `/sewer-center/chat`;
+      router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
+      return;
+    }
+
+    const { data: profile, error } = await supabase
+      .from("users")
+      .select("user_type")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !profile) {
+      console.error("Failed to fetch user type:", error);
+      return;
+    }
+
+    const isSeller = profile.user_type === "seller";
+    const isBuyer = profile.user_type === "buyer";
+
+    const buyerId = user.id;
+    const sellerUUID = sellerId;
+
+    // Try to get existing conversation
+    const { data: existing, error: selectErr } = await supabase
+      .from("chat_conversations")
+      .select("id")
+      .eq("buyer_id", buyerId)
+      .eq("seller_id", sellerUUID)
+      .single();
+
+    let conversationId: string;
+
+    if (selectErr && selectErr.code !== "PGRST116") {
+      console.error("Error checking conversation:", selectErr);
+      return;
+    }
+
+    if (existing) {
+      conversationId = existing.id;
+    } else {
+      const { data: newConv, error: insertErr } = await supabase
+        .from("chat_conversations")
+        .insert({
+          buyer_id: buyerId,
+          seller_id: sellerUUID,
+        })
+        .select("id")
+        .single();
+
+      if (insertErr) {
+        console.error("Failed to create conversation:", insertErr);
+        return;
+      }
+
+      conversationId = newConv.id;
+    }
+
+    if (isSeller) {
+      // Seller: open full‑page chat
+      router.push(`/sewer-center/chat?conversationId=${conversationId}`);
+    } else if (isBuyer) {
+      // Buyer: open chat widget only
+      setIsChatWidgetOpen(true);
+      setSelectedConversationId(conversationId);
+      setChatView("chat");
+    }
+  };
+
   return (
     <div className="bg-orchid-vertical-b rounded-3xl overflow-hidden px-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full max-w-xl h-150">
-      <Link href={`/sewer-profiles/${sewer.id}`}>
+      <Link href={`/sewers/${sewer.id}`} className="block h-full">
         <div className="relative w-full aspect-video bg-white rounded-b-3xl mt-6">
           <Image
             src={getImageUrl(sewer.img_src)}
@@ -40,12 +123,11 @@ export default function SewerCard({ sewer }: SewerCardProps) {
             fill
             className="object-cover rounded-b-3xl"
           />
-
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              // Future: Open chat
+              await openChatWithSeller(sewer.id);
             }}
             className="absolute top-2 right-2 bg-secondary hover:bg-primary hover:text-white text-heading p-2 rounded-full shadow-lg transition-colors z-10"
             aria-label="Message sewer"

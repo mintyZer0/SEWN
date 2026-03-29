@@ -70,7 +70,7 @@ export const ProductModal = ({
       });
     }
 
-    console.log(product ? "Editing Product:" : "Adding Product:", formValues);
+  
     onClose();
   };
 
