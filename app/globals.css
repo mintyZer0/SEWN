@@ -58,3 +58,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+* {
+  outline: 1px solid red !important;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
