@@ -1,4 +1,4 @@
-export interface Sewer {
+ interface Sewe {
   id: string;
   name: string;
   bio: string;
@@ -14,7 +14,7 @@ export interface Sewer {
   email: string;
 }
 
-export const sewersData: Sewer[] = [
+ const sewersData: Sewe[] = [
   {
     id: "1",
     name: "Maria Santos",
@@ -126,6 +126,6 @@ export const sewersData: Sewer[] = [
   },
 ];
 
-export function getSewerById(id: string): Sewer | undefined {
+export function getSewerById(id: string): Sewe | undefined {
   return sewersData.find((sewer) => sewer.id === id);
 }
