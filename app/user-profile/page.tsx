@@ -80,6 +80,7 @@ export default function UserProfilePage() {
       return;
     }
 
+    {/*Save to database*/}
     try {
       setIsSaving(true);
       const {
@@ -90,7 +91,6 @@ export default function UserProfilePage() {
       const [firstName, ...lastNameParts] = formData.name.split(" ");
       const lastName = lastNameParts.join(" ");
 
-      // Need to update database
       const { error: userError } = await supabase
         .from("users")
         .update({
@@ -103,7 +103,8 @@ export default function UserProfilePage() {
 
       const { error: phoneError } = await supabase
         .from("user_phones")
-        .update({
+        .upsert({
+          user_id: user.id,
           phone: formData.phone,
         })
         .eq("id", user.id);

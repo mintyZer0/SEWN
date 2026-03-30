@@ -1,92 +1,194 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
 import AddAddressModal from "@/components/modals/add-address-modal";
 import ProfileSection from "@/components/user-profile/profile-section";
+import { ProfileButton } from "@/components/user-profile/profile-buttons";
+import { AddressCard } from "@/components/user-profile/address-card";
+
+interface Address {
+  id: string;
+  user_id: string;
+  full_address: string;
+  barangay: string;
+  city: string;
+  province: string;
+  zip_code: number;
+  is_primary: boolean;
+  contact_name?: string;
+  contact_phone?: string;
+}
 
 export default function MyAddressesPage() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
-  useEffect(() => {
-    async function fetchAddresses() {
-      try {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-      } catch (error) {
-        console.error("Error fetching addresses:", error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchAddresses = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("user_addresses")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("is_primary", { ascending: false });
+
+      if (error) throw error;
+      setAddresses(data || []);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+    } finally {
+      setLoading(false);
     }
-    fetchAddresses();
   }, [supabase]);
 
-  const handleSaveAddress = async (addressData: any) => {
+  useEffect(() => {
+    fetchAddresses();
+  }, [fetchAddresses]);
+
+  const handleSaveAddress = async (formData: any) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert("You must be logged in to save an address.");
+        return;
+      }
+
+      const zip = parseInt(formData.postalCode);
+      if (isNaN(zip)) {
+        alert("Please enter a valid numeric postal code.");
+        return;
+      }
+
+      const addressData = {
+        user_id: user.id,
+        full_address: formData.addressLine,
+        barangay: formData.barangay,
+        city: formData.city,
+        province: formData.province,
+        zip_code: zip,
+        contact_name: formData.fullName,
+        contact_phone: formData.phone,
+        is_primary: editingAddress ? editingAddress.is_primary : addresses.length === 0,
+      };
+
+      if (editingAddress) {
+        const { error } = await supabase
+          .from("user_addresses")
+          .update(addressData)
+          .eq("id", editingAddress.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("user_addresses")
+          .insert(addressData);
+        if (error) throw error;
+      }
+
+      await fetchAddresses();
+      setIsModalOpen(false);
+      setEditingAddress(null);
+    } catch (error: any) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+
+  const handleSetPrimary = async (id: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      console.log("Saving address:", addressData);
+      await supabase.from("user_addresses").update({ is_primary: false }).eq("user_id", user.id);
+      await supabase.from("user_addresses").update({ is_primary: true }).eq("id", id);
+      await fetchAddresses();
     } catch (error) {
-      console.error("Error saving address:", error);
+      console.error("Error setting primary:", error);
     }
   };
 
-  const handleEditAddress = async (id: string) => {};
-  const handleDeleteAddress = async (id: string) => {};
+  const handleDeleteAddress = async (id: string) => {
+    try {
+      const addressToDelete = addresses.find((a) => a.id === id);
+      if (!addressToDelete) return;
 
-  if (loading) return <div className="flex h-[400px] items-center justify-center">Loading...</div>;
+      const { error } = await supabase.from("user_addresses").delete().eq("id", id);
+      if (error) throw error;
+
+      if (addressToDelete.is_primary && addresses.length > 1) {
+        const next = addresses.find((a) => a.id !== id);
+        if (next) {
+          await supabase.from("user_addresses").update({ is_primary: true }).eq("id", next.id);
+        }
+      }
+      await fetchAddresses();
+    } catch (error) {
+      console.error("Error deleting address:", error);
+    }
+  };
+
+  const openEditModal = (address: Address) => {
+    setEditingAddress(address);
+    setIsModalOpen(true);
+  };
+
+  const openAddModal = () => {
+    setEditingAddress(null);
+    setIsModalOpen(true);
+  };
+
+  if (loading) return <div className="flex h-96 items-center justify-center">Loading...</div>;
 
   return (
     <ProfileSection 
       title="My Addresses" 
       description="Manage your addresses"
       headerAction={
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="bg-white text-third px-8 py-3 rounded-xl font-bold text-xl shadow-lg hover:bg-gray-50 transition-all active:scale-95 cursor-pointer"
+        <ProfileButton 
+          variant="white"
+          onClick={openAddModal}
         >
           Add Address
-        </button>
+        </ProfileButton>
       }
     >
-      {addresses.length > 0 ? (
-        addresses.map((addr, index) => (
-          <div key={addr.id} className="bg-white rounded-[30px] p-10 flex justify-between items-start shadow-lg border border-white/20">
-            <div className="space-y-4">
-              <h2 className="text-third text-2xl font-bold tracking-tight">Address #{index + 1}</h2>
-              <div className="text-gray-800 space-y-1">
-                <p className="text-xl font-bold">{addr.fullName} | {addr.phone}</p>
-                <p className="text-lg">{addr.addressLine}</p>
-                <p className="text-lg">{addr.city}, {addr.province} {addr.postalCode}</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 min-w-[140px]">
-              <button onClick={() => handleEditAddress(addr.id)} className="bg-third text-white px-6 py-2 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition-all active:scale-95">Edit</button>
-              <button onClick={() => handleDeleteAddress(addr.id)} className="bg-third text-white px-6 py-2 rounded-xl font-bold text-lg shadow-md hover:opacity-90 transition-all active:scale-95">Delete</button>
+      <div className="space-y-6">
+        {addresses.length > 0 ? (
+          addresses.map((addr, index) => (
+            <AddressCard 
+              key={addr.id}
+              address={addr}
+              index={index}
+              onEdit={openEditModal}
+              onSetPrimary={handleSetPrimary}
+              onDelete={handleDeleteAddress}
+            />
+          ))
+        ) : (
+          <div className="bg-white rounded-3xl p-10 shadow-lg border border-white/20">
+            <h2 className="text-third text-2xl font-bold tracking-tight mb-4">No Addresses Found</h2>
+            <div className="flex flex-col items-center justify-center py-10">
+              <p className="text-2xl text-gray-800 font-medium text-center">
+                Click "Add Address" to register a new location
+              </p>
             </div>
           </div>
-        ))
-      ) : (
-        <div className="bg-white rounded-[30px] p-10 shadow-lg border border-white/20">
-          <h2 className="text-third text-2xl font-bold tracking-tight mb-4">No Addresses Found</h2>
-          <div className="flex flex-col items-center justify-center py-10">
-            <p className="text-2xl text-gray-800 font-medium text-center">
-              Click "Add Address" to register a new location
-            </p>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <AddAddressModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingAddress(null);
+        }} 
         onSave={handleSaveAddress} 
+        initialData={editingAddress}
       />
     </ProfileSection>
   );
