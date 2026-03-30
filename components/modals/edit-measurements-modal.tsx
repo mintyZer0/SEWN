@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
-import { X, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { MeasurementData } from "@/components/user-profile/measurement-card";
 
 interface EditMeasurementsModalProps {
