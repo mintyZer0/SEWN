@@ -25,21 +25,6 @@ export default function Header({ variant = "default" }: HeaderProps) {
     seller: "third-gradient",
   };
 
-  useEffect(() => {
-    return () => {
-      if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    };
-  }, []);
-
-  const handleProfileMouseEnter = () => {
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    hoverTimer.current = setTimeout(() => setIsProfileOpen(true), showDelay);
-  };
-
-  const handleProfileMouseLeave = () => {
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
-    hoverTimer.current = setTimeout(() => setIsProfileOpen(false), hideDelay);
-  };
   const { cart, getCartCount, getCartTotal, updateQuantity, removeFromCart } =
     useCart();
   const navLinks = [
@@ -69,7 +54,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
     {
       icon: User,
       label: "Profile",
-      onClick: () => router.push("/user-profile"),
+      onClick: () => setIsProfileOpen(!isProfileOpen),
     },
   ];
 
@@ -163,14 +148,8 @@ export default function Header({ variant = "default" }: HeaderProps) {
             return (
               <button
                 key={button.label}
-                onMouseEnter={
-                  Label === "Profile" ? handleProfileMouseEnter : undefined
-                }
-                onMouseLeave={
-                  Label === "Profile" ? handleProfileMouseLeave : undefined
-                }
                 onClick={button.onClick}
-                className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
+                className="text-white  hover:cursor-pointer transition-opacity relative"
                 aria-label={button.label}
               >
                 <Icon size={32} />
@@ -186,17 +165,23 @@ export default function Header({ variant = "default" }: HeaderProps) {
                         ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
                         : "opacity-0 scale-60 pointer-events-none -translate-y-1"
                     }`}
-                    onMouseEnter={handleProfileMouseEnter}
-                    onMouseLeave={handleProfileMouseLeave}
                   >
                     <div className="px-2 text-sm text-black">
-                      <ul className="text-primary text-lg">
+                      <ul className="text-primary text-lg text-left">
                         <li>
                           <Link
                             href="/user-profile"
-                            className="block px-4 py-2 hover:bg-gray-100"
+                            className="block px-4 py-2 hover:bg-gray-50"
                           >
                             User Profile
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="/auth/logout"
+                            className="block px-4 py-2 hover:bg-gray-50"
+                          >
+                            Logout
                           </Link>
                         </li>
                       </ul>
