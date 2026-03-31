@@ -1,20 +1,37 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { MeasurementData } from "@/components/user-profile/measurement-card";
 import { revalidatePath } from "next/cache";
 
 export interface MeasurementProfile {
   id: string;
   user_id: string;
-  title: string;
-  data: MeasurementData;
+  profile_name: string;
+  unit: string;
+  chest: number | null;
+  shoulder_width: number | null;
+  neck: number | null;
+  sleeve_length_short: number | null;
+  sleeve_length_long: number | null;
+  upper_arm_bicep: number | null;
+  wrist: number | null;
+  shirt_length: number | null;
+  waist_shirt: number | null;
+  waist_pants: number | null;
+  hips: number | null;
+  inseam: number | null;
+  outseam: number | null;
+  thigh: number | null;
+  knee: number | null;
+  leg_opening: number | null;
+  front_rise: number | null;
+  back_rise: number | null;
   created_at?: string;
+  updated_at?: string;
 }
 
-//
-//Sample data structure for measurements cause we have no table yet
-//
+export type MeasurementData = Omit<MeasurementProfile, "id" | "user_id" | "created_at" | "updated_at">;
+
 /**
  * Fetches all measurements for the current authenticated user.
  */
@@ -38,7 +55,7 @@ export async function getMeasurements() {
 /**
  * Creates a new measurement profile.
  */
-export async function createMeasurement(title: string, data: MeasurementData) {
+export async function createMeasurement(profile_name: string, data: Partial<MeasurementData>) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,12 +65,17 @@ export async function createMeasurement(title: string, data: MeasurementData) {
 
   const { data: newEntry, error } = await supabase
     .from("user_measurements")
-    .insert([{ user_id: user.id, title, data }])
+    .insert([{ 
+      user_id: user.id, 
+      profile_name, 
+      unit: "in", // Hardcoded to inches as requested
+      ...data 
+    }])
     .select()
     .single();
 
   if (!error) revalidatePath("/user-profile/measurements");
-  return { data: newEntry, error };
+  return { data: newEntry as MeasurementProfile, error };
 }
 
 /**
@@ -61,20 +83,19 @@ export async function createMeasurement(title: string, data: MeasurementData) {
  */
 export async function updateMeasurement(
   id: string,
-  title: string,
-  data: MeasurementData,
+  data: Partial<MeasurementData>,
 ) {
   const supabase = await createClient();
 
   const { data: updatedEntry, error } = await supabase
     .from("user_measurements")
-    .update({ title, data })
+    .update({ ...data, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select()
     .single();
 
   if (!error) revalidatePath("/user-profile/measurements");
-  return { data: updatedEntry, error };
+  return { data: updatedEntry as MeasurementProfile, error };
 }
 
 /**
