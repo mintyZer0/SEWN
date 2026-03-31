@@ -11,14 +11,17 @@ export default function TodaysFeaturedSewer() {
   };
 
   return (
-    <div className="flex h-96 flex-col lg:flex-row w-full bg-secondary-gradient-b p-9 justify-between overflow-x-hidden">
-      <div className="flex w-full lg:w-150">
-        <h2 className="text-7xl lg:text-8xl p-3 text-heading font-light">
-          Today's <br /> Featured <br /> Sewer
+    <div className="flex h-auto lg:h-96 flex-col lg:flex-row w-full bg-secondary-gradient-b p-6 lg:p-9 justify-between overflow-hidden">
+
+      <div className="flex w-full lg:w-150 justify-center lg:justify-start text-center lg:text-left">
+        <h2 className="text-5xl md:text-7xl lg:text-8xl p-3 text-heading font-light">
+          Today's <br className="hidden lg:block"/> Featured <br className="hidden lg:block"/> Sewer
         </h2>
       </div>
-      <div className="h-full w-1 mx-4 bg-primary"></div>
-      <div className="flex-1 flex justify-end">
+      
+      <div className="h-1 w-full lg:h-full lg:w-1 my-6 lg:my-0 lg:mx-4 bg-primary rounded-full"></div>
+      
+      <div className="flex-1 flex justify-center lg:justify-end w-full">
         <FeaturedSewer
           sewerName={featuredSewer.sewerName}
           description={featuredSewer.description}
