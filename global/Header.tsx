@@ -22,7 +22,13 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
   const bgStyles = {
     default: "bg-orchid-light",
-    seller: "third-gradient",
+    seller: "bg-third-gradient",
+  };
+
+  // FIX 1: Added this missing function back!
+  const handleProfileMouseEnter = () => {
+    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    hoverTimer.current = setTimeout(() => setIsProfileOpen(true), showDelay);
   };
 
   const handleProfileMouseLeave = () => {
@@ -57,7 +63,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
   ];
 
   return (
-    <header className="sticky top-0 left-0 right-0 z-50 bg-orchid-light shadow overflow-x-hidden">
+    <header className={cn("sticky top-0 left-0 right-0 z-50 shadow overflow-x-hidden", bgStyles[variant])}>
       <div className="flex flex-col w-full py-4 px-4 sm:px-8 gap-4">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2 md:gap-4">
@@ -103,7 +109,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
             ))}
           </nav>
 
-          <div className="flex justify-end items-center gap-x-4 md:gap-x-8">
+          <div className="hidden md:flex justify-end items-center gap-x-4 md:gap-x-8">
             {iconButtons.map((button) => {
               const Icon = button.icon;
               const Label = button.label;
@@ -155,7 +161,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex flex-1 justify-end items-center gap-x-4 md:gap-x-8 absolute right-4 sm:right-8 top-4">
+        <div className="flex md:hidden flex-1 justify-end items-center gap-x-4 absolute right-4 top-4 z-50">
           {iconButtons.map((button) => {
             const Icon = button.icon;
             const Label = button.label;
@@ -168,7 +174,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
                 className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
                 aria-label={button.label}
               >
-                <Icon size={28} className="md:w-8 md:h-8" />
+                <Icon size={24} />
                 {Label === "Cart" && getCartCount() > 0 && (
                   <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {getCartCount()}
@@ -178,6 +184,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
             );
           })}
         </div>
+      </div> 
 
       {isCartOpen && (
         <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setIsCartOpen(false)}>
@@ -195,15 +202,15 @@ export default function Header({ variant = "default" }: HeaderProps) {
               ) : (
                 <>
                   <div className="space-y-4 mb-6">
-                    {cart.map((item) => (
+                    {cart.map((item: any) => (
                       <div key={item.id} className="flex gap-4 p-4 bg-white rounded-lg shadow">
                         <div className="relative w-20 h-20 flex-shrink-0">
-                          <Image src={item.img_src} alt={item.product_name} fill className="object-cover rounded" />
+                          <Image src={item.img_src} alt={item.product_name || item.name} fill className="object-cover rounded" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium text-heading">{item.product_name}</h3>
+                          <h3 className="font-medium text-heading">{item.product_name || item.name}</h3>
                           <p className="text-sm text-gray-600">{item.sewer_name}</p>
-                          <p className="text-heading font-semibold">₱{item.price.toFixed(2)}</p>
+                          <p className="text-heading font-semibold">₱{item.price?.toFixed(2)}</p>
                         </div>
                         <div className="flex flex-col items-end justify-between">
                           <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:opacity-70">
