@@ -30,10 +30,27 @@ The main product catalog.
 - **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `seller_name`.
 
 ### Product Attributes & Variants
-- **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Specific attributes linked to `product_id`.
-- **`product_variants`**: Handles SKUs and stock.
-  - **Fields:** `id`, `product_id`, `sku` (Unique), `stock_quantity`, `price_override`.
-- **`variant_attribute_values`**: Maps specific variant attributes (e.g., `attribute_type`: 'Size', `attribute_value`: 'Large').
+- **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Global tags for a product (One-to-Many).
+- **`product_variants`**: The specific physical item in stock.
+  - **Fields:** `id`, `product_id`, `sku`, `stock_quantity`, `price_override`.
+- **`variant_attribute_values`**: Maps specific variant attributes.
+
+#### Working with Multi-Attribute Variants
+To create a variant with multiple attributes (e.g., a "Red, Large" shirt), you insert one row into `product_variants` and **multiple rows** into `variant_attribute_values` using the same `variant_id`.
+
+**Example Logic:**
+1. Create Variant: `Insert into product_variants (sku: 'SHIRT-RED-L', stock: 10)` -> returns `variant_id: 'uuid-123'`.
+2. Assign Attributes:
+   - `Insert into variant_attribute_values (variant_id: 'uuid-123', type: 'Color', value: 'Red')`
+   - `Insert into variant_attribute_values (variant_id: 'uuid-123', type: 'Size', value: 'Large')`
+
+**Fetching a Variant's Details:**
+```sql
+SELECT attribute_type, attribute_value 
+FROM variant_attribute_values 
+WHERE variant_id = 'uuid-123';
+-- Returns: [{type: 'Color', value: 'Red'}, {type: 'Size', value: 'Large'}]
+```
 
 ---
 
