@@ -2,49 +2,48 @@
 
 import React from "react";
 import { ProfileButton } from "./profile-buttons";
-
-export interface MeasurementData {
-  [key: string]: string;
-}
+import { MeasurementProfile } from "@/lib/measurements";
 
 interface MeasurementCardProps {
-  title: string;
-  data: MeasurementData;
+  profile: MeasurementProfile;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function MeasurementCard({
-  title,
-  data,
+  profile,
   onEdit,
   onDelete,
 }: MeasurementCardProps) {
-  const displayData = Object.entries(data).slice(0, 3);
-  const hasMore = Object.entries(data).length > 3;
+  // Define display mapping for the card preview
+  const displayFields = [
+    { label: "Chest", value: profile.chest },
+    { label: "Shoulder Width", value: profile.shoulder_width },
+    { label: "Neck", value: profile.neck },
+  ];
+
+  const unit = profile.unit || "in";
 
   return (
     <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-lg min-h-[220px] flex flex-col justify-center border border-white/20">
       <h3 className="text-third text-2xl md:text-3xl font-bold mb-4 tracking-tight">
-        {title}
+        {profile.profile_name}
       </h3>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1.5 ml-2">
-          {displayData.map(([key, value]) => (
+          {displayFields.map((field) => (
             <p
-              key={key}
+              key={field.label}
               className="text-xl md:text-2xl text-gray-800 font-medium flex items-center gap-2"
             >
-              <span>{key}:</span>
-              <span>{value}</span>
+              <span>{field.label}:</span>
+              <span>{field.value !== null ? `${field.value} ${unit}` : "N/A"}</span>
             </p>
           ))}
-          {hasMore && (
-            <p className="text-2xl text-gray-800 font-bold tracking-widest leading-none">
-              ...
-            </p>
-          )}
+          <p className="text-2xl text-gray-800 font-bold tracking-widest leading-none">
+            ...
+          </p>
         </div>
 
         <div className="flex flex-col gap-3 w-full md:w-auto min-w-[200px]">
