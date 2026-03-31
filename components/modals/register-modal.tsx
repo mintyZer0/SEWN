@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { signup, signUpAsSewer } from "@/lib/auth-actions";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 const variants = {
   customer: {
@@ -85,7 +86,7 @@ export function RegisterModal({
           className="absolute right-6 top-6 cursor-pointer"
           aria-label={step > 1 ? "Go back" : "Close register details form"}
         >
-          ←
+          <ArrowLeft className="w-8 h-8" />
         </button>
         <div className="mb-6">
           <h2 className="text-6xl font-normal">Register</h2>
@@ -96,9 +97,7 @@ export function RegisterModal({
           </p>
         </div>
 
-        {/* On submit, if it's customer variant, directly submit the form. If
-        it's sewer variant, go to next step first before submitting. */}
-
+        {/* Step 1 Form */}
         {step === 1 ? (
           <form
             className="space-y-4 px-4"

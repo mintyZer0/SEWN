@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, ArrowLeft } from "lucide-react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomField } from "@/components/ui/custom-field";
 import { PhotoSlot } from "@/components/ui/photo-slot";
@@ -93,7 +93,7 @@ export const ProductModal = ({
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-8 h-8 text-gray-400" />
+            <ArrowLeft className="w-8 h-8 text-gray-400" />
           </button>
         </div>
 
