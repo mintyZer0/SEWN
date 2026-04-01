@@ -18,6 +18,8 @@ interface Address {
   is_primary: boolean;
   contact_name?: string;
   contact_phone?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export default function MyAddressesPage() {
@@ -76,6 +78,8 @@ export default function MyAddressesPage() {
         contact_name: formData.fullName,
         contact_phone: formData.phone,
         is_primary: editingAddress ? editingAddress.is_primary : addresses.length === 0,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
       };
 
       if (editingAddress) {
