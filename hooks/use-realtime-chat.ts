@@ -62,45 +62,69 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
     loadMessages();
   }, [roomName, username]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim()) return;
+const sendMessage = async (text: string) => {
+  if (!text.trim()) return;
 
-    const match = roomName.match(/^chat:(.*)$/);
-    if (!match) return;
-    const conversationId = match[1];
+  const match = roomName.match(/^chat:(.*)$/);
+  if (!match) {
+    console.error("Invalid roomName format:", roomName);
+    return;
+  }
+  const conversationId = match[1];
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    console.error("No authenticated user.");
+    return;
+  }
 
-    const { data: messageData, error } = await supabase
-      .from("chat_messages")
-      .insert({
-        conversation_id: conversationId,
-        from_user_id: user.id,
-        to_user_id: "placeholder", // you can fill this later from DB
-        content: text,
-      })
-      .select("id, content, created_at, from_user_id");
+  // Load conversation to get buyer_id / seller_id
+  const { data: conversation, error: convErr } = await supabase
+    .from("chat_conversations")
+    .select("id, buyer_id, seller_id")
+    .eq("id", conversationId)
+    .single();
 
-    if (error) {
-      console.error("Failed to send message:", error);
-      return;
-    }
+  if (convErr || !conversation) {
+    console.error("Failed to load conversation:", convErr);
+    return;
+  }
 
-    const msg = messageData[0];
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: msg.id,
-        content: msg.content,
-        createdAt: msg.created_at,
-        user: {
-          name: username,
-          id: msg.from_user_id,
-        },
+  const myId = user.id;
+  const otherId =
+    conversation.seller_id === myId
+      ? conversation.buyer_id
+      : conversation.seller_id;
+
+  const { data: messageData, error } = await supabase
+    .from("chat_messages")
+    .insert({
+      conversation_id: conversationId,
+      from_user_id: myId,
+      to_user_id: otherId,
+      content: text,
+    })
+    .select("id, content, created_at, from_user_id");
+
+  if (error) {
+    console.error("Failed to send message:", error);
+    return;
+  }
+
+  const msg = messageData[0];
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: msg.id,
+      content: msg.content,
+      createdAt: msg.created_at,
+      user: {
+        name: username,
+        id: msg.from_user_id,
       },
-    ]);
-  };
+    },
+  ]);
+};
 
   // Realtime subscription
   useEffect(() => {
