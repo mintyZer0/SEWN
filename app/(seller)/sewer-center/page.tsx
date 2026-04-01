@@ -3,8 +3,10 @@
 import dynamic from "next/dynamic";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomCheckbox } from "@/components/ui/custom-checkbox";
+import { APIProvider } from "@vis.gl/react-google-maps";
+import { useState, useCallback } from "react";
 
-// Dynamically import map component to avoid SSR issues with Leaflet
+// Dynamically import map components to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
   ssr: false,
   loading: () => (
@@ -12,7 +14,33 @@ const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
   ),
 });
 
+const MapSearchBox = dynamic(() => import("@/components/ui/map-search-box"), {
+  ssr: false,
+});
+
 export default function SewerCenterPage() {
+  const [position, setPosition] = useState({ lat: 15.48, lng: 120.59 });
+  const [address, setAddress] = useState("");
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
+  const handlePlaceSelected = useCallback(
+    (place: google.maps.places.PlaceResult) => {
+      if (place.geometry?.location) {
+        const newPos = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+        setPosition(newPos);
+        setAddress(place.formatted_address || "");
+      }
+    },
+    [],
+  );
+
+  const handlePositionChange = useCallback((newPos: { lat: number; lng: number }) => {
+    setPosition(newPos);
+  }, []);
+
   return (
     <div className="p-12">
       <form className="max-w-7xl mx-auto">
@@ -64,6 +92,8 @@ export default function SewerCenterPage() {
                 <input
                   type="text"
                   name="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   placeholder="Ren Avenue, Manila"
                   className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none"
                 />
@@ -176,12 +206,23 @@ export default function SewerCenterPage() {
           <h3 className="text-3xl font-bold text-primary mb-6">
             Pin your workplace
           </h3>
-          <MapComponent
-            position={[15.48, 120.59]}
-            height={600}
-            width="80%"
-            className="mx-auto shadow-lg"
-          />
+          <div className="max-w-[80%] mx-auto space-y-4">
+            <MapSearchBox 
+              onPlaceSelected={handlePlaceSelected} 
+              className="mb-4"
+              placeholder="Search for your workplace address..."
+            />
+            <MapComponent
+              position={position}
+              height={600}
+              width="100%"
+              className="shadow-lg"
+              draggable={true}
+              onPositionChange={handlePositionChange}
+            />
+            <input type="hidden" name="latitude" value={position.lat} />
+            <input type="hidden" name="longitude" value={position.lng} />
+          </div>
         </div>
 
         {/* Action Buttons */}

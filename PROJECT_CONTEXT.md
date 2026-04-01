@@ -7,7 +7,7 @@ SEWN is a specialized marketplace platform connecting users with local tailors a
 - **Framework:** Next.js (App Router, React 19)
 - **Styling:** Tailwind CSS v4, DaisyUI, Radix UI
 - **Backend/Auth:** Supabase (@supabase/ssr, @supabase/supabase-js), NextAuth
-- **Maps:** Leaflet (via react-leaflet) for locating sewers
+- **Maps:** Google Maps API (via @vis.gl/react-google-maps)
 - **Icons:** Lucide-React, React-Feather
 - **State Management:** React Context (CartContext)
 

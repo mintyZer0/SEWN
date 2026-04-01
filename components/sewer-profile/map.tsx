@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
 export default function Map() {
-  const position: [number, number] = [15.4753, 120.596]; // Tarlac City, Tarlac
+  const position = { lat: 15.4753, lng: 120.596 }; // Tarlac City, Tarlac
 
   const MapComponent = useMemo(
     () =>

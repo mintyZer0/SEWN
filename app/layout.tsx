@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Jost } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ChatWidget } from "@/components/messaging/chat-widget";
+import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
 
 const jost = Jost({
   variable: "--font-jost",
@@ -33,11 +34,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jost.className} antialiased overflow-x-hidden`}>
-        <CartProvider>
-          <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
-          {children}
-          <ChatWidget />
-        </CartProvider>
+        <GoogleMapsProvider>
+          <CartProvider>
+            <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
+            {children}
+            <ChatWidget />
+          </CartProvider>
+        </GoogleMapsProvider>
       </body>
     </html>
   );

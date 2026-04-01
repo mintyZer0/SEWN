@@ -11,14 +11,15 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 
 ## Key Features & Components
 - **Marketplace:** Multi-step checkout stepper (`product-details` → `address` → `payment` → `confirmation`).
-- **Sewer Center:** Profile management (Achievements, Services, Location pinning via Leaflet) and Product dashboard.
+- **Sewer Center:** Profile management (Achievements, Services, Location pinning via Google Maps) and Product dashboard.
 - **Reusable Components:**
   - `ProfileButton`: Located in `@/components/user-profile/profile-buttons`. Use variants like `orange` (white text) and sizes like `xl` for primary actions.
+  - `MapComponent`: Now using Google Maps API via `@vis.gl/react-google-maps`.
 - **State Management:** **React Context** (e.g., `CartContext`) and **Supabase SSR**.
 
 ## Project Conventions
 - **Forms:** Wrap profile/product fields in `<form>` elements with appropriate `name` and `type` attributes to prepare for future data integration.
-- **Maps:** Use `dynamic` imports for Leaflet components to avoid SSR issues.
+- **Maps:** Use Google Maps API. Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in `.env.local`. Use `dynamic` imports for map components to avoid SSR issues.
 - **Navigation:** The Seller Center utilizes a `SewerSidebar` with themed navigation links.
 
 ## Coding Standards
