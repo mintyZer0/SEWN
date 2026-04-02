@@ -17,6 +17,16 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
   - `MapComponent`: Now using Google Maps API via `@vis.gl/react-google-maps`.
 - **State Management:** **React Context** (e.g., `CartContext`) and **Supabase SSR**.
 
+## Real-time Messaging & Supabase
+- **Realtime Requirements:**
+  - **Replication:** For `postgres_changes` to broadcast, tables (e.g., `chat_messages`, `chat_conversations`) MUST be added to the `supabase_realtime` publication via SQL (`alter publication supabase_realtime add table ...`).
+  - **RLS Policies:** Supabase Realtime requires a valid `SELECT` policy for the authenticated user to receive broadcasts for a specific row.
+- **Messaging Patterns:**
+  - **Optimistic UI:** Always update local message state immediately in `sendMessage` before the database confirms the insert to ensure zero-latency feel.
+  - **State Management:** Use Client-side "Container" components (e.g., `ChatContainer`) to manage active conversation IDs. Avoid using Server Component URL navigations for switching chats to prevent slow server round-trips.
+  - **Caching:** Use a global in-memory `messageCache` in chat hooks to provide instant switching between previously opened rooms while fresh data loads in the background.
+  - **Sidebar Sync:** The `useChatThreads` hook must listen for both new messages (`INSERT`) and conversation updates (`UPDATE` on `last_message_at`) to keep the inbox ordered and snippets fresh.
+
 ## Project Conventions
 - **Forms:** Wrap profile/product fields in `<form>` elements with appropriate `name` and `type` attributes to prepare for future data integration.
 - **Maps:** Use Google Maps API. Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in `.env.local`. Use `dynamic` imports for map components to avoid SSR issues.
