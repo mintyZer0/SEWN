@@ -126,7 +126,7 @@ const sendMessage = async (text: string) => {
   ]);
 };
 
-  // Realtime subscription
+
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
