@@ -1,4 +1,3 @@
-// components/sewer-card.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -43,6 +42,7 @@ export default function SewerCard({
 
   const openChatWithSeller = async (sellerId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
+    
 
     if (!user) {
       const redirect = `/sewer-center/chat`;
@@ -103,10 +103,9 @@ export default function SewerCard({
     }
 
     if (isSeller) {
-      // Seller: open full‑page chat
       router.push(`/sewer-center/chat?conversationId=${conversationId}`);
-    } else if (isBuyer) {
-      // Buyer: open chat widget only
+    } 
+    else if (isBuyer) {
       setIsChatWidgetOpen(true);
       setSelectedConversationId(conversationId);
       setChatView("chat");

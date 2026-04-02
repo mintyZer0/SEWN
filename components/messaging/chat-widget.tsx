@@ -56,7 +56,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
     }
   }, [supabase, threads, loading, selectedConversationId]);
 
-  if (pathname?.startsWith("/sewer-center")) return null;
+  if (pathname?.startsWith("/sewer-center") && !pathname.includes("/chat")) return null;
 
   const handleSelectUser = (conversationId: string) => {
     setSelectedConversationId(conversationId);
