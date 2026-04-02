@@ -2,14 +2,34 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ChatThreadItem, type ChatThread } from "./chat-thread-item";
 import { useChatThreads } from "@/hooks/use-chat-thread"; // ← real threads hook
 
-export function ChatList() {
+interface ChatListProps {
+  onSelect?: (id: string) => void;
+  selectedId?: string | null;
+}
+
+export function ChatList({ onSelect, selectedId: selectedIdProp }: ChatListProps) {
   const { threads, loading } = useChatThreads();
   const searchParams = useSearchParams();
-  const selectedId = searchParams.get("conversationId") || threads[0]?.id;
+  const router = useRouter();
+  
+  // Use prop if provided, otherwise fallback to URL or first thread
+  const selectedId = selectedIdProp !== undefined 
+    ? selectedIdProp 
+    : (searchParams.get("conversationId") || threads[0]?.id);
+
+  const handleSelect = (id: string) => {
+    if (onSelect) {
+      onSelect(id);
+    } else {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("conversationId", id);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+  };
 
   if (loading) {
     return (
@@ -27,6 +47,7 @@ export function ChatList() {
           key={thread.id}
           thread={thread}
           isSelected={selectedId === thread.id}
+          onSelect={handleSelect}
         />
       ))}
     </div>

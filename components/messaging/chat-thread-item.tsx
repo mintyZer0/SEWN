@@ -16,12 +16,13 @@ export interface ChatThread {
 interface ChatThreadItemProps {
   thread: ChatThread;
   isSelected: boolean;
+  onSelect: (id: string) => void;
 }
 
-export const ChatThreadItem = ({ thread, isSelected }: ChatThreadItemProps) => {
+export const ChatThreadItem = ({ thread, isSelected, onSelect }: ChatThreadItemProps) => {
   return (
-    <Link
-      href={`?conversationId=${thread.id}`}
+    <div
+      onClick={() => onSelect(thread.id)}
       className={cn(
         "p-5 flex gap-4 cursor-pointer transition-all hover:bg-secondary/80",
         isSelected ? "bg-third/20 shadow-inner" : ""
@@ -41,6 +42,6 @@ export const ChatThreadItem = ({ thread, isSelected }: ChatThreadItemProps) => {
           {thread.lastMessage}
         </p>
       </div>
-    </Link>
+    </div>
   );
 };
