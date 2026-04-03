@@ -6,6 +6,18 @@ export async function updateSession(request: NextRequest) {
   const isSellerApp = host.startsWith("seller.");
   const path = request.nextUrl.pathname;
 
+  // Force seller subdomain auth pages to the seller root equivalents
+  if (isSellerApp && path === "/auth/login") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    return NextResponse.redirect(redirectUrl);
+  }
+  if (isSellerApp && path === "/auth/signup") {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/signup";
+    return NextResponse.redirect(redirectUrl);
+  }
+
   let response: NextResponse;
 
   // Domain Rewrite Logic

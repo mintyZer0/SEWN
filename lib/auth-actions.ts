@@ -41,7 +41,7 @@ export async function loginSewer(formData: FormData) {
 
   if (error) {
     if (error.message === "Email not confirmed") {
-      redirect("/auth/sewer-login?error=email_not_confirmed");
+      redirect("/login?error=email_not_confirmed");
     }
     redirect("/error");
   }

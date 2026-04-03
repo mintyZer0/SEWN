@@ -198,21 +198,21 @@ export function SignupForm({
 
           <div className="flex mt-4 text-center text-sm justify-between ">
             <Link
-              href="/auth/login"
+              href={variant === "sewer" ? "/login" : "/auth/login"}
               className="hover:underline underline-offset-4"
             >
               or Login
             </Link>
             {variant === "customer" ? (
               <Link
-                href="/auth/signup-sewer"
+                href={process.env.NODE_ENV === "production" ? "https://seller.sewn.com/signup" : "http://seller.localhost:3000/signup"}
                 className="hover:underline underline-offset-4"
               >
                 Sign up as a seller
               </Link>
             ) : (
               <Link
-                href="/auth/signup"
+                href={process.env.NODE_ENV === "production" ? "https://sewn.com/auth/signup" : "http://localhost:3000/auth/signup"}
                 className="hover:underline underline-offset-4"
               >
                 Sign up as a customer

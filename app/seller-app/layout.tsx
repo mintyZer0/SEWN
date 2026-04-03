@@ -26,7 +26,7 @@ export default async function SellerLayout({
     .single();
 
   if (error || userData?.user_type !== "seller") {
-    redirect("/auth/signup-sewer");
+    redirect("/signup");
   }
 
   return (
