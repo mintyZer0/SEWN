@@ -205,14 +205,14 @@ export function SignupForm({
             </Link>
             {variant === "customer" ? (
               <Link
-                href={process.env.NODE_ENV === "production" ? "https://seller.sewn.com/signup" : "http://seller.localhost:3000/signup"}
+                href={process.env.NODE_ENV === "production" ? "https://seller.sewn.com/signup" : "http://seller.sewn.local:3000/signup"}
                 className="hover:underline underline-offset-4"
               >
                 Sign up as a seller
               </Link>
             ) : (
               <Link
-                href={process.env.NODE_ENV === "production" ? "https://sewn.com/auth/signup" : "http://localhost:3000/auth/signup"}
+                href={process.env.NODE_ENV === "production" ? "https://sewn.com/auth/signup" : "http://sewn.local:3000/auth/signup"}
                 className="hover:underline underline-offset-4"
               >
                 Sign up as a customer

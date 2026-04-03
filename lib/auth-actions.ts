@@ -172,17 +172,13 @@ export async function signUpAsSewer(
 }
 
 async function getRedirectTo(role?: "customer" | "sewer") {
-  // If NEXT_PUBLIC_SITE_URL is set, use it.
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  let base = siteUrl ? siteUrl.replace(/\/$/, "") : "";
-
-  if (!base) {
-    // Otherwise, construct it dynamically from headers for environmental-agnosticism.
-    const headerList = await headers();
-    const host = headerList.get("host");
-    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
-    base = `${protocol}://${host}`;
-  }
+  // Otherwise, construct it dynamically from headers for environmental-agnosticism.
+  const headerList = await headers();
+  const host = headerList.get("host");
+  const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
+  
+  // If no host is found, fallback to sewn.local
+  const base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
   
   return `${base}/auth/callback${role ? `?role=${role}` : ""}`;
 }

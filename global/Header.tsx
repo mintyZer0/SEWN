@@ -30,7 +30,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
     { name: "Sewers", href: "/browse/sewers" },
     { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
-    { name: "Sewer Center", href: process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.localhost:3000" },
+    { name: "Sewer Center", href: process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.sewn.local:3000" },
   ];
   
   const router = useRouter();

@@ -103,7 +103,7 @@ export default function SewerCard({
     }
 
     if (isSeller) {
-      router.push(`${process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.localhost:3000"}/chat?conversationId=${conversationId}`);
+      router.push(`${process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.sewn.local:3000"}/chat?conversationId=${conversationId}`);
     } 
     else if (isBuyer) {
       setIsChatWidgetOpen(true);
