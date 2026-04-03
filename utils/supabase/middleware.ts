@@ -3,41 +3,39 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host") || "";
-  const isSellerApp = host.startsWith("seller.");
+  const hostname = host.split(":")[0];
+  const isSellerApp = hostname.startsWith("seller.");
   const path = request.nextUrl.pathname;
+
+  console.log("Middleware Request:", { hostname, path, isSellerApp });
 
   // Force seller subdomain auth pages to the seller root equivalents
   if (isSellerApp && path === "/auth/login") {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    return NextResponse.redirect(redirectUrl);
+    const loginUrl = new URL("/login", request.url);
+    request.nextUrl.searchParams.forEach((val, key) => loginUrl.searchParams.set(key, val));
+    return NextResponse.redirect(loginUrl);
   }
   if (isSellerApp && path === "/auth/signup") {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/signup";
-    return NextResponse.redirect(redirectUrl);
+    const signupUrl = new URL("/signup", request.url);
+    request.nextUrl.searchParams.forEach((val, key) => signupUrl.searchParams.set(key, val));
+    return NextResponse.redirect(signupUrl);
   }
 
-  let response: NextResponse;
+  let response: NextResponse = NextResponse.next({
+    request: { headers: request.headers },
+  });
 
   // Domain Rewrite Logic
-  if (isSellerApp && !path.startsWith("/auth")) {
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = `/seller-app${path === "/" ? "" : path}`;
+  if (isSellerApp && !path.startsWith("/auth") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+    const rewriteUrl = new URL(`/seller-app${path === "/" ? "" : path}`, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
   } else if (!isSellerApp && path.startsWith("/seller-app")) {
-    const rewriteUrl = request.nextUrl.clone();
-    rewriteUrl.pathname = "/404";
-    response = NextResponse.rewrite(rewriteUrl, {
-      request: { headers: request.headers },
-    });
-  } else {
-    response = NextResponse.next({
-      request: { headers: request.headers },
-    });
+    return NextResponse.rewrite(new URL("/404", request.url));
   }
+
+  const domain = hostname.includes("sewn.local") ? ".sewn.local" : hostname.includes("localhost") ? "localhost" : undefined;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,16 +43,26 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         get(name: string) {
-          const cookie = request.cookies.get(name)?.value;
-          return cookie;
+          return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({ name, value, ...options });
-          response.cookies.set({ name, value, ...options });
+          // If we already have a rewrite/redirect response, we need to update its cookies too
+          response.cookies.set({ 
+            name, 
+            value, 
+            ...options,
+            domain: name.startsWith("sb-") || name.includes("-auth-token") ? domain : options.domain
+          });
         },
         remove(name: string, options: CookieOptions) {
           request.cookies.set({ name, value: "", ...options });
-          response.cookies.set({ name, value: "", ...options });
+          response.cookies.set({ 
+            name, 
+            value: "", 
+            ...options,
+            domain: name.startsWith("sb-") || name.includes("-auth-token") ? domain : options.domain
+          });
         },
       },
     }
@@ -67,13 +75,19 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect unauthenticated users
   if (!isPublicRoute && !user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = isSellerApp ? "/login" : "/auth/login";
+    const loginUrl = new URL(isSellerApp ? "/login" : "/auth/login", request.url);
+    // Preserving query params can be dangerous during OAuth, but we'll keep it for now
+    // except if it looks like a dead OAuth code
+    if (!request.nextUrl.searchParams.has("code")) {
+      request.nextUrl.searchParams.forEach((val, key) => {
+        loginUrl.searchParams.set(key, val);
+      });
+    }
     return NextResponse.redirect(loginUrl);
   }
 
   // Seller App Access Control
-  if (user && isSellerApp) {
+  if (user && isSellerApp && path !== "/login" && path !== "/signup") {
     const { data: profile } = await supabase
       .from("users")
       .select("user_type")
@@ -81,17 +95,13 @@ export async function updateSession(request: NextRequest) {
       .single();
 
     if (!profile || profile.user_type !== "seller") {
-      // redirect buyers away from seller dashboard
-      const homeUrl = request.nextUrl.clone();
-      homeUrl.host = host.replace("seller.", "");
-      homeUrl.pathname = "/";
-      return NextResponse.redirect(homeUrl);
+      // If they are a buyer trying to access seller features, send them to the seller login page
+      // so they can upgrade/sign in as a sewer
+      const sellerLoginUrl = new URL("/login", request.url);
+      console.log("Redirecting non-seller to seller login:", sellerLoginUrl.toString());
+      return NextResponse.redirect(sellerLoginUrl);
     }
   }
-
-  // Buyer App Access Control: Prevent sellers from seeing buyer dashboard?
-  // If we only wanted buyers on the main site, we could add logic here.
-  // But usually sellers can buy too, so we'll leave it alone.
 
   return response;
 }

@@ -37,13 +37,26 @@ export async function loginSewer(formData: FormData) {
     password: formData.get("password") as string,
   };
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const { data: authData, error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
     if (error.message === "Email not confirmed") {
       redirect("/login?error=email_not_confirmed");
     }
     redirect("/error");
+  }
+
+  // Check if the user is actually a seller
+  const { data: profile } = await supabase
+    .from("users")
+    .select("user_type")
+    .eq("id", authData.user.id)
+    .single();
+
+  if (profile && profile.user_type === "buyer") {
+    // Force sign out if they are just a buyer trying to use the seller login
+    await supabase.auth.signOut();
+    redirect("/login?error=must_register_as_sewer");
   }
 
   revalidatePath("/", "layout");
@@ -78,16 +91,23 @@ export async function signup(
   };
 
   const { data: existingUser } = await supabase
-    .from("public.profiles")
-    .select("email")
+    .from("users")
+    .select("email, user_type")
     .eq("email", data.email)
     .single();
 
   if (existingUser) {
-    console.log(existingUser);
+    if (existingUser.user_type === "seller") {
+      return {
+        success: false,
+        error: "An account with this email already exists.",
+      };
+    }
+    // If they are a buyer, they should probably go through the sewer signup flow 
+    // to update their status, but if they are here, we handle it.
     return {
       success: false,
-      error: "An account with this email already exists.",
+      error: "This email is registered as a customer. Please sign up as a Sewer to upgrade.",
     };
   }
 
@@ -121,18 +141,66 @@ export async function signUpAsSewer(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
 
+  const email = formData.get("email") as string;
   const firstName = formData.get("first-name") as string;
   const lastName = formData.get("last-name") as string;
 
+  // 1. Check if user already exists in public.users (Buyer account)
+  const { data: existingUser } = await supabase
+    .from("users")
+    .select("id, user_type")
+    .eq("email", email)
+    .single();
+
+  if (existingUser) {
+    if (existingUser.user_type === "seller") {
+      return {
+        success: false,
+        error: "An account with this email already exists.",
+      };
+    }
+
+    // 2. If they are a buyer, check if they are logged in to upgrade
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session || session.user.email !== email) {
+      return {
+        success: false,
+        error: "This email is already registered as a customer. Please login first, then come back here to upgrade your account to a Sewer.",
+      };
+    }
+
+    console.log("Upgrading existing buyer account to seller:", existingUser.id);
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ 
+        user_type: "seller",
+        first_name: firstName,
+        last_name: lastName
+      })
+      .eq("id", existingUser.id);
+
+    if (updateError) return { success: false, error: updateError.message };
+    
+    // Also update auth metadata
+    await supabase.auth.updateUser({
+      data: { role: "seller" }
+    });
+
+    revalidatePath("/", "layout");
+    return { success: true };
+  }
+
+  // 3. If new user, proceed with standard signup
   const data = {
-    email: formData.get("email") as string,
+    email: email,
     password: formData.get("password") as string,
     options: {
       data: {
         role: "seller",
         first_name: firstName,
         last_name: lastName,
-        email: formData.get("email") as string,
+        email: email,
         phone_number: formData.get("phone-number") as string,
         landline_number: formData.get("landline") as string,
         address_line: formData.get("customer-address") as string,
@@ -146,19 +214,6 @@ export async function signUpAsSewer(
       },
     },
   };
-
-  const { data: existingUser } = await supabase
-    .from("public.profiles")
-    .select("email")
-    .eq("email", data.email)
-    .single();
-
-  if (existingUser) {
-    return {
-      success: false,
-      error: "An account with this email already exists.",
-    };
-  }
 
   const { error } = await supabase.auth.signUp(data);
 
