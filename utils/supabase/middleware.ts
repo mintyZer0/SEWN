@@ -87,7 +87,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Seller App Access Control
-  if (user && isSellerApp && path !== "/login" && path !== "/signup") {
+  if (user && isSellerApp && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
     const { data: profile } = await supabase
       .from("users")
       .select("user_type")

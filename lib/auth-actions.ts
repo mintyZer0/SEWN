@@ -54,9 +54,8 @@ export async function loginSewer(formData: FormData) {
     .single();
 
   if (profile && profile.user_type === "buyer") {
-    // Force sign out if they are just a buyer trying to use the seller login
-    await supabase.auth.signOut();
-    redirect("/login?error=must_register_as_sewer");
+    // If they are just a buyer, send them to onboarding to complete their profile
+    redirect("/onboarding");
   }
 
   revalidatePath("/", "layout");
@@ -224,6 +223,39 @@ export async function signUpAsSewer(
 
   revalidatePath("/", "layout");
   return { success: true };
+}
+
+export async function upgradeToSewer(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const upgradeData = {
+    user_type: "seller",
+    first_name: formData.get("first-name") as string,
+    last_name: formData.get("last-name") as string,
+  };
+
+  const { error } = await supabase
+    .from("users")
+    .update(upgradeData)
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Upgrade error:", error.message);
+    redirect("/error");
+  }
+
+  // Update metadata so the session reflects the new role
+  await supabase.auth.updateUser({
+    data: { role: "seller" }
+  });
+
+  revalidatePath("/", "layout");
+  redirect("/");
 }
 
 async function getRedirectTo(role?: "customer" | "sewer") {

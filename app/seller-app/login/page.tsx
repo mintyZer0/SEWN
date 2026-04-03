@@ -1,10 +1,13 @@
+import { Suspense } from "react";
 import { SewerLoginForm } from "./components/sewer-login-form";
 
 export default function Page() {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-        <SewerLoginForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <SewerLoginForm />
+        </Suspense>
       </div>
     </div>
   );
