@@ -29,6 +29,27 @@ export async function login(formData: FormData) {
   redirect("/");
 }
 
+export async function loginSewer(formData: FormData) {
+  const supabase = await createClient();
+
+  const data = {
+    email: formData.get("email") as string,
+    password: formData.get("password") as string,
+  };
+
+  const { error } = await supabase.auth.signInWithPassword(data);
+
+  if (error) {
+    if (error.message === "Email not confirmed") {
+      redirect("/auth/sewer-login?error=email_not_confirmed");
+    }
+    redirect("/error");
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/sewer-center");
+}
+
 export async function signup(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
@@ -43,6 +64,7 @@ export async function signup(
     password: formData.get("password") as string,
     options: {
       data: {
+        role: "buyer",
         first_name: firstName,
         last_name: lastName,
         email: formData.get("email") as string,
@@ -107,7 +129,7 @@ export async function signUpAsSewer(
     password: formData.get("password") as string,
     options: {
       data: {
-        role: "sewer",
+        role: "seller",
         first_name: firstName,
         last_name: lastName,
         email: formData.get("email") as string,
@@ -149,24 +171,25 @@ export async function signUpAsSewer(
   return { success: true };
 }
 
-async function getRedirectTo() {
+async function getRedirectTo(role?: "customer" | "sewer") {
   // If NEXT_PUBLIC_SITE_URL is set, use it.
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (siteUrl) {
-    return `${siteUrl.replace(/\/$/, "")}/auth/callback`;
-  }
+  let base = siteUrl ? siteUrl.replace(/\/$/, "") : "";
 
-  // Otherwise, construct it dynamically from headers for environmental-agnosticism.
-  const headerList = await headers();
-  const host = headerList.get("host");
-  const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+  if (!base) {
+    // Otherwise, construct it dynamically from headers for environmental-agnosticism.
+    const headerList = await headers();
+    const host = headerList.get("host");
+    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") ? "http" : "https");
+    base = `${protocol}://${host}`;
+  }
   
-  return `${protocol}://${host}/auth/callback`;
+  return `${base}/auth/callback${role ? `?role=${role}` : ""}`;
 }
 
-export async function signInWithOAuth(provider: "google" | "facebook" | "twitter") {
+export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewer") {
   const supabase = await createClient();
-  const redirectTo = await getRedirectTo();
+  const redirectTo = await getRedirectTo(role);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -200,4 +223,16 @@ export async function signInWithFacebook() {
 
 export async function signInWithTwitter() {
   return signInWithOAuth("twitter");
+}
+
+export async function signInWithGoogleSewer() {
+  return signInWithOAuth("google", "sewer");
+}
+
+export async function signInWithFacebookSewer() {
+  return signInWithOAuth("facebook", "sewer");
+}
+
+export async function signInWithTwitterSewer() {
+  return signInWithOAuth("twitter", "sewer");
 }
