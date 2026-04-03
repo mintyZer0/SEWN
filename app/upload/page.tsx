@@ -1,6 +1,6 @@
 'use client'
 
-import { useImageUpload, ImageFile } from '@/hook/useImageUpload';
+import { useImageUpload, ImageFile } from '@/hooks/useImageUpload';
 import React, { useCallback, DragEvent } from 'react';
 
 const ImageUploadPage: React.FC = () => {

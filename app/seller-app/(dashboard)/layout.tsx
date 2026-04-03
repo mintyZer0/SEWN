@@ -16,7 +16,7 @@ export default async function SellerLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   const { data: userData, error } = await supabase
@@ -26,7 +26,7 @@ export default async function SellerLayout({
     .single();
 
   if (error || userData?.user_type !== "seller") {
-    redirect("/auth/signup-sewer");
+    redirect("/signup");
   }
 
   return (

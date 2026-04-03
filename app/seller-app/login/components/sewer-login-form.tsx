@@ -11,15 +11,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginSewer, signInWithGoogleSewer, signInWithFacebookSewer, signInWithTwitterSewer } from "@/lib/auth-actions";
-import SocialSignInButton from "../../login/components/social-sign-in-button";
-import { useState } from "react";
+import SocialSignInButton from "@/app/(auth)/auth/login/components/social-sign-in-button";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export function SewerLoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+  const error = searchParams.get("error");
+
   return (
     <div
       className={cn("flex flex-col gap-6 items-center", className)}
@@ -35,6 +39,15 @@ export function SewerLoginForm({
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-2xl text-center text-lg animate-in fade-in zoom-in duration-200">
+                  {error === "must_register_as_sewer" && "You are registered as a customer. Please sign up as a Sewer to access this dashboard."}
+                  {error === "email_not_confirmed" && "Please confirm your email address before logging in."}
+                  {error === "oauth_exchange_failed" && "Failed to connect with your social account. Please try again."}
+                  {error === "no_session" && "Session expired or not found. Please login again."}
+                  {!["must_register_as_sewer", "email_not_confirmed", "oauth_exchange_failed", "no_session"].includes(error) && "An unexpected error occurred. Please try again."}
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label className="text-2xl" htmlFor="email">
                   Email
@@ -88,23 +101,23 @@ export function SewerLoginForm({
                 <SocialSignInButton
                   imageSrc="/assets/login-page/gmail.png"
                   altText="Google Icon"
-                  onSignIn={signInWithGoogleSewer}
+                  onSignIn={() => signInWithGoogleSewer("login")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="Facebook Icon"
-                  onSignIn={signInWithFacebookSewer}
+                  onSignIn={() => signInWithFacebookSewer("login")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="X Icon"
-                  onSignIn={signInWithTwitterSewer}
+                  onSignIn={() => signInWithTwitterSewer("login")}
                 />
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="/auth/signup-sewer" className="underline underline-offset-4">
+              <a href="/signup" className="underline underline-offset-4">
                 Sign up as Sewer
               </a>
             </div>
