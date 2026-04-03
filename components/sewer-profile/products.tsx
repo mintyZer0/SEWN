@@ -1,8 +1,18 @@
 import ProductCard from "@/components/sections/shop/product-card";
-import { products as allProducts } from "@/data/products";
+import { createClient } from "@/utils/supabase/server";
 
-export default function Products() {
-  const products = allProducts.slice(0, 3);
+export default async function Products() {
+  const supabase = await createClient();
+  
+  const { data: products } = await supabase
+    .from("seller_products")
+    .select("*")
+    .eq("is_active", true)
+    .limit(3);
+
+  if (!products || products.length === 0) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center py-16 px-8">

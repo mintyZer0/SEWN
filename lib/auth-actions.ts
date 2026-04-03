@@ -47,7 +47,7 @@ export async function loginSewer(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/sewer-center");
+  redirect("/");
 }
 
 export async function signup(

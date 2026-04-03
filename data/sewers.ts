@@ -14,7 +14,7 @@
   email: string;
 }
 
- const sewersData: Sewe[] = [
+export const sewersData: Sewe[] = [
   {
     id: "1",
     name: "Maria Santos",

@@ -14,7 +14,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login?redirect=/sewer-center/chat");
+    redirect("/login?redirect=/chat");
   }
 
   const { data: profile } = await supabase

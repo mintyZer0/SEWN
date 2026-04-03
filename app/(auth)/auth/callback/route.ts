@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     if (!error && authData.user) {
       if (role === "sewer") {
         await supabase.from("users").update({ user_type: "seller" }).eq("id", authData.user.id);
-        return NextResponse.redirect(`${origin}/sewer-center`);
+        return NextResponse.redirect(`${origin}/`);
       } else {
         await supabase.from("users").update({ user_type: "buyer" }).eq("id", authData.user.id);
         return NextResponse.redirect(`${origin}${next}`);
