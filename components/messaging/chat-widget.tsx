@@ -24,6 +24,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
   const [view, setView] = useState<"list" | "chat">("list");
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isCheckingUser, setIsCheckingUser] = useState(true);
   const [username, setUsername] = useState(initialUsername);
   const supabase = createClient();
 
@@ -46,6 +47,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
           setUsername(user.email || "User");
         }
       }
+      setIsCheckingUser(false);
     };
 
     fetchUser();
@@ -56,7 +58,8 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
     }
   }, [supabase, threads, loading, selectedConversationId]);
 
-  if (pathname?.startsWith("/sewer-center")) return null;
+  if (pathname?.startsWith("/sewer-center") || pathname?.startsWith("/auth")) return null;
+  if (isCheckingUser || !currentUserId) return null;
 
   const handleSelectUser = (conversationId: string) => {
     setSelectedConversationId(conversationId);
