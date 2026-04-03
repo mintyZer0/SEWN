@@ -17,6 +17,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import SocialSignInButton from "@/app/(auth)/auth/login/components/social-sign-in-button";
+import { signInWithGoogleSewer, signInWithFacebookSewer, signInWithTwitterSewer } from "@/lib/auth-actions";
 
 const variants = {
   customer: {
@@ -194,6 +196,26 @@ export function SignupForm({
             >
               Register
             </Button>
+
+            {variant === "sewer" && (
+              <div className="flex flex-row justify-around mt-4">
+                <SocialSignInButton
+                  imageSrc="/assets/login-page/gmail.png"
+                  altText="Google Icon"
+                  onSignIn={() => signInWithGoogleSewer("signup")}
+                />
+                <SocialSignInButton
+                  imageSrc="/assets/login-page/facebook.png"
+                  altText="Facebook Icon"
+                  onSignIn={() => signInWithFacebookSewer("signup")}
+                />
+                <SocialSignInButton
+                  imageSrc="/assets/login-page/facebook.png"
+                  altText="X Icon"
+                  onSignIn={() => signInWithTwitterSewer("signup")}
+                />
+              </div>
+            )}
           </form>
 
           <div className="flex mt-4 text-center text-sm justify-between ">

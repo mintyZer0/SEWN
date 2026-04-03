@@ -26,7 +26,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Domain Rewrite Logic
-  if (isSellerApp && !path.startsWith("/auth") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+  if (isSellerApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
     const rewriteUrl = new URL(`/seller-app${path === "/" ? "" : path}`, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
@@ -70,7 +70,7 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const publicRoutes = ["/auth", "/error", "/login", "/signup"];
+  const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
 
   // Redirect unauthenticated users
@@ -87,7 +87,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Seller App Access Control
-  if (user && isSellerApp && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
+  // IMPORTANT: Do not block /auth or public paths, as they handle the login/signup/data logic itself
+  if (user && isSellerApp && !isPublicRoute && !path.startsWith("/auth") && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
     const { data: profile } = await supabase
       .from("users")
       .select("user_type")
@@ -97,7 +98,10 @@ export async function updateSession(request: NextRequest) {
     if (!profile || profile.user_type !== "seller") {
       // If they are a buyer trying to access seller features, send them to the seller login page
       // so they can upgrade/sign in as a sewer
-      const sellerLoginUrl = new URL("/login", request.url);
+      const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
+      const sellerLoginUrl = new URL("/login", `${protocol}://${host}`);
+      sellerLoginUrl.searchParams.set("error", "must_register_as_sewer");
+      
       console.log("Redirecting non-seller to seller login:", sellerLoginUrl.toString());
       return NextResponse.redirect(sellerLoginUrl);
     }

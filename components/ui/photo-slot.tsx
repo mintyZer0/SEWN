@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils";
 
 interface PhotoSlotProps {
   size?: "sm" | "lg";
+  name?: string;
   className?: string;
   onChange?: (file: File) => void;
 }
 
-export const PhotoSlot = ({ size = "sm", className, onChange }: PhotoSlotProps) => {
+export const PhotoSlot = ({ size = "sm", name, className, onChange }: PhotoSlotProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -42,6 +43,7 @@ export const PhotoSlot = ({ size = "sm", className, onChange }: PhotoSlotProps) 
       <input
         type="file"
         ref={fileInputRef}
+        name={name}
         className="hidden"
         accept="image/*"
         onChange={handleFileChange}

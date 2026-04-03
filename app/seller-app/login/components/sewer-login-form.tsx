@@ -39,9 +39,13 @@ export function SewerLoginForm({
         <CardContent>
           <form>
             <div className="flex flex-col gap-6">
-              {error === "must_register_as_sewer" && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative text-center">
-                  You are registered as a customer. Please sign up as a Sewer to access this dashboard.
+              {error && (
+                <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-2xl text-center text-lg animate-in fade-in zoom-in duration-200">
+                  {error === "must_register_as_sewer" && "You are registered as a customer. Please sign up as a Sewer to access this dashboard."}
+                  {error === "email_not_confirmed" && "Please confirm your email address before logging in."}
+                  {error === "oauth_exchange_failed" && "Failed to connect with your social account. Please try again."}
+                  {error === "no_session" && "Session expired or not found. Please login again."}
+                  {!["must_register_as_sewer", "email_not_confirmed", "oauth_exchange_failed", "no_session"].includes(error) && "An unexpected error occurred. Please try again."}
                 </div>
               )}
               <div className="grid gap-2">
@@ -97,17 +101,17 @@ export function SewerLoginForm({
                 <SocialSignInButton
                   imageSrc="/assets/login-page/gmail.png"
                   altText="Google Icon"
-                  onSignIn={signInWithGoogleSewer}
+                  onSignIn={() => signInWithGoogleSewer("login")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="Facebook Icon"
-                  onSignIn={signInWithFacebookSewer}
+                  onSignIn={() => signInWithFacebookSewer("login")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="X Icon"
-                  onSignIn={signInWithTwitterSewer}
+                  onSignIn={() => signInWithTwitterSewer("login")}
                 />
               </div>
             </div>

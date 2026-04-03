@@ -54,8 +54,9 @@ export async function loginSewer(formData: FormData) {
     .single();
 
   if (profile && profile.user_type === "buyer") {
-    // If they are just a buyer, send them to onboarding to complete their profile
-    redirect("/onboarding");
+    // Force sign out if they are just a buyer trying to use the seller login
+    await supabase.auth.signOut();
+    redirect("/login?error=must_register_as_sewer");
   }
 
   revalidatePath("/", "layout");
@@ -233,32 +234,85 @@ export async function upgradeToSewer(formData: FormData): Promise<void> {
     redirect("/login");
   }
 
-  const upgradeData = {
-    user_type: "seller",
-    first_name: formData.get("first-name") as string,
-    last_name: formData.get("last-name") as string,
-  };
+  // 1. Capture All Form Data
+  const firstName = formData.get("first-name") as string;
+  const lastName = formData.get("last-name") as string;
+  const middleName = formData.get("middle-name") as string;
+  const suffix = formData.get("suffix") as string;
+  const shopName = formData.get("shop-name") as string;
+  const businessEmail = formData.get("business-email") as string;
+  const businessPhone = formData.get("business-phone") as string;
+  const location = formData.get("location") as string;
+  const zipCode = formData.get("zip-code") as string;
+  const registeredAddress = formData.get("address") as string;
+  const sellerType = formData.get("seller-type") as string;
+  const tin = formData.get("tin") as string;
+  const vatStatus = formData.get("vat-status") as string;
+  const swornDecl = formData.get("sworn-decl") as string;
 
-  const { error } = await supabase
+  // File Captures (Future: Upload to Supabase Storage)
+  const businessDoc = formData.get("business-doc") as File;
+  const govId = formData.get("gov-id") as File;
+  const birCert = formData.get("bir-cert") as File;
+
+  console.log("Upgrading user with data:", { 
+    id: user.id, 
+    shopName, 
+    sellerType, 
+    tin, 
+    location,
+    hasBusinessDoc: !!businessDoc?.size,
+    hasGovId: !!govId?.size,
+    hasBirCert: !!birCert?.size
+  });
+
+  // 2. Update Core User Info
+  const { error: userError } = await supabase
     .from("users")
-    .update(upgradeData)
+    .update({ 
+      user_type: "seller",
+      first_name: firstName,
+      last_name: lastName
+      // Future: add middle_name, suffix to schema if needed
+    })
     .eq("id", user.id);
 
-  if (error) {
-    console.error("Upgrade error:", error.message);
+  if (userError) {
+    console.error("User upgrade error:", userError.message);
     redirect("/error");
   }
 
-  // Update metadata so the session reflects the new role
+  // 3. Add/Update Registered Address
+  // Format location: "Region / Province / City / Barangay"
+  const parts = location.split(" / ").map(s => s.trim());
+  const [region, province, city, barangay] = parts;
+
+  await supabase.from("user_addresses").upsert({
+    user_id: user.id,
+    full_address: registeredAddress,
+    city: city || "",
+    province: province || region || "",
+    barangay: barangay || "",
+    zip_code: parseInt(zipCode) || 0,
+    is_primary: true
+  }, { onConflict: "user_id, is_primary" });
+
+  // 4. Update Auth Metadata
   await supabase.auth.updateUser({
-    data: { role: "seller" }
+    data: { 
+      role: "seller",
+      shop_name: shopName,
+      seller_type: sellerType,
+      tin: tin,
+      vat_status: vatStatus
+    }
   });
 
   revalidatePath("/", "layout");
   redirect("/");
 }
 
-async function getRedirectTo(role?: "customer" | "sewer") {
+async function getRedirectTo(role?: "customer" | "sewer", intent?: "login" | "signup") {
   // Otherwise, construct it dynamically from headers for environmental-agnosticism.
   const headerList = await headers();
   const host = headerList.get("host");
@@ -267,12 +321,18 @@ async function getRedirectTo(role?: "customer" | "sewer") {
   // If no host is found, fallback to sewn.local
   const base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
   
-  return `${base}/auth/callback${role ? `?role=${role}` : ""}`;
+  let url = `${base}/auth/callback`;
+  const params = new URLSearchParams();
+  if (role) params.set("role", role);
+  if (intent) params.set("intent", intent);
+  
+  const queryString = params.toString();
+  return queryString ? `${url}?${queryString}` : url;
 }
 
-export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewer") {
+export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewer", intent?: "login" | "signup") {
   const supabase = await createClient();
-  const redirectTo = await getRedirectTo(role);
+  const redirectTo = await getRedirectTo(role, intent);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -308,14 +368,14 @@ export async function signInWithTwitter() {
   return signInWithOAuth("twitter");
 }
 
-export async function signInWithGoogleSewer() {
-  return signInWithOAuth("google", "sewer");
+export async function signInWithGoogleSewer(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("google", "sewer", intent);
 }
 
-export async function signInWithFacebookSewer() {
-  return signInWithOAuth("facebook", "sewer");
+export async function signInWithFacebookSewer(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("facebook", "sewer", intent);
 }
 
-export async function signInWithTwitterSewer() {
-  return signInWithOAuth("twitter", "sewer");
+export async function signInWithTwitterSewer(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("twitter", "sewer", intent);
 }

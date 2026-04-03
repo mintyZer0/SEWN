@@ -31,6 +31,16 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
   const { threads, loading } = useChatThreads();
 
   useEffect(() => {
+    // Hide on seller subdomain or auth pages
+    const isSellerDomain = typeof window !== "undefined" && window.location.hostname.startsWith("seller.");
+    const isAuthPage = pathname?.startsWith("/auth") || pathname === "/login" || pathname === "/signup";
+    
+    if (isSellerDomain || isAuthPage) {
+      setCurrentUserId(null); // Force hidden
+      setIsCheckingUser(false); // Resolve loading state
+      return;
+    }
+
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -56,9 +66,8 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
     if (!selectedConversationId && !loading && threads.length > 0) {
       setSelectedConversationId(threads[0].id);
     }
-  }, [supabase, threads, loading, selectedConversationId]);
+  }, [supabase, threads, loading, selectedConversationId, pathname]);
 
-  if (pathname?.startsWith("/sewer-center") || pathname?.startsWith("/auth")) return null;
   if (isCheckingUser || !currentUserId) return null;
 
   const handleSelectUser = (conversationId: string) => {
