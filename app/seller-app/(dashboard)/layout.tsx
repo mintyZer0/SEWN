@@ -16,7 +16,7 @@ export default async function SellerLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   const { data: userData, error } = await supabase
