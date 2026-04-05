@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 
 const sidebarItems = [
-  { name: "Profile", href: "/sewer-center" },
-  { name: "Products", href: "/sewer-center/products" },
-  { name: "Notifications", href: "/sewer-center/notifications" },
-  { name: "Chat", href: "/sewer-center/chat" },
+  { name: "Profile", href: "/" },
+  { name: "Products", href: "/products" },
+  { name: "Notifications", href: "/notifications" },
+  { name: "Chat", href: "/chat" },
 ];
 
 export default function SewerSidebar() {

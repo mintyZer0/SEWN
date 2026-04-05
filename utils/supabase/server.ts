@@ -1,9 +1,11 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextRequest } from "next/server";
 
 export async function createClient() {
   const cookieStore = await cookies();
+  const host = (await headers()).get("host") || "";
+  const domain = host.includes("sewn.local") ? ".sewn.local" : host.includes("localhost") ? "localhost" : undefined;
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,12 +17,22 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options });
+            cookieStore.set({ 
+              name, 
+              value, 
+              ...options,
+              domain: name.startsWith("sb-") ? domain : options.domain 
+            });
           } catch (error) {}
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: "", ...options });
+            cookieStore.set({ 
+              name, 
+              value: "", 
+              ...options,
+              domain: name.startsWith("sb-") ? domain : options.domain 
+            });
           } catch (error) {}
         },
       },

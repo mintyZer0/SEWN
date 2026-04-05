@@ -3,7 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-interface CustomCheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CustomCheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   label?: string;
   className?: string;
   containerClassName?: string;
