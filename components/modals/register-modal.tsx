@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { PhotoSlot } from "@/components/ui/photo-slot";
+import { LocationPicker } from "@/components/ui/location-picker";
 
 const variants = {
   customer: {
@@ -50,8 +51,7 @@ export function RegisterModal({
   // Step 1
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [province, setProvince] = useState("Tarlac");
-  const [city, setCity] = useState("Tarlac City");
+  const [location, setLocation] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [landline, setLandline] = useState("");
@@ -79,7 +79,7 @@ export function RegisterModal({
 
       <div
         className={cn(
-          "relative z-10 w-full max-w-3xl rounded-2xl bg-white shadow-2xl text-4xl p-8 px-12 my-auto",
+          "relative z-10 w-full max-w-3xl rounded-2xl bg-white shadow-2xl p-8 px-12 my-auto",
           textColor,
         )}
       >
@@ -118,6 +118,7 @@ export function RegisterModal({
               }
               setSubmitting(true);
               const formData = new FormData(e.currentTarget);
+              formData.set("location", location);
               const result = await signup(formData);
               setSubmitting(false);
               if (result.success) {
@@ -144,23 +145,18 @@ export function RegisterModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-1">
-                <Label htmlFor="province" className="text-sm">Province</Label>
-                <select id="province" name="province" className={cn("h-10 rounded-2xl border px-3 text-sm text-black", borderStyle)} value={province} onChange={(e) => setProvince(e.target.value)}>
-                  <option value="Tarlac">Tarlac</option>
-                </select>
-              </div>
-              <div className="grid gap-1">
-                <Label htmlFor="city" className="text-sm">City/Municipality</Label>
-                <select id="city" name="city" className={cn("h-10 rounded-2xl border px-3 text-sm text-black", borderStyle)} value={city} onChange={(e) => setCity(e.target.value)}>
-                  <option value="Tarlac City">Tarlac City</option>
-                </select>
-              </div>
+            <div className="grid gap-1">
+              <Label className="text-sm">Province / City / Barangay</Label>
+              <LocationPicker 
+                name="location" 
+                placeholder="Select Location" 
+                onChange={(val) => setLocation(val)}
+                required
+              />
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="customer-address" className="text-sm">Customer Address</Label>
+              <Label htmlFor="customer-address" className="text-sm">Detail Address</Label>
               <Input id="customer-address" name="customer-address" placeholder="Sitio Diyan Lang, Sa tabi tabi, Tarlac City, Tarlac" className={cn("rounded-2xl text-black", borderStyle)} value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} />
             </div>
 
@@ -197,8 +193,7 @@ export function RegisterModal({
               formData.set("password", capturedData.password);
               formData.set("first-name", firstName);
               formData.set("last-name", lastName);
-              formData.set("province", province);
-              formData.set("city", city);
+              formData.set("location", location);
               formData.set("customer-address", customerAddress);
               formData.set("phone-number", phoneNumber);
               formData.set("landline", landline);
