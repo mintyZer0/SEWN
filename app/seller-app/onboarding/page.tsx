@@ -23,6 +23,7 @@ const STEPS = [
   { id: 1, name: "Shop Information" },
   { id: 2, name: "Business Information" },
   { id: 3, name: "Tax Information" },
+  { id: 4, name: "Sewer Profile & Questionnaire" },
 ];
 
 export default function OnboardingPage() {
@@ -111,11 +112,18 @@ export default function OnboardingPage() {
 
           <CardContent className="p-8 md:p-12">
             <form action={async (formData) => {
-              if (step < 3) {
+              if (step < 4) {
                 setStep(step + 1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
-                await upgradeToSewer(formData);
+                const result = await upgradeToSewer(formData);
+                if (result.success) {
+                  // Force a full hard reload to ensure middleware catches the updated session metadata
+                  window.location.href = "/";
+                } else {
+                  console.error(result.error);
+                  alert(result.error || "An error occurred during upgrade.");
+                }
               }
             }}>
               {/* Step 1: Shop Information */}
@@ -282,15 +290,248 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
+
+              {/* Step 4: Sewer Profile & Questionnaire */}
+              <div className={cn("space-y-8 animate-in fade-in slide-in-from-right-4 duration-300", step !== 4 && "hidden")}>
+                <div className="space-y-4">
+                  <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Demographics & Background</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="age" className="text-sm text-third/70">Age</Label>
+                      <Input name="age" id="age" type="number" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="sex" className="text-sm text-third/70">Sex</Label>
+                      <select name="sex" id="sex" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="educational-attainment" className="text-sm text-third/70">Educational Attainment</Label>
+                    <select name="educational-attainment" id="educational-attainment" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select Educational Attainment</option>
+                      <option value="Elementary Level">Elementary Level</option>
+                      <option value="Elementary Graduate">Elementary Graduate</option>
+                      <option value="High School Level">High School Level</option>
+                      <option value="High School Graduate">High School Graduate</option>
+                      <option value="College Level">College Level</option>
+                      <option value="College Graduate">College Graduate</option>
+                      <option value="Vocational or Trade Course">Vocational or Trade Course</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="monthly-income" className="text-sm text-third/70">Monthly income as Sewer (Php)</Label>
+                    <select name="monthly-income" id="monthly-income" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select Monthly Income</option>
+                      <option value="5,000 – below">5,000 – below</option>
+                      <option value="5000 – 10,000">5000 – 10,000</option>
+                      <option value="10,001 – 15,000">10,001 – 15,000</option>
+                      <option value="15,000 – 20,000">15,000 – 20,000</option>
+                      <option value="25,000 – 30,000">25,000 – 30,000</option>
+                      <option value="30,000 – above">30,000 – above</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Documents</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <Label className="text-sm text-third/70 block">Identification Card</Label>
+                      <div className="h-48">
+                        <PhotoSlot name="id-card-upload" size="lg" className="h-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <Label className="text-sm text-third/70 block">Sewer’s Profile (Optional)</Label>
+                      <div className="h-48">
+                        <PhotoSlot name="sewer-profile-upload" size="lg" className="h-full" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Sewing Questionnaire</h3>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="why-sew" className="text-sm text-third/70">Why do you continue to sew today?</Label>
+                    <select name="why-sew" id="why-sew" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select reason</option>
+                      <option value="Source of Income">Source of Income</option>
+                      <option value="Community Tradition">Community Tradition</option>
+                      <option value="Continue Family’s Legacy">Continue Family’s Legacy</option>
+                      <option value="Part-Time Job">Part-Time Job</option>
+                      <option value="Provide for the Needs of the Family">Provide for the Needs of the Family</option>
+                      <option value="No Alternative Options for Employment">No Alternative Options for Employment</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="like-sewing" className="text-sm text-third/70">What do you like about sewing?</Label>
+                    <select name="like-sewing" id="like-sewing" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select reason</option>
+                      <option value="Gives Relaxation / Reduce Stress">Gives Relaxation / Reduce Stress</option>
+                      <option value="Generates Income">Generates Income</option>
+                      <option value="Satisfaction">Satisfaction</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="give-pride" className="text-sm text-third/70">Does it give you pride?</Label>
+                      <select name="give-pride" id="give-pride" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="express-yourself" className="text-sm text-third/70">Were you able to express yourself through sewing?</Label>
+                      <select name="express-yourself" id="express-yourself" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="goals" className="text-sm text-third/70">What are your goals as a sewer for other people?</Label>
+                    <select name="goals" id="goals" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select Goal</option>
+                      <option value="Share my Knowledge">Share my Knowledge</option>
+                      <option value="Help in Generating Income">Help in Generating Income</option>
+                      <option value="Recognized our Tradition">Recognized our Tradition</option>
+                      <option value="Promote the Business">Promote the Business</option>
+                      <option value="Build the Community">Build the Community</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Sewing Community</h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="learn-craft" className="text-sm text-third/70">How did you learn the craft?</Label>
+                      <Input name="learn-craft" id="learn-craft" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="who-taught" className="text-sm text-third/70">Who taught you? (Indicate the relationship)</Label>
+                      <Input name="who-taught" id="who-taught" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="motivations" className="text-sm text-third/70">What are your motivations for pursuing sewing as a livelihood?</Label>
+                    <select name="motivations" id="motivations" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select Motivation</option>
+                      <option value="To provide for the needs of the family">To provide for the needs of the family</option>
+                      <option value="Acquire comprehensive knowledge in sewing">Acquire comprehensive knowledge in sewing</option>
+                      <option value="Skills Enhancement">Skills Enhancement</option>
+                      <option value="Satisfaction of being able to produce a woven fabric">Satisfaction of being able to produce a woven fabric</option>
+                      <option value="For customer’s satisfaction">For customer’s satisfaction</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="only-livelihood" className="text-sm text-third/70">Is it the only livelihood available in your area?</Label>
+                    <Input name="only-livelihood" id="only-livelihood" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="own-machine" className="text-sm text-third/70">Do you own a Sewing Machine?</Label>
+                      <select name="own-machine" id="own-machine" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="machine-owner" className="text-sm text-third/70">Who owned the Machine?</Label>
+                      <Input name="machine-owner" id="machine-owner" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Design Process</h3>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="traditional-products" className="text-sm text-third/70">Are the sewn products you produced traditional products of your community?</Label>
+                    <select name="traditional-products" id="traditional-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <option value="">Select Yes/No</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="products-used-for" className="text-sm text-third/70">What products are the sewn usually used for?</Label>
+                      <select name="products-used-for" id="products-used-for" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Product Type</option>
+                        <option value="Apparel">Apparel</option>
+                        <option value="Masks">Masks</option>
+                        <option value="Bags">Bags</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="specific-products" className="text-sm text-third/70">Specific products sewed are used for if applicable?</Label>
+                      <select name="specific-products" id="specific-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700">
+                        <option value="">Select Specific Product</option>
+                        <option value="Shawls">Shawls</option>
+                        <option value="Uniforms">Uniforms</option>
+                        <option value="Barong">Barong</option>
+                        <option value="Dress">Dress</option>
+                        <option value="Table Runners">Table Runners</option>
+                        <option value="Gowns">Gowns</option>
+                        <option value="Blankets">Blankets</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="design-products" className="text-sm text-third/70">Do you design the garment products?</Label>
+                      <select name="design-products" id="design-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-third/10">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" className="mt-1 w-5 h-5 accent-third rounded border-third/20" required={step === 4} />
+                    <span className="text-gray-600 text-xs group-hover:text-third transition-colors">
+                      I agree to the <span className="text-blue-500 underline">Terms and Conditions</span> and <span className="text-blue-500 underline">Data Privacy Policy</span>. I certify that the information provided is true and correct.
+                    </span>
+                  </label>
+                </div>
+              </div>
+
               <div className="flex justify-end mt-12">
+
                 <ProfileButton
                   type="submit"
                   variant="orange"
                   size="xl"
                   className="px-12 shadow-xl hover:scale-[1.02]"
                 >
-                  {step === 3 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
-                  {step < 3 && <ChevronRight size={28} className="ml-2" />}
+                  {step === 4 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
+                  {step < 4 && <ChevronRight size={28} className="ml-2" />}
                 </ProfileButton>
               </div>
             </form>

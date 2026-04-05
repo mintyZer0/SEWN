@@ -89,13 +89,21 @@ export async function updateSession(request: NextRequest) {
   // Seller App Access Control
   // IMPORTANT: Do not block /auth or public paths, as they handle the login/signup/data logic itself
   if (user && isSellerApp && !isPublicRoute && !path.startsWith("/auth") && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
-    const { data: profile } = await supabase
-      .from("users")
-      .select("user_type")
-      .eq("id", user.id)
-      .single();
+    
+    const isSellerMetadata = user.user_metadata?.role === "seller" || user.user_metadata?.user_type === "seller";
+    
+    let isSeller = isSellerMetadata;
 
-    if (!profile || profile.user_type !== "seller") {
+    if (!isSeller) {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("user_type")
+        .eq("id", user.id)
+        .single();
+      isSeller = profile?.user_type === "seller";
+    }
+
+    if (!isSeller) {
       // If they are a buyer trying to access seller features, send them to the seller login page
       // so they can upgrade/sign in as a sewer
       const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
