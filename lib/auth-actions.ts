@@ -308,6 +308,36 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     }
   });
 
+  // 5. Insert into sewer_profiles
+  const ageRaw = formData.get("age") as string;
+  const age = ageRaw ? parseInt(ageRaw) : null;
+
+  await supabase.from("sewer_profiles").insert({
+    user_id: user.id,
+    tax_id: formData.get("tax-id") as string,
+    dti_sec_number: formData.get("dti-sec-number") as string,
+    social_link: formData.get("social-link") as string,
+    age: age,
+    sex: formData.get("sex") as string,
+    educational_attainment: formData.get("educational-attainment") as string,
+    monthly_income: formData.get("monthly-income") as string,
+    reason_for_sewing: formData.get("why-sew") as string,
+    favorite_aspect: formData.get("like-sewing") as string,
+    gives_pride: formData.get("give-pride") as string,
+    expresses_self: formData.get("express-yourself") as string,
+    community_goals: formData.get("goals") as string,
+    learn_method: formData.get("learn-craft") as string,
+    teacher_relationship: formData.get("who-taught") as string,
+    motivations: formData.get("motivations") as string,
+    is_only_livelihood: formData.get("only-livelihood") as string,
+    owns_machine: formData.get("own-machine") as string,
+    machine_owner: formData.get("machine-owner") as string,
+    makes_traditional_products: formData.get("traditional-products") as string,
+    common_products_used_for: formData.get("products-used-for") as string,
+    specific_products: formData.get("specific-products") as string,
+    designs_garments: formData.get("design-products") as string,
+  });
+
   revalidatePath("/", "layout");
   return { success: true };
 }
