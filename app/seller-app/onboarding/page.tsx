@@ -184,6 +184,22 @@ export default function OnboardingPage() {
                   <Label htmlFor="address" className="text-lg text-third font-semibold">Registered Address</Label>
                   <textarea name="address" id="address" rows={3} className="w-full rounded-xl border border-third/20 focus:border-third bg-white p-4 text-gray-700 text-sm" placeholder="Registered Address as written on your BIR Certificate of Registration" required={step === 1} />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="tax-id" className="text-lg text-third font-semibold">Tax Identification Number (TIN)</Label>
+                    <Input name="tax-id" id="tax-id" placeholder="000-000-000-000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dti-sec-number" className="text-lg text-third font-semibold">DTI / SEC Registration Number</Label>
+                    <Input name="dti-sec-number" id="dti-sec-number" placeholder="00000000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="social-link" className="text-lg text-third font-semibold">Link to Socials</Label>
+                  <Input name="social-link" id="social-link" type="url" placeholder="https://facebook.com/yourpage" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" />
+                </div>
               </div>
 
               

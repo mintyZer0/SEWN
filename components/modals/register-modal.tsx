@@ -66,6 +66,9 @@ export function RegisterModal({
   const [givePride, setGivePride] = useState("");
   const [expressYourself, setExpressYourself] = useState("");
   const [goals, setGoals] = useState("");
+  const [taxId, setTaxId] = useState("");
+  const [socialLink, setSocialLink] = useState("");
+  const [dtiSecNumber, setDtiSecNumber] = useState("");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 overflow-y-auto pt-20 pb-20">
@@ -212,6 +215,21 @@ export function RegisterModal({
             }}
           >
             <div className="space-y-4">
+              <div className="grid gap-1">
+                <Label htmlFor="tax-id" className="text-sm">Tax Identification Number (TIN)</Label>
+                <Input id="tax-id" name="tax-id" placeholder="000-000-000-000" className={cn("rounded-2xl text-black", borderStyle)} value={taxId} onChange={(e) => setTaxId(e.target.value)} required />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="social-link" className="text-sm">Link to Socials</Label>
+                <Input id="social-link" name="social-link" type="url" placeholder="https://facebook.com/yourpage" className={cn("rounded-2xl text-black", borderStyle)} value={socialLink} onChange={(e) => setSocialLink(e.target.value)} />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="dti-sec-number" className="text-sm">DTI / SEC Registration Number</Label>
+                <Input id="dti-sec-number" name="dti-sec-number" placeholder="00000000" className={cn("rounded-2xl text-black", borderStyle)} value={dtiSecNumber} onChange={(e) => setDtiSecNumber(e.target.value)} required />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-1">
                   <Label htmlFor="age" className="text-sm">Age</Label>
