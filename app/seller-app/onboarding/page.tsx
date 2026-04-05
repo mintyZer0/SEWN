@@ -21,9 +21,7 @@ import { LocationPicker } from "@/components/ui/location-picker";
 
 const STEPS = [
   { id: 1, name: "Shop Information" },
-  { id: 2, name: "Business Information" },
-  { id: 3, name: "Tax Information" },
-  { id: 4, name: "Sewer Profile & Questionnaire" },
+  { id: 2, name: "Sewer Profile & Questionnaire" },
 ];
 
 export default function OnboardingPage() {
@@ -95,8 +93,7 @@ export default function OnboardingPage() {
                 </CardTitle>
                 <CardDescription className="text-xl text-third/70">
                   {step === 1 && "Basic details about your tailoring shop"}
-                  {step === 2 && "Legal and entity verification"}
-                  {step === 3 && "Tax and payment information"}
+                  {step === 2 && "Demographics and Sewing Questionnaire"}
                 </CardDescription>
               </div>
               {step > 1 && (
@@ -112,7 +109,7 @@ export default function OnboardingPage() {
 
           <CardContent className="p-8 md:p-12">
             <form action={async (formData) => {
-              if (step < 4) {
+              if (step < 2) {
                 setStep(step + 1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
@@ -189,121 +186,22 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Step 2: Business Information */}
+              
+
+
+              {/* Step 2: Sewer Profile & Questionnaire */}
               <div className={cn("space-y-8 animate-in fade-in slide-in-from-right-4 duration-300", step !== 2 && "hidden")}>
-                <div className="space-y-4">
-                  <Label className="text-lg text-third font-semibold block">Seller Type</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {["Sole Proprietorship", "Corporation", "One Person Corp"].map((type) => (
-                      <label key={type} className="flex items-center gap-3 p-4 rounded-xl border border-third/20 cursor-pointer hover:bg-third/5 transition-colors">
-                        <input type="radio" name="seller-type" value={type} className="w-5 h-5 accent-third" defaultChecked={type === "Sole Proprietorship"} />
-                        <span className="text-gray-700 text-sm">{type}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <Label className="text-lg text-third font-semibold block">Primary Business Document</Label>
-                    <div className="flex flex-col gap-2">
-                      <select name="doc-type" className="h-12 rounded-xl border border-third/20 bg-white px-3 text-sm mb-2">
-                        <option>DTI Certificate</option>
-                        <option>SEC Registration</option>
-                        <option>Mayor's Permit</option>
-                      </select>
-                      <div className="h-48">
-                        <PhotoSlot name="business-doc" size="lg" className="h-full" />
-                      </div>
-                      <p className="text-xs text-third/60">Upload a clear photo of your business registration.</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label className="text-lg text-third font-semibold block">Government Issued ID</Label>
-                    <div className="flex flex-col gap-2">
-                      <select name="id-type" className="h-12 rounded-xl border border-third/20 bg-white px-3 text-sm mb-2">
-                        <option>UMID</option>
-                        <option>Driver's License</option>
-                        <option>Philippine Passport</option>
-                        <option>PhilSys ID</option>
-                      </select>
-                      <div className="h-48">
-                        <PhotoSlot name="gov-id" size="lg" className="h-full" />
-                      </div>
-                      <p className="text-xs text-third/60">Upload a clear photo of your valid ID (Front).</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Step 3: Tax Information */}
-              <div className={cn("space-y-8 animate-in fade-in slide-in-from-right-4 duration-300", step !== 3 && "hidden")}>
-                <div className="space-y-2">
-                  <Label htmlFor="tin" className="text-lg text-third font-semibold">Taxpayer Identification Number (TIN)</Label>
-                  <Input name="tin" id="tin" placeholder="000-000-000-000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 3} />
-                  <p className="text-xs text-third/50 italic">Your 9-digit TIN and 3 to 5 digit branch code. Please use "000" as your branch code if you don't have one.</p>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-lg text-third font-semibold block">Value Added Tax Registration Status</Label>
-                  <div className="flex gap-6">
-                    {["VAT Registered", "Non-VAT Registered"].map((status) => (
-                      <label key={status} className="flex items-center gap-3 cursor-pointer">
-                        <input type="radio" name="vat-status" value={status} className="w-5 h-5 accent-third" defaultChecked={status === "Non-VAT Registered"} />
-                        <span className="text-gray-700 text-sm">{status}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-lg text-third font-semibold block">BIR Certificate of Registration</Label>
-                  <div className="h-64 max-w-md">
-                    <PhotoSlot name="bir-cert" size="lg" className="h-full" />
-                  </div>
-                  <p className="text-xs text-third/60 italic">Please upload your BIR Form 2303.</p>
-                </div>
-
-                <div className="space-y-4">
-                  <Label className="text-lg text-third font-semibold block">Submit Sworn Declaration?</Label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="radio" name="sworn-decl" value="yes" className="w-5 h-5 accent-third" />
-                      <span className="text-gray-700 text-sm">Yes</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input type="radio" name="sworn-decl" value="no" className="w-5 h-5 accent-third" defaultChecked />
-                      <span className="text-gray-700 text-sm">No</span>
-                    </label>
-                  </div>
-                  <p className="text-xs text-third/50 italic">Submission of Sworn Declaration is required to be exempted from withholding tax if your total annual gross remittance is less than or equal to ₱500,000.00.</p>
-                </div>
-
-                <div className="pt-6 border-t border-third/10">
-                  <label className="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" className="mt-1 w-5 h-5 accent-third rounded border-third/20" required={step === 3} />
-                    <span className="text-gray-600 text-xs group-hover:text-third transition-colors">
-                      I agree to the <span className="text-blue-500 underline">Terms and Conditions</span> and <span className="text-blue-500 underline">Data Privacy Policy</span>. I certify that the information provided is true and correct.
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-
-              {/* Step 4: Sewer Profile & Questionnaire */}
-              <div className={cn("space-y-8 animate-in fade-in slide-in-from-right-4 duration-300", step !== 4 && "hidden")}>
                 <div className="space-y-4">
                   <h3 className="text-xl text-third font-semibold border-b border-third/10 pb-2">Demographics & Background</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="age" className="text-sm text-third/70">Age</Label>
-                      <Input name="age" id="age" type="number" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                      <Input name="age" id="age" type="number" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="sex" className="text-sm text-third/70">Sex</Label>
-                      <select name="sex" id="sex" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="sex" id="sex" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Sex</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
@@ -313,7 +211,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="educational-attainment" className="text-sm text-third/70">Educational Attainment</Label>
-                    <select name="educational-attainment" id="educational-attainment" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="educational-attainment" id="educational-attainment" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select Educational Attainment</option>
                       <option value="Elementary Level">Elementary Level</option>
                       <option value="Elementary Graduate">Elementary Graduate</option>
@@ -327,7 +225,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="monthly-income" className="text-sm text-third/70">Monthly income as Sewer (Php)</Label>
-                    <select name="monthly-income" id="monthly-income" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="monthly-income" id="monthly-income" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select Monthly Income</option>
                       <option value="5,000 – below">5,000 – below</option>
                       <option value="5000 – 10,000">5000 – 10,000</option>
@@ -363,7 +261,7 @@ export default function OnboardingPage() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="why-sew" className="text-sm text-third/70">Why do you continue to sew today?</Label>
-                    <select name="why-sew" id="why-sew" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="why-sew" id="why-sew" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select reason</option>
                       <option value="Source of Income">Source of Income</option>
                       <option value="Community Tradition">Community Tradition</option>
@@ -376,7 +274,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="like-sewing" className="text-sm text-third/70">What do you like about sewing?</Label>
-                    <select name="like-sewing" id="like-sewing" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="like-sewing" id="like-sewing" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select reason</option>
                       <option value="Gives Relaxation / Reduce Stress">Gives Relaxation / Reduce Stress</option>
                       <option value="Generates Income">Generates Income</option>
@@ -388,7 +286,7 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="give-pride" className="text-sm text-third/70">Does it give you pride?</Label>
-                      <select name="give-pride" id="give-pride" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="give-pride" id="give-pride" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Yes/No</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -396,7 +294,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="express-yourself" className="text-sm text-third/70">Were you able to express yourself through sewing?</Label>
-                      <select name="express-yourself" id="express-yourself" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="express-yourself" id="express-yourself" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Yes/No</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -406,7 +304,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="goals" className="text-sm text-third/70">What are your goals as a sewer for other people?</Label>
-                    <select name="goals" id="goals" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="goals" id="goals" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select Goal</option>
                       <option value="Share my Knowledge">Share my Knowledge</option>
                       <option value="Help in Generating Income">Help in Generating Income</option>
@@ -424,17 +322,17 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="learn-craft" className="text-sm text-third/70">How did you learn the craft?</Label>
-                      <Input name="learn-craft" id="learn-craft" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                      <Input name="learn-craft" id="learn-craft" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="who-taught" className="text-sm text-third/70">Who taught you? (Indicate the relationship)</Label>
-                      <Input name="who-taught" id="who-taught" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                      <Input name="who-taught" id="who-taught" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="motivations" className="text-sm text-third/70">What are your motivations for pursuing sewing as a livelihood?</Label>
-                    <select name="motivations" id="motivations" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="motivations" id="motivations" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select Motivation</option>
                       <option value="To provide for the needs of the family">To provide for the needs of the family</option>
                       <option value="Acquire comprehensive knowledge in sewing">Acquire comprehensive knowledge in sewing</option>
@@ -447,13 +345,13 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="only-livelihood" className="text-sm text-third/70">Is it the only livelihood available in your area?</Label>
-                    <Input name="only-livelihood" id="only-livelihood" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 4} />
+                    <Input name="only-livelihood" id="only-livelihood" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="own-machine" className="text-sm text-third/70">Do you own a Sewing Machine?</Label>
-                      <select name="own-machine" id="own-machine" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="own-machine" id="own-machine" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Yes/No</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -471,7 +369,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="traditional-products" className="text-sm text-third/70">Are the sewn products you produced traditional products of your community?</Label>
-                    <select name="traditional-products" id="traditional-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                    <select name="traditional-products" id="traditional-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                       <option value="">Select Yes/No</option>
                       <option value="Yes">Yes</option>
                       <option value="No">No</option>
@@ -481,7 +379,7 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="products-used-for" className="text-sm text-third/70">What products are the sewn usually used for?</Label>
-                      <select name="products-used-for" id="products-used-for" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="products-used-for" id="products-used-for" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Product Type</option>
                         <option value="Apparel">Apparel</option>
                         <option value="Masks">Masks</option>
@@ -503,7 +401,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="design-products" className="text-sm text-third/70">Do you design the garment products?</Label>
-                      <select name="design-products" id="design-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 4}>
+                      <select name="design-products" id="design-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
                         <option value="">Select Yes/No</option>
                         <option value="Yes">Yes</option>
                         <option value="No">No</option>
@@ -514,7 +412,7 @@ export default function OnboardingPage() {
 
                 <div className="pt-6 border-t border-third/10">
                   <label className="flex items-start gap-3 cursor-pointer group">
-                    <input type="checkbox" className="mt-1 w-5 h-5 accent-third rounded border-third/20" required={step === 4} />
+                    <input type="checkbox" className="mt-1 w-5 h-5 accent-third rounded border-third/20" required={step === 2} />
                     <span className="text-gray-600 text-xs group-hover:text-third transition-colors">
                       I agree to the <span className="text-blue-500 underline">Terms and Conditions</span> and <span className="text-blue-500 underline">Data Privacy Policy</span>. I certify that the information provided is true and correct.
                     </span>
@@ -530,8 +428,8 @@ export default function OnboardingPage() {
                   size="xl"
                   className="px-12 shadow-xl hover:scale-[1.02]"
                 >
-                  {step === 4 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
-                  {step < 4 && <ChevronRight size={28} className="ml-2" />}
+                  {step === 2 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
+                  {step < 2 && <ChevronRight size={28} className="ml-2" />}
                 </ProfileButton>
               </div>
             </form>
