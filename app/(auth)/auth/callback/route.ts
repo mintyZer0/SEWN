@@ -42,27 +42,19 @@ export async function GET(request: Request) {
         console.log("Sewer-intent OAuth login detected.");
         
         if (profile?.user_type === "buyer") {
-          if (intent === "login") {
-            // Login attempt by a buyer - show error
-            console.log("Buyer trying to login as sewer. Blocking.");
-            await supabase.auth.signOut();
-            return NextResponse.redirect(`${origin}/login?error=must_register_as_sewer`);
-          } else {
-            // Signup attempt by a buyer - send to onboarding to upgrade
-            console.log("Existing buyer account found during signup. Redirecting to onboarding.");
-            return NextResponse.redirect(`${origin}/onboarding`);
-          }
+          // Whether login or signup, send them to onboarding to upgrade
+          console.log("Buyer account found on seller domain. Redirecting to onboarding.");
+          return NextResponse.redirect(`${origin}/onboarding`);
         }
 
-        // 2. If new user or already seller, ensure seller type and go to dashboard
-        // If it's a new user, they should probably go to onboarding anyway?
+        // 2. If new user, create as buyer and go to onboarding
         if (!profile) {
           await supabase.from("users").upsert({ 
             id: authData.user.id,
             email: email,
             first_name: firstName,
             last_name: lastName,
-            user_type: "seller" 
+            user_type: "buyer" 
           }, { onConflict: 'id' });
           return NextResponse.redirect(`${origin}/onboarding`);
         }
