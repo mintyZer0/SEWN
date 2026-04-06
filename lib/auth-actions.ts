@@ -43,7 +43,10 @@ export async function loginSewer(formData: FormData) {
     if (error.message === "Email not confirmed") {
       redirect("/login?error=email_not_confirmed");
     }
-    redirect("/error");
+    if (error.message === "Invalid login credentials") {
+      redirect("/login?error=invalid_credentials");
+    }
+    redirect("/login?error=unknown_error");
   }
 
   // Check if the user is actually a seller
@@ -54,9 +57,7 @@ export async function loginSewer(formData: FormData) {
     .single();
 
   if (profile && profile.user_type === "buyer") {
-    // Force sign out if they are just a buyer trying to use the seller login
-    await supabase.auth.signOut();
-    redirect("/login?error=must_register_as_sewer");
+    redirect("/onboarding");
   }
 
   revalidatePath("/", "layout");
@@ -80,22 +81,28 @@ export async function signup(
     .single();
 
   if (existingUser) {
-    if (existingUser.user_type === "seller") {
-      return {
-        success: false,
-        error: "An account with this email already exists.",
-      };
-    }
     return {
       success: false,
-      error: "This email is registered as a customer. Please sign up as a Sewer to upgrade.",
+      error: "An account with this email already exists. Please log in.",
     };
   }
+
+  const headerList = await headers();
+  let base = headerList.get("origin");
+  const host = headerList.get("host");
+  
+  if (!base) {
+    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
+    base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
+  }
+
+  console.log("Signup URL Construction:", { origin: headerList.get("origin"), host, base });
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${base}/auth/confirm`,
       data: {
         role: "buyer",
         first_name: firstName,
@@ -296,13 +303,14 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
 }
 
 async function getRedirectTo(role?: "customer" | "sewer", intent?: "login" | "signup") {
-  // Otherwise, construct it dynamically from headers for environmental-agnosticism.
   const headerList = await headers();
-  const host = headerList.get("host");
-  const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
+  let base = headerList.get("origin");
   
-  // If no host is found, fallback to sewn.local
-  const base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
+  if (!base) {
+    const host = headerList.get("host");
+    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
+    base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
+  }
   
   let url = `${base}/auth/callback`;
   const params = new URLSearchParams();

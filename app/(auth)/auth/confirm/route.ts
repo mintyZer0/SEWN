@@ -32,10 +32,28 @@ export async function GET(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
+      const isSellerDomain = host.startsWith("seller.");
+
+      if (type === "signup") {
+        const fallbackUrl = isSellerDomain && profile?.user_type !== "seller" 
+          ? new URL("/onboarding", origin).toString() 
+          : (profile?.user_type === "seller" ? (isSellerDomain ? new URL("/", origin).toString() : new URL("/", `seller.${origin.replace(/^https?:\/\//, "")}`).toString()) : redirectTo.toString());
+
+        const verifiedUrl = new URL("/auth/verified", origin);
+        verifiedUrl.searchParams.set("fallback", fallbackUrl);
+        return NextResponse.redirect(verifiedUrl);
+      }
+
+      // Fallback for non-signup OTPs
+      if (isSellerDomain && profile?.user_type !== "seller") {
+        const onboardingUrl = new URL("/onboarding", origin);
+        return NextResponse.redirect(onboardingUrl);
+      }
+
       if (profile?.user_type === "seller") {
-        // If it's a seller, make sure they end up on the seller subdomain
+        // If it's a seller, make sure they end up on the seller subdomain dashboard
         const sellerUrl = new URL("/", origin);
-        if (!host.startsWith("seller.")) {
+        if (!isSellerDomain) {
           sellerUrl.host = `seller.${host}`;
         }
         return NextResponse.redirect(sellerUrl);
