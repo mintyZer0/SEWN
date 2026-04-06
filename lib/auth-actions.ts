@@ -226,7 +226,7 @@ export async function signUpAsSewer(
   return { success: true };
 }
 
-export async function upgradeToSewer(formData: FormData): Promise<void> {
+export async function upgradeToSewer(formData: FormData): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -279,7 +279,7 @@ export async function upgradeToSewer(formData: FormData): Promise<void> {
 
   if (userError) {
     console.error("User upgrade error:", userError.message);
-    redirect("/error");
+    return { success: false, error: userError.message };
   }
 
   // 3. Add/Update Registered Address
@@ -309,7 +309,7 @@ export async function upgradeToSewer(formData: FormData): Promise<void> {
   });
 
   revalidatePath("/", "layout");
-  redirect("/");
+  return { success: true };
 }
 
 async function getRedirectTo(role?: "customer" | "sewer", intent?: "login" | "signup") {
