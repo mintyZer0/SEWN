@@ -113,6 +113,7 @@ export async function signup(
         address_line: formData.get("customer-address") as string,
         province: formData.get("province") as string,
         city: formData.get("city") as string,
+        address_type: "shipping"
       },
     },
   });
@@ -245,15 +246,21 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     finalProvince = formData.get("province") as string;
   }
 
-  await supabase.from("user_addresses").upsert({
+  const { error: addressError } = await supabase.from("user_addresses").upsert({
     user_id: user.id,
     full_address: registeredAddress,
     city: finalCity || "",
     province: finalProvince || "",
     barangay: finalBarangay || "",
     zip_code: parseInt(zipCode) || 0,
-    is_primary: true
-  }, { onConflict: "user_id, is_primary" });
+    is_primary: true,
+    address_type: "shop"
+  }, { onConflict: "user_id, address_type, is_primary" });
+
+  if (addressError) {
+    console.error("Address Error:", addressError);
+    return { success: false, error: addressError.message };
+  }
 
   // 4. Update Auth Metadata
   await supabase.auth.updateUser({
