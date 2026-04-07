@@ -246,16 +246,35 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     finalProvince = formData.get("province") as string;
   }
 
-  const { error: addressError } = await supabase.from("user_addresses").upsert({
+  // Check if they already have a shop address to update it
+  const { data: existingShopAddress } = await supabase
+    .from("user_addresses")
+    .select("id, is_primary")
+    .eq("user_id", user.id)
+    .eq("address_type", "shop")
+    .maybeSingle();
+
+  // For role-specific primaries, the shop address should be primary for the 'shop' type.
+  // If it's a new shop address, we set it to true. 
+  // If it's an existing one, we keep its current primary status.
+  const isPrimary = existingShopAddress ? existingShopAddress.is_primary : true;
+
+  const addressData: any = {
     user_id: user.id,
     full_address: registeredAddress,
     city: finalCity || "",
     province: finalProvince || "",
     barangay: finalBarangay || "",
     zip_code: parseInt(zipCode) || 0,
-    is_primary: true,
+    is_primary: isPrimary,
     address_type: "shop"
-  }, { onConflict: "user_id, address_type, is_primary" });
+  };
+
+  if (existingShopAddress) {
+    addressData.id = existingShopAddress.id;
+  }
+
+  const { error: addressError } = await supabase.from("user_addresses").upsert(addressData);
 
   if (addressError) {
     console.error("Address Error:", addressError);
