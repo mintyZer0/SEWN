@@ -20,6 +20,7 @@ interface LocationPickerProps {
   defaultValue?: string;
   onChange?: (value: string) => void;
   className?: string;
+  triggerClassName?: string;
   placeholder?: string;
   required?: boolean;
 }
@@ -29,6 +30,7 @@ export const LocationPicker = ({
   defaultValue = "",
   onChange,
   className,
+  triggerClassName,
   placeholder = "Select Location",
   required
 }: LocationPickerProps) => {
@@ -152,7 +154,8 @@ export const LocationPicker = ({
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "w-full h-12 rounded-xl border border-third/20 bg-white px-4 flex items-center justify-between cursor-pointer transition-all",
-          isOpen ? "border-third ring-2 ring-third/10" : "hover:border-third/40"
+          isOpen ? "border-third ring-2 ring-third/10" : "hover:border-third/40",
+          triggerClassName
         )}
       >
         <span className={cn("text-gray-700 truncate", !displayValue && "text-gray-400")}>
