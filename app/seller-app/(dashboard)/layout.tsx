@@ -1,4 +1,4 @@
-import Header from "@/global/Header";
+import SellerHeader from "@/global/SellerHeader";
 import Footer from "@/global/Footer";
 import SewerSidebar from "@/components/sewer-profile/sewer-sidebar";
 import { createClient } from "@/utils/supabase/server";
@@ -31,7 +31,7 @@ export default async function SellerLayout({
 
   return (
     <>
-      <Header variant="seller" />
+      <SellerHeader />
       <div className="flex items-center justify-center py-10 text-8xl text-third font-light bg-white">
         SEWER CENTER
       </div>
