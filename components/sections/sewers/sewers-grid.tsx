@@ -9,16 +9,10 @@ type Filters = Record<string, string[]>;
 
 interface SewersGridProps {
   filters: Filters;
-  setIsChatWidgetOpen: (open: boolean) => void;
-  setSelectedConversationId: (id: string | null) => void;
-  setChatView: (view: "list" | "chat") => void;
 }
 
 export default function SewersGrid({
   filters,
-  setIsChatWidgetOpen,
-  setSelectedConversationId,
-  setChatView,
 }: SewersGridProps) {
   const [allSewers, setAllSewers] = useState<Sewer[]>([]);
   const [filteredSewers, setFilteredSewers] = useState<Sewer[]>([]);
@@ -170,9 +164,6 @@ export default function SewersGrid({
           <SewerCard
             key={sewer.id}
             sewer={sewer}
-            setIsChatWidgetOpen={setIsChatWidgetOpen}
-            setSelectedConversationId={setSelectedConversationId}
-            setChatView={setChatView}
           />
         ))}
       </div>

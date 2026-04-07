@@ -19,16 +19,10 @@ export type Sewer = {
 
 export interface SewerCardProps {
   sewer: Sewer;
-  setIsChatWidgetOpen: (open: boolean) => void;
-  setSelectedConversationId: (id: string | null) => void;
-  setChatView: (view: "list" | "chat") => void;
 }
 
 export default function SewerCard({
   sewer,
-  setIsChatWidgetOpen,
-  setSelectedConversationId,
-  setChatView,
 }: SewerCardProps) {
   const router = useRouter();
 
@@ -88,9 +82,11 @@ export default function SewerCard({
       conversationId = newConv.id;
     }
 
-    setIsChatWidgetOpen(true);
-    setSelectedConversationId(conversationId);
-    setChatView("chat");
+    window.dispatchEvent(
+      new CustomEvent("open-chat", {
+        detail: { conversationId, view: "chat" },
+      })
+    );
   };
 
   return (
