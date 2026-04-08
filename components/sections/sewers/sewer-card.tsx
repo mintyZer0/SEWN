@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp } from "react-feather";
+import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle } from "react-feather";
 import { supabase } from "@/utils/supabase/client";
 
 export type Sewer = {
@@ -15,6 +15,8 @@ export type Sewer = {
   completed_orders?: number;
   services?: string[];
   years_of_experience?: number;
+  is_verified?: boolean;
+  is_tesda_certified?: boolean;
 };
 
 export interface SewerCardProps {
@@ -124,12 +126,17 @@ export default function SewerCard({
                   className="object-cover"
                 />
               </div>
-              <h3 className="text-xl font-semibold">{sewer.name}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xl font-semibold">{sewer.name}</h3>
+                {sewer.is_verified && (
+                  <CheckCircle size={18} className="text-blue-200 fill-current" />
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-1 bg-white text-heading px-3 py-1 rounded-full">
               <Star size={16} fill="currentColor" />
-              <span className="font-semibold">{sewer.rating}</span>
+              <span className="font-semibold">{sewer.rating > 0 ? sewer.rating.toFixed(1) : "N/A"}</span>
             </div>
           </div>
 

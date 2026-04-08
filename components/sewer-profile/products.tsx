@@ -1,12 +1,17 @@
 import ProductCard from "@/components/sections/shop/product-card";
 import { createClient } from "@/utils/supabase/server";
 
-export default async function Products() {
+interface ProductsProps {
+  sewerId: string;
+}
+
+export default async function Products({ sewerId }: ProductsProps) {
   const supabase = await createClient();
   
   const { data: products } = await supabase
     .from("seller_products")
     .select("*")
+    .eq("user_id", sewerId)
     .eq("is_active", true)
     .limit(3);
 
