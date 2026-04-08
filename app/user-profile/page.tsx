@@ -1,17 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { User, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import ProfileSection from "@/components/user-profile/profile-section";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export default function UserProfilePage() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { images, uploading, addImages, uploadImages } = useImageUpload();
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files;
+    if (!file) return;
+    addImages(file)
+  };
 
   const [formData, setFormData] = useState({
     username: "",
@@ -246,18 +255,31 @@ export default function UserProfilePage() {
         </div>
 
         <div className="hidden lg:block w-px bg-gray-200 self-stretch"></div>
-
         <div className="flex flex-col items-center justify-center gap-8 lg:px-12">
           <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner">
+            <span>
             <User className="w-32 h-32 text-gray-400" />
+            </span>
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="profile_image"
+              accept="image/*"
+              onChange={handleChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+              >
+            </input>
           </div>
+          
           <ProfileButton
             variant="ghost"
             disabled={!isEditing}
+            onClick={() => fileInputRef.current?.click()}
             className={cn(
               "border-2 border-gray-300 text-gray-600 px-8 py-2 rounded-full hover:bg-gray-50 hover:border-gray-400 shadow-sm",
               !isEditing && "opacity-50 cursor-not-allowed",
             )}
+          
           >
             Select Image
           </ProfileButton>
