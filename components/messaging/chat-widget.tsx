@@ -68,6 +68,22 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
     }
   }, [supabase, threads, loading, selectedConversationId, pathname]);
 
+  useEffect(() => {
+    const handleOpenChat = (e: Event) => {
+      const customEvent = e as CustomEvent<{ conversationId?: string; view?: "list" | "chat" }>;
+      setIsOpenLocal(true);
+      if (customEvent.detail?.conversationId) {
+        setSelectedConversationId(customEvent.detail.conversationId);
+      }
+      if (customEvent.detail?.view) {
+        setView(customEvent.detail.view);
+      }
+    };
+
+    window.addEventListener("open-chat", handleOpenChat);
+    return () => window.removeEventListener("open-chat", handleOpenChat);
+  }, []);
+
   if (isCheckingUser || !currentUserId) return null;
 
   const handleSelectUser = (conversationId: string) => {

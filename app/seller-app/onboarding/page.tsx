@@ -108,7 +108,9 @@ export default function OnboardingPage() {
           </CardHeader>
 
           <CardContent className="p-8 md:p-12">
-            <form action={async (formData) => {
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
               if (step < 2) {
                 setStep(step + 1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -181,8 +183,8 @@ export default function OnboardingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address" className="text-lg text-third font-semibold">Registered Address</Label>
-                  <textarea name="address" id="address" rows={3} className="w-full rounded-xl border border-third/20 focus:border-third bg-white p-4 text-gray-700 text-sm" placeholder="Registered Address as written on your BIR Certificate of Registration" required={step === 1} />
+                  <Label htmlFor="address" className="text-lg text-third font-semibold">Detail Address</Label>
+                  <textarea name="address" id="address" rows={3} className="w-full rounded-xl border border-third/20 focus:border-third bg-white p-4 text-gray-700 text-sm" placeholder="Street Address, Barangay, City, Province" required={step === 1} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

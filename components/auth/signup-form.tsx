@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import SocialSignInButton from "@/app/(auth)/auth/login/components/social-sign-in-button";
-import { signInWithGoogleSewer, signInWithFacebookSewer, signInWithTwitterSewer } from "@/lib/auth-actions";
+import { signInWithGoogleSewer, signInWithFacebookSewer, signInWithTwitterSewer, signup } from "@/lib/auth-actions";
 
 const variants = {
   customer: {
@@ -61,16 +61,37 @@ export function SignupForm({
     const supabase = createClient();
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN") {
-        router.push("/");
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        // Fetch user type to decide redirect
+        const { data: profile } = await supabase
+          .from("users")
+          .select("user_type")
+          .eq("id", session.user.id)
+          .single();
+
+        const isSellerDomain = window.location.hostname.startsWith("seller.");
+
+        if (isSellerDomain && profile?.user_type !== "seller") {
+          router.push("/onboarding");
+        } else if (profile?.user_type === "seller") {
+          if (!isSellerDomain) {
+            window.location.href = `${window.location.protocol}//seller.${window.location.host}/`;
+          } else {
+            router.push("/");
+          }
+        } else {
+          router.push("/");
+        }
       }
     });
 
     return () => subscription.unsubscribe();
   }, [showSuccess, router]);
 
-  const openRegisterModal = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+
+  const openRegisterModal = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
@@ -91,8 +112,20 @@ export function SignupForm({
     }
 
     setFormError("");
-    setCapturedData({ username, email, password });
-    setShowRegisterModal(true);
+    
+    if (variant === "sewer") {
+      setSubmitting(true);
+      const result = await signup(formData);
+      setSubmitting(false);
+      if (result.success) {
+        setShowSuccess(true);
+      } else {
+        setFormError(result.error || "An error occurred during registration.");
+      }
+    } else {
+      setCapturedData({ username, email, password });
+      setShowRegisterModal(true);
+    }
   };
 
   return (
@@ -192,9 +225,10 @@ export function SignupForm({
 
             <Button
               type="submit"
-              className={`w-full h-20 rounded-3xl ${variants[variant].submitButtonClass} text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer`}
+              disabled={submitting}
+              className={`w-full h-20 rounded-3xl ${variants[variant].submitButtonClass} text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer disabled:opacity-50`}
             >
-              Register
+              {submitting ? "Registering..." : "Register"}
             </Button>
 
             {variant === "sewer" && (

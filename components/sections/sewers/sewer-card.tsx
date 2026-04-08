@@ -19,16 +19,10 @@ export type Sewer = {
 
 export interface SewerCardProps {
   sewer: Sewer;
-  setIsChatWidgetOpen: (open: boolean) => void;
-  setSelectedConversationId: (id: string | null) => void;
-  setChatView: (view: "list" | "chat") => void;
 }
 
 export default function SewerCard({
   sewer,
-  setIsChatWidgetOpen,
-  setSelectedConversationId,
-  setChatView,
 }: SewerCardProps) {
   const router = useRouter();
 
@@ -49,20 +43,6 @@ export default function SewerCard({
       router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
-
-    const { data: profile, error } = await supabase
-      .from("users")
-      .select("user_type")
-      .eq("id", user.id)
-      .single();
-
-    if (error || !profile) {
-      console.error("Failed to fetch user type:", error);
-      return;
-    }
-
-    const isSeller = profile.user_type === "seller";
-    const isBuyer = profile.user_type === "buyer";
 
     const buyerId = user.id;
     const sellerUUID = sellerId;
@@ -102,14 +82,11 @@ export default function SewerCard({
       conversationId = newConv.id;
     }
 
-    if (isSeller) {
-      router.push(`${process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.sewn.local:3000"}/chat?conversationId=${conversationId}`);
-    } 
-    else if (isBuyer) {
-      setIsChatWidgetOpen(true);
-      setSelectedConversationId(conversationId);
-      setChatView("chat");
-    }
+    window.dispatchEvent(
+      new CustomEvent("open-chat", {
+        detail: { conversationId, view: "chat" },
+      })
+    );
   };
 
   return (

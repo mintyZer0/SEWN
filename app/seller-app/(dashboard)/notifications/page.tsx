@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { User, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/utils/supabase/client";
 
 interface StatusItem {
   id: string;
@@ -87,6 +88,7 @@ const StatusSection = ({
 };
 
 export default function NotificationsPage() {
+  const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<{
     notifications: StatusItem[];
@@ -98,40 +100,120 @@ export default function NotificationsPage() {
     commissions: [],
   });
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${dd}/${mm}/${yy} ${hours}:${minutes}${ampm}`;
+  };
+
   useEffect(() => {
     async function fetchSewerStatus() {
       try {
         setLoading(true);
-        // TODO: Replace with actual Supabase fetching
-        // const { data: notificationsData } = await supabase.from('notifications').select('*')...
-        
-        // Simulating fetch delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Mock data to show the layout while you connect the DB
-        setData({
-          notifications: Array(3).fill(null).map((_, i) => ({
-            id: `n-${i}`,
-            title: "Hard Concrete is now approved!",
-            description: "Congrats sewer! Your product is now active!",
-            timestamp: "15/02/26 8:40PM",
-            type: "notification",
-          })),
-          orders: Array(2).fill(null).map((_, i) => ({
-            id: `o-${i}`,
-            title: "(Customer Name) bought Hard Concrete!",
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // 1. Fetch Notifications
+        const { data: notificationsData } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        // 2. Fetch Orders (Order Items belonging to this seller's products)
+        const { data: orderItemsData } = await supabase
+          .from('order_items')
+          .select(`
+            id,
+            orders!inner (
+              created_at,
+              users (
+                first_name,
+                last_name
+              )
+            ),
+            seller_products!inner (
+              name,
+              user_id
+            )
+          `)
+          .eq('seller_products.user_id', user.id);
+
+        // 3. Fetch Commissions
+        const { data: commissionsData } = await supabase
+          .from('service_requests')
+          .select(`
+            id,
+            created_at,
+            client_id,
+            users!service_requests_client_id_fkey (
+              first_name,
+              last_name
+            )
+          `)
+          .eq('sewer_id', user.id)
+          .eq('service_type', 'commission')
+          .order('created_at', { ascending: false });
+
+        // Format Notifications
+        const formattedNotifications: StatusItem[] = (notificationsData || []).map(n => ({
+          id: n.id,
+          title: n.title,
+          description: n.message || "",
+          timestamp: formatDate(n.created_at),
+          type: "notification",
+          link: n.action_link
+        }));
+
+        // Format Orders
+        // Note: orderItemsData.orders.users might be an array or single object depending on PostgREST setup.
+        // We'll handle both cases safely.
+        let formattedOrders: StatusItem[] = (orderItemsData || []).map((item: any) => {
+          const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
+          const customer = order?.users ? (Array.isArray(order.users) ? order.users[0] : order.users) : null;
+          const product = Array.isArray(item.seller_products) ? item.seller_products[0] : item.seller_products;
+          
+          const customerName = customer ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() : "Customer";
+          
+          return {
+            id: item.id,
+            title: `${customerName} bought ${product?.name || "a product"}!`,
             description: "Click to go to products summary",
-            timestamp: "15/02/26 8:40PM",
+            timestamp: formatDate(order?.created_at),
             type: "order",
-          })),
-          commissions: Array(2).fill(null).map((_, i) => ({
-            id: `c-${i}`,
-            title: "(Customer Name) would like to commission you!",
-            description: "Click to check details",
-            timestamp: "15/02/26 8:40PM",
-            type: "commission",
-          })),
+          };
         });
+
+        // Sort orders by timestamp descending manually since we fetched via join
+        formattedOrders.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+        // Format Commissions
+        const formattedCommissions: StatusItem[] = (commissionsData || []).map((c: any) => {
+           const client = Array.isArray(c.users) ? c.users[0] : c.users;
+           const clientName = client ? `${client.first_name || ""} ${client.last_name || ""}`.trim() : "Customer";
+           return {
+            id: c.id,
+            title: `${clientName} would like to commission you!`,
+            description: "Click to check details",
+            timestamp: formatDate(c.created_at),
+            type: "commission",
+          };
+        });
+
+        setData({
+          notifications: formattedNotifications,
+          orders: formattedOrders,
+          commissions: formattedCommissions,
+        });
+
       } catch (error) {
         console.error("Error fetching status:", error);
       } finally {
@@ -140,7 +222,7 @@ export default function NotificationsPage() {
     }
 
     fetchSewerStatus();
-  }, []);
+  }, [supabase]);
 
   return (
     <div className="p-16 max-w-6xl mx-auto">
