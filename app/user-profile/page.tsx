@@ -50,9 +50,9 @@ export default function UserProfilePage() {
               username: data.first_name || "",
               name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
               email: data.email || user.email || "",
-              phone: data.phone_number || "",
+              phone: data.user_phones?.[0]?.phone || "",
               gender: data.gender || "male",
-              dob: data.dob || "2004-10-06",
+              dob: data.birthday || "",
             });
           }
         }
@@ -106,8 +106,7 @@ export default function UserProfilePage() {
         .upsert({
           user_id: user.id,
           phone: formData.phone,
-        })
-        .eq("id", user.id);
+        }, { onConflict: 'user_id' });
 
       if (userError || phoneError) {
         throw new Error(
