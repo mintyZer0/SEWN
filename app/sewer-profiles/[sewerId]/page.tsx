@@ -31,6 +31,7 @@ export default async function SewerPage({ params }: PageProps) {
       user_addresses (province, city, is_primary),
       user_phones (phone),
       sewer_achievements (title),
+      sewer_statistics (rating_avg, profile_views_total),
       sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions)
     `)
     .eq("id", sewerId)
@@ -38,6 +39,12 @@ export default async function SewerPage({ params }: PageProps) {
 
   if (error || !user || user.user_type !== "seller") {
     return notFound();
+  }
+
+  // Increment profile views in the background (Optional: track if requester is not the owner)
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  if (!authUser || authUser.id !== sewerId) {
+    await supabase.rpc('increment_profile_views', { target_user_id: sewerId });
   }
 
   const primaryAddress =
@@ -53,10 +60,11 @@ export default async function SewerPage({ params }: PageProps) {
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewer";
 
   // New logic for dynamic fields
+  const stats = user.sewer_statistics?.[0];
   const bio = "This is a placeholder bio. Additional profile fields coming soon.";
-  const rating = 5.0; // Still mocked
-  const yearsOfExperience = 0; // Still mocked
-  const productsSewed = 0; // Still mocked
+  const rating = stats?.rating_avg || 0;
+  const yearsOfExperience = 0; // Still mocked until 'started_sewing_at' is implemented
+  const productsSewed = stats?.total_orders_completed || 0;
   
   const achievements = user.sewer_achievements?.map((a: any) => a.title) || [];
   const tesdaCertified = false; // Still mocked

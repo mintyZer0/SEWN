@@ -331,8 +331,11 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     return { success: false, error: surveyError.message };
   }
 
-  // 7. Ensure sewer_settings exists
-  await supabase.from("sewer_settings").upsert({ user_id: user.id }, { onConflict: "user_id" });
+  // 7. Ensure sewer_settings and sewer_statistics exist
+  await Promise.all([
+    supabase.from("sewer_settings").upsert({ user_id: user.id }, { onConflict: "user_id" }),
+    supabase.from("sewer_statistics").upsert({ user_id: user.id }, { onConflict: "user_id" })
+  ]);
 
   // 8. Insert social link if provided
   const socialLink = formData.get("social-link") as string;

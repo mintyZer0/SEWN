@@ -8,7 +8,7 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 - **Styling:** **Tailwind CSS 4** with **DaisyUI** and Radix UI.
 - **Theme:** Colors like `primary`, `secondary`, and `third` (orange) are defined as CSS variables in `globals.css`. Use Tailwind classes like `text-primary`, `bg-secondary`, `border-third`.
 - **User Roles:** Triple-user ecosystem distinguishing between **Customers** (User Profile), **Sellers** (Sewer Center), and **Admins** (Internal Management).
-- **Database Schema:** Follows a normalized structure where seller-specific data is distributed across specialized tables (`sewer_verifications`, `sewer_onboarding_surveys`, `sewer_achievements`) rather than a single profile table.
+- **Database Schema:** Follows a normalized structure where seller-specific data is distributed across specialized tables (`sewer_verifications`, `sewer_onboarding_surveys`, `sewer_achievements`, `sewer_statistics`) rather than a single profile table.
 
 ## Key Features & Components
 - **Marketplace:** Multi-step checkout stepper (`product-details` → `address` → `payment` → `confirmation`).
