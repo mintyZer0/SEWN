@@ -74,6 +74,9 @@ The workflow for custom work.
 
 ### Sewer-Specific Config
 - **`sewer_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
+- **`sewer_verifications`**: Stores `tax_id`, `dti_sec_number`, and `verification_status` ('pending', 'verified', 'rejected').
+- **`sewer_onboarding_surveys`**: Qualitative data like `educational_attainment`, `monthly_income`, and personal sewing background.
+- **`sewer_achievements`**: A list of professional milestones for a sewer (`user_id`, `title`).
 - **`sewer_fabrics`**: A catalog of fabrics a sewer offers for commissions. Includes `name`, `description`, `image_url`, and `is_available`.
 
 ---
@@ -84,7 +87,12 @@ The workflow for custom work.
 - All tables use `uuid` for primary keys with `gen_random_uuid()` defaults.
 - Most tables include `user_id` or `product_id` foreign keys with standard relational constraints.
 
+### User Roles & Permissions
+- **Triple-User System:** `users` can have types `buyer`, `seller`, or `admin`.
+- **Admin Verification:** Admins are responsible for reviewing documents in `sewer_verifications` and updating the `verification_status`.
+
 ### For Frontend Developers
 - Use the `user_measurements` table to populate the "Measurements" section of the user profile.
 - When creating a `service_request`, ensure a `measurement_profile_id` is linked if the service type is `commission`.
 - Filter `seller_products` using the `location` and `type` fields for the marketplace browse pages.
+- Data from `sewer_onboarding_surveys` and `sewer_achievements` should be used to build the public "About" section of a sewer's profile.

@@ -61,7 +61,8 @@ export default function SewerCenterPage() {
           email,
           user_phones(phone),
           user_addresses(id, full_address, latitude, longitude, is_primary, address_type, province, city, barangay, zip_code),
-          sewer_profiles(social_link, reason_for_sewing),
+          user_socials(handle),
+          sewer_achievements(title),
           sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions)
         `)
         .eq('id', user.id)
@@ -76,21 +77,23 @@ export default function SewerCenterPage() {
         const phones = Array.isArray(profileData.user_phones) ? profileData.user_phones : [profileData.user_phones].filter(Boolean);
         const phone = phones[0]?.phone;
 
-        const profiles = Array.isArray(profileData.sewer_profiles) ? profileData.sewer_profiles : [profileData.sewer_profiles].filter(Boolean);
-        const profile = profiles[0];
+        const socials = Array.isArray(profileData.user_socials) ? profileData.user_socials : [profileData.user_socials].filter(Boolean);
+        const social = socials[0];
+
+        const achievements = Array.isArray(profileData.sewer_achievements) ? profileData.sewer_achievements : [profileData.sewer_achievements].filter(Boolean);
 
         const settingsArray = Array.isArray(profileData.sewer_settings) ? profileData.sewer_settings : [profileData.sewer_settings].filter(Boolean);
         const settings = settingsArray[0];
 
         setFormData({
           name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim(),
-          description: profile?.reason_for_sewing || "",
+          description: "", // Shop description is not yet linked to a DB field
           email: profileData.email || "",
-          social_link: profile?.social_link || "",
+          social_link: social?.handle || "",
           phone: phone || "",
-          achievement_1: "", // Mocked as there's no DB schema for this yet
-          achievement_2: "",
-          achievement_3: "",
+          achievement_1: achievements[0]?.title || "",
+          achievement_2: achievements[1]?.title || "",
+          achievement_3: achievements[2]?.title || "",
         });
 
         if (shopAddress) {
@@ -165,11 +168,22 @@ export default function SewerCenterPage() {
             await supabase.from('user_phones').upsert({ user_id: user.id, phone: formData.phone }, { onConflict: 'user_id' });
         }
 
-        await supabase.from('sewer_profiles').upsert({ 
-            user_id: user.id, 
-            social_link: formData.social_link,
-            reason_for_sewing: formData.description
-        }, { onConflict: 'user_id' });
+        if (formData.social_link) {
+            await supabase.from('user_socials').upsert({ 
+                user_id: user.id, 
+                platform: 'Other', 
+                handle: formData.social_link 
+            }, { onConflict: 'user_id, platform' });
+        }
+
+        // Achievements (Simple replacement logic)
+        const achievements = [formData.achievement_1, formData.achievement_2, formData.achievement_3].filter(Boolean);
+        if (achievements.length > 0) {
+            await supabase.from('sewer_achievements').delete().eq('user_id', user.id);
+            await supabase.from('sewer_achievements').insert(
+                achievements.map(title => ({ user_id: user.id, title }))
+            );
+        }
 
         const { data: shopAddr } = await supabase
             .from('user_addresses')

@@ -215,6 +215,8 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   const zipCode = formData.get("zip-code") as string;
   const registeredAddress = (formData.get("address") || formData.get("customer-address")) as string;
   const taxId = (formData.get("tax-id") || formData.get("tin")) as string;
+  const birthday = formData.get("birthday") as string;
+  const gender = formData.get("gender") as string;
 
   // 2. Update Core User Info
   const { error: userError } = await supabase
@@ -222,7 +224,9 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     .update({ 
       user_type: "seller",
       first_name: firstName,
-      last_name: lastName
+      last_name: lastName,
+      birthday: birthday || null,
+      gender: gender as any
     })
     .eq("id", user.id);
 
@@ -290,17 +294,20 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     }
   });
 
-  // 5. Upsert into sewer_profiles
-  const ageRaw = formData.get("age") as string;
-  const age = ageRaw ? parseInt(ageRaw) : null;
-
-  const { error: profileError } = await supabase.from("sewer_profiles").upsert({
+  // 5. Upsert into sewer_verifications
+  const { error: verificationError } = await supabase.from("sewer_verifications").upsert({
     user_id: user.id,
     tax_id: taxId,
     dti_sec_number: formData.get("dti-sec-number") as string,
-    social_link: formData.get("social-link") as string,
-    age: age,
-    sex: formData.get("sex") as string,
+  }, { onConflict: "user_id" });
+
+  if (verificationError) {
+    return { success: false, error: verificationError.message };
+  }
+
+  // 6. Upsert into sewer_onboarding_surveys
+  const { error: surveyError } = await supabase.from("sewer_onboarding_surveys").upsert({
+    user_id: user.id,
     educational_attainment: (formData.get("educational-attainment") || formData.get("education")) as string,
     monthly_income: (formData.get("monthly-income") || formData.get("income")) as string,
     reason_for_sewing: (formData.get("why-sew") || formData.get("whySew")) as string,
@@ -320,8 +327,21 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     designs_garments: (formData.get("design-products") || formData.get("designProducts")) as string,
   }, { onConflict: "user_id" });
 
-  if (profileError) {
-    return { success: false, error: profileError.message };
+  if (surveyError) {
+    return { success: false, error: surveyError.message };
+  }
+
+  // 7. Ensure sewer_settings exists
+  await supabase.from("sewer_settings").upsert({ user_id: user.id }, { onConflict: "user_id" });
+
+  // 8. Insert social link if provided
+  const socialLink = formData.get("social-link") as string;
+  if (socialLink) {
+    await supabase.from("user_socials").upsert({
+      user_id: user.id,
+      platform: "Other",
+      handle: socialLink
+    }, { onConflict: "user_id, platform" });
   }
 
   revalidatePath("/", "layout");

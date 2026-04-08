@@ -28,7 +28,10 @@ export default async function SewerPage({ params }: PageProps) {
       email,
       user_type,
       user_avatars (avatar_url),
-      user_addresses (province, city, is_primary)
+      user_addresses (province, city, is_primary),
+      user_phones (phone),
+      sewer_achievements (title),
+      sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions)
     `)
     .eq("id", sewerId)
     .single();
@@ -49,15 +52,22 @@ export default async function SewerPage({ params }: PageProps) {
   const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewer-photos/1.jpg";
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewer";
 
-  // Dummy data for missing schema fields
+  // New logic for dynamic fields
   const bio = "This is a placeholder bio. Additional profile fields coming soon.";
-  const rating = 5.0;
-  const yearsOfExperience = 0;
-  const productsSewed = 0;
-  const achievements: string[] = [];
-  const tesdaCertified = false;
-  const servicesOffered: string[] = [];
-  const mobileNumber = "+63 000 000 0000";
+  const rating = 5.0; // Still mocked
+  const yearsOfExperience = 0; // Still mocked
+  const productsSewed = 0; // Still mocked
+  
+  const achievements = user.sewer_achievements?.map((a: any) => a.title) || [];
+  const tesdaCertified = false; // Still mocked
+
+  const settings = user.sewer_settings?.[0];
+  const servicesOffered: ("repair" | "alteration" | "commission")[] = [];
+  if (settings?.accepting_repairs) servicesOffered.push("repair");
+  if (settings?.accepting_alterations) servicesOffered.push("alteration");
+  if (settings?.accepting_commissions) servicesOffered.push("commission");
+
+  const mobileNumber = user.user_phones?.[0]?.phone || "Phone not listed";
 
   return (
     <div className="py-12">
@@ -68,7 +78,7 @@ export default async function SewerPage({ params }: PageProps) {
         rating={rating}
         location={location}
       />
-      <Services sewerId={sewerId} />
+      <Services sewerId={sewerId} servicesOffered={servicesOffered} />
       <Stats
         yearsOfExperience={yearsOfExperience}
         rating={rating}
