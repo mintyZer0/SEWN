@@ -31,7 +31,8 @@ export default async function SewerPage({ params }: PageProps) {
       user_addresses (province, city, is_primary),
       user_phones (phone),
       sewer_achievements (title),
-      sewer_statistics (rating_avg, profile_views_total),
+      sewer_statistics (rating_avg, profile_views_total, total_orders_completed),
+      sewer_verifications (verification_status),
       sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions)
     `)
     .eq("id", sewerId)
@@ -42,9 +43,14 @@ export default async function SewerPage({ params }: PageProps) {
   }
 
   // Increment profile views in the background (Optional: track if requester is not the owner)
-  const { data: { user: authUser } } = await supabase.auth.getUser();
-  if (!authUser || authUser.id !== sewerId) {
-    await supabase.rpc('increment_profile_views', { target_user_id: sewerId });
+  try {
+    const { data: authData } = await supabase.auth.getUser();
+    const authUser = authData?.user;
+    if (!authUser || authUser.id !== sewerId) {
+      await supabase.rpc('increment_profile_views', { target_user_id: sewerId });
+    }
+  } catch (err) {
+    console.error("View Tracking Error:", err);
   }
 
   const primaryAddress =
@@ -61,13 +67,14 @@ export default async function SewerPage({ params }: PageProps) {
 
   // New logic for dynamic fields
   const stats = user.sewer_statistics?.[0];
+  const verification = user.sewer_verifications?.[0];
   const bio = "This is a placeholder bio. Additional profile fields coming soon.";
   const rating = stats?.rating_avg || 0;
   const yearsOfExperience = 0; // Still mocked until 'started_sewing_at' is implemented
   const productsSewed = stats?.total_orders_completed || 0;
   
   const achievements = user.sewer_achievements?.map((a: any) => a.title) || [];
-  const tesdaCertified = false; // Still mocked
+  const tesdaCertified = achievements.some(a => a.toLowerCase().includes("tesda"));
 
   const settings = user.sewer_settings?.[0];
   const servicesOffered: ("repair" | "alteration" | "commission")[] = [];
@@ -85,6 +92,8 @@ export default async function SewerPage({ params }: PageProps) {
         bio={bio}
         rating={rating}
         location={location}
+        isVerified={verification?.verification_status === "verified"}
+        isTesdaCertified={tesdaCertified}
       />
       <Services sewerId={sewerId} servicesOffered={servicesOffered} />
       <Stats
@@ -92,7 +101,7 @@ export default async function SewerPage({ params }: PageProps) {
         rating={rating}
         productsSewed={productsSewed}
       />
-      <Products />
+      <Products sewerId={sewerId} />
       <SeparatorX />
       <AchievementsServices
         achievements={achievements}
