@@ -46,6 +46,7 @@ export default function SewerCenterPage() {
     alterations: false,
     repair: false,
     commissions: false,
+    appointments: false,
   });
 
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function SewerCenterPage() {
           user_addresses(id, full_address, latitude, longitude, is_primary, address_type, province, city, barangay, zip_code),
           user_socials(handle),
           sewer_achievements(title),
-          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions)
+          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions, accepting_appointments)
         `)
         .eq('id', user.id)
         .single();
@@ -114,6 +115,7 @@ export default function SewerCenterPage() {
                 alterations: settings.accepting_alterations || false,
                 repair: settings.accepting_repairs || false,
                 commissions: settings.accepting_commissions || false,
+                appointments: settings.accepting_appointments || false,
             });
         }
       }
@@ -482,6 +484,15 @@ export default function SewerCenterPage() {
                 name="services"
                 value="commissions"
                 checked={services.commissions}
+                onChange={handleServiceChange}
+                disabled={!isEditing || isSaving}
+                size="md"
+              />
+              <CustomCheckbox
+                label="Appointments"
+                name="services"
+                value="appointments"
+                checked={services.appointments}
                 onChange={handleServiceChange}
                 disabled={!isEditing || isSaving}
                 size="md"
