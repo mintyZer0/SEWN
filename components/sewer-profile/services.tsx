@@ -47,7 +47,7 @@ export default function Services({ sewerId, servicesOffered }: ServicesProps) {
 
   return (
     <>
-      <CardBentoGrid items={filteredItems} header="browse" />
+      <CardBentoGrid items={filteredItems} header="Pick a service" />
     </>
   );
 }

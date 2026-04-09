@@ -76,7 +76,8 @@ export default async function SewerPage({ params }: PageProps) {
   const achievements = user.sewer_achievements?.map((a: any) => a.title) || [];
   const tesdaCertified = achievements.some(a => a.toLowerCase().includes("tesda"));
 
-  const settings = user.sewer_settings?.[0];
+  const settingsArray = Array.isArray(user.sewer_settings) ? user.sewer_settings : [user.sewer_settings].filter(Boolean);
+  const settings = settingsArray[0];
   const servicesOffered: ("repair" | "alteration" | "commission")[] = [];
   if (settings?.accepting_repairs) servicesOffered.push("repair");
   if (settings?.accepting_alterations) servicesOffered.push("alteration");

@@ -3,10 +3,15 @@
 import { useState } from "react";
 import Image from "next/image";
 import PrimaryButton from "../ui/primary-button";
+import { createClient } from "@/utils/supabase/client";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface CommissionFormProps {
   sewerName: string;
   sewerImage: string;
+  sewerId: string;
+  serviceType: "commission" | "repair" | "alteration";
   disableEmail?: boolean;
   disableFullName?: boolean;
   disableFabric?: boolean;
@@ -19,6 +24,8 @@ interface CommissionFormProps {
 export default function CommissionForm({
   sewerName,
   sewerImage,
+  sewerId,
+  serviceType,
   disableEmail = false,
   disableFullName = false,
   disableFabric = false,
@@ -27,6 +34,11 @@ export default function CommissionForm({
   disableScheduleAppointment = false,
   orderDetailsLabel = "Order Details",
 }: CommissionFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const supabase = createClient();
+
   const [formData, setFormData] = useState({
     email: "",
     fullName: "",
@@ -80,6 +92,52 @@ export default function CommissionForm({
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMsg("");
+
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error("You must be logged in to submit a request.");
+      }
+
+      // Format details
+      let finalDetails = formData.orderDetails;
+      if (formData.fabricToUse) {
+        finalDetails += `\nFabric: ${formData.fabricToUse}`;
+      }
+      if (formData.measurements) {
+        finalDetails += `\nMeasurements: ${formData.measurements}`;
+      }
+
+      const { error: submitError } = await supabase.from("service_requests").insert({
+        client_id: user.id,
+        sewer_id: sewerId,
+        service_type: serviceType,
+        contact_email: formData.email || user.email || "",
+        contact_phone: "Not provided", // Add to form later if needed
+        contact_name: formData.fullName || user.user_metadata?.full_name || "User",
+        request_details: finalDetails,
+        appointment_date: formData.scheduleAppointment === "yes" && formData.appointmentDate 
+          ? new Date(formData.appointmentDate).toISOString()
+          : new Date().toISOString(), // Fallback if no date
+        status: "pending"
+      });
+
+      if (submitError) throw submitError;
+      
+      setSuccess(true);
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setErrorMsg(err.message || "An error occurred while submitting your request.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const fabricOptions = [
     "Cotton",
     "Linen",
@@ -99,7 +157,26 @@ export default function CommissionForm({
         <span className="text-black">Commision</span> {sewerName}
       </h2>
 
-      <form className="space-y-5">
+      {success ? (
+        <div className="text-center space-y-6">
+          <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-3xl font-medium text-heading">Request Submitted!</h3>
+          <p className="text-xl text-gray-600">The sewer will review your request and get back to you shortly.</p>
+          <Link href={`/sewers/${sewerId}`}>
+            <PrimaryButton className="mt-8">Return to Profile</PrimaryButton>
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {errorMsg && (
+            <div className="p-4 bg-red-50 text-red-500 rounded-md">
+              {errorMsg}
+            </div>
+          )}
         {!disableEmail && (
           <div>
             <label
@@ -231,12 +308,16 @@ export default function CommissionForm({
           </div>
         )}
 
-        <PrimaryButton type="submit">Confirm Order</PrimaryButton>
+        <PrimaryButton type="submit" disabled={isSubmitting} className="flex items-center justify-center gap-2">
+          {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isSubmitting ? "Submitting..." : "Confirm Order"}
+        </PrimaryButton>
 
         <p className="text-xs text-center text-[#2C2463] mt-4">
           By continuing, you agree to our terms and conditions
         </p>
       </form>
+      )}
     </div>
   );
 }
