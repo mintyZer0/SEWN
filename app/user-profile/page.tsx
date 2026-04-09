@@ -14,12 +14,20 @@ export default function UserProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { images, uploading, addImages, uploadImages } = useImageUpload();
+  
+  // Use a dedicated folder for avatars in the existing bucket
+  const { images, uploading, addImages, uploadImages, clearAll } = useImageUpload({
+    bucket: 'product-images',
+    folder: 'avatars'
+  });
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files;
     if (!file) return;
-    addImages(file)
+    
+    // Clear any stuck previous uploads first
+    clearAll();
+    addImages(file).then((newImages) => uploadImages(newImages));
   };
 
   const [formData, setFormData] = useState({
@@ -29,7 +37,19 @@ export default function UserProfilePage() {
     phone: "",
     gender: "",
     dob: "",
+    avatar_url: "",
   });
+
+  const [uploadReady, setUploadReady] = useState(true);
+
+  useEffect(() => {
+    const hasPending = images.some(img => img.status === "pending");
+    const uploadReady = !hasPending || images.length === 0;
+    setUploadReady(uploadReady);
+  }, [images]);
+
+  // Keep track of the current avatar record to handle deletion of old files
+  const [currentAvatarRecord, setCurrentAvatarRecord] = useState<{id?: string, avatar_url: string} | null>(null);
 
   useEffect(() => {
     async function getProfile() {
@@ -44,24 +64,25 @@ export default function UserProfilePage() {
             .from("users")
             .select(
               `*,
-              user_phones(
-              phone
-              )
-              `,
-            )
+              user_phones(phone),
+              user_avatars(id,avatar_url)`)
             .eq("id", user.id)
             .single();
 
           if (error) {
             console.error("Error fetching profile:", error.message);
           } else if (data) {
+            const avatar = data.user_avatars?.[0] || null;
+            setCurrentAvatarRecord(avatar);
+            
             setFormData({
               username: data.first_name || "",
               name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
               email: data.email || user.email || "",
-              phone: data.phone_number || "",
+              phone: data.user_phones?.[0]?.phone || "",
               gender: data.gender || "male",
-              dob: data.dob || "2004-10-06",
+              dob: data.birthday || "2004-10-06",
+              avatar_url: avatar?.avatar_url || "",
             });
           }
         }
@@ -89,7 +110,6 @@ export default function UserProfilePage() {
       return;
     }
 
-    {/*Save to database*/}
     try {
       setIsSaving(true);
       const {
@@ -100,6 +120,7 @@ export default function UserProfilePage() {
       const [firstName, ...lastNameParts] = formData.name.split(" ");
       const lastName = lastNameParts.join(" ");
 
+      // Update User Basic Info
       const { error: userError } = await supabase
         .from("users")
         .update({
@@ -110,13 +131,66 @@ export default function UserProfilePage() {
         })
         .eq("id", user.id);
 
+      // Update Phone
       const { error: phoneError } = await supabase
         .from("user_phones")
         .upsert({
           user_id: user.id,
           phone: formData.phone,
-        })
-        .eq("id", user.id);
+        }, { onConflict: 'user_id' });
+
+      // Handle Avatar Update
+      const completedUpload = images.find(img => img.status === 'complete');
+      if (completedUpload?.publicUrl) {
+        // Delete old image from storage if it exists
+        if (currentAvatarRecord?.avatar_url) {
+          try {
+            console.log("Attempting to delete old avatar:", currentAvatarRecord.avatar_url);
+            let oldPath = "";
+            const decodedUrl = decodeURIComponent(currentAvatarRecord.avatar_url);
+            
+            if (decodedUrl.includes('/public/product-images/')) {
+              oldPath = decodedUrl.split('/public/product-images/')[1];
+            } else if (decodedUrl.includes('product-images/')) {
+              oldPath = decodedUrl.split('product-images/')[1];
+            }
+
+            if (oldPath.includes('?')) {
+              oldPath = oldPath.split('?')[0];
+            }
+
+            if (oldPath) {
+              console.log("Final extracted old path for deletion:", oldPath);
+              const { data: deleteData, error: deleteError } = await supabase.storage.from('product-images').remove([oldPath]);
+              
+              if (deleteError) {
+                console.error("Storage delete error:", deleteError);
+              } else if (deleteData && deleteData.length > 0) {
+                console.log("Successfully deleted old avatar from storage:", deleteData);
+              } else {
+                console.warn("Delete request successful but no files were removed. Check if path exists:", oldPath);
+              }
+            }
+          } catch (err) {
+            console.error("Failed to delete old avatar:", err);
+          }
+        }
+
+        // Update database with new URL
+        const { data: newAvatar, error: avatarError } = await supabase
+          .from("user_avatars")
+          .upsert({
+            user_id: user.id,
+            avatar_url: completedUpload.publicUrl,
+          }, { onConflict: 'user_id' })
+          .select()
+          .single();
+
+        if (newAvatar) {
+          setCurrentAvatarRecord(newAvatar);
+          setFormData(prev => ({ ...prev, avatar_url: newAvatar.avatar_url }));
+        }
+      }
 
       if (userError || phoneError) {
         throw new Error(
@@ -125,6 +199,7 @@ export default function UserProfilePage() {
       }
 
       setIsEditing(false);
+      clearAll();
     } catch (error: any) {
       alert("Error updating profile: " + error.message);
     } finally {
@@ -139,6 +214,8 @@ export default function UserProfilePage() {
       </div>
     );
   }
+
+  const currentPreview = images[images.length - 1]?.preview || formData.avatar_url;
 
   return (
     <ProfileSection
@@ -256,32 +333,42 @@ export default function UserProfilePage() {
 
         <div className="hidden lg:block w-px bg-gray-200 self-stretch"></div>
         <div className="flex flex-col items-center justify-center gap-8 lg:px-12">
-          <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner">
-            <span>
-            <User className="w-32 h-32 text-gray-400" />
-            </span>
+          <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner relative">
+            {currentPreview ? (
+            <img
+                src={currentPreview}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                
+              />
+            ) : null}
+            {uploading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-white animate-spin" />
+              </div>
+            )}
             <input
               ref={fileInputRef}
               type="file"
               name="profile_image"
               accept="image/*"
-              onChange={handleChange}
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              >
-            </input>
+              onChange={handleFileChange}
+              className="hidden"
+            />
           </div>
           
           <ProfileButton
             variant="ghost"
-            disabled={!isEditing}
             onClick={() => fileInputRef.current?.click()}
+            disabled={!isEditing}
             className={cn(
               "border-2 border-gray-300 text-gray-600 px-8 py-2 rounded-full hover:bg-gray-50 hover:border-gray-400 shadow-sm",
-              !isEditing && "opacity-50 cursor-not-allowed",
+              (!isEditing || uploading) && "opacity-50 cursor-not-allowed",
             )}
           
           >
-            Select Image
+            {uploading ? "Uploading..." : "Select Image"}
+
           </ProfileButton>
         </div>
       </div>
@@ -291,7 +378,7 @@ export default function UserProfilePage() {
           variant="white"
           size="xl"
           onClick={handleConfirmChanges}
-          disabled={isSaving}
+          disabled={isSaving || !uploadReady}
           className="flex items-center gap-3"
         >
           {isSaving && <Loader2 className="w-6 h-6 animate-spin" />}

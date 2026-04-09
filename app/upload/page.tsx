@@ -80,7 +80,7 @@ const ImageUploadPage: React.FC = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={uploadImages}
+                onClick={() => uploadImages()}
                 disabled={uploading || pendingCount === 0}
                 className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-2xl hover:shadow-xl transition-all disabled:opacity-50"
               >

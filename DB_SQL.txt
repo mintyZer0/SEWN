@@ -1,0 +1,304 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.chat_conversations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  buyer_id uuid NOT NULL,
+  seller_id uuid NOT NULL,
+  last_message_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT chat_conversations_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_conversations_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES auth.users(id),
+  CONSTRAINT chat_conversations_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.chat_messages (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  conversation_id uuid NOT NULL,
+  from_user_id uuid NOT NULL,
+  to_user_id uuid NOT NULL,
+  content text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
+  CONSTRAINT chat_messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.chat_conversations(id),
+  CONSTRAINT chat_messages_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES auth.users(id),
+  CONSTRAINT chat_messages_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.notifications (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  title character varying NOT NULL,
+  message text,
+  type character varying NOT NULL,
+  is_read boolean DEFAULT false,
+  action_link character varying,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT notifications_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.order_items (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  order_id uuid NOT NULL,
+  product_id uuid NOT NULL,
+  quantity integer NOT NULL,
+  price_at_purchase numeric NOT NULL,
+  variant_id uuid,
+  CONSTRAINT order_items_pkey PRIMARY KEY (id),
+  CONSTRAINT order_items_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id),
+  CONSTRAINT order_items_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id),
+  CONSTRAINT order_items_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)
+);
+CREATE TABLE public.orders (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  total numeric NOT NULL,
+  status character varying DEFAULT 'pending'::character varying,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT orders_pkey PRIMARY KEY (id),
+  CONSTRAINT orders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.product_categories (
+  product_id uuid NOT NULL,
+  category USER-DEFINED NOT NULL,
+  CONSTRAINT product_categories_pkey PRIMARY KEY (product_id),
+  CONSTRAINT product_categories_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.product_colors (
+  product_id uuid NOT NULL,
+  color character varying NOT NULL,
+  CONSTRAINT product_colors_pkey PRIMARY KEY (product_id, color),
+  CONSTRAINT product_colors_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.product_images (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  image_url text NOT NULL,
+  is_main boolean DEFAULT false,
+  display_order integer NOT NULL DEFAULT 0,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT product_images_pkey PRIMARY KEY (id),
+  CONSTRAINT product_images_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.product_materials (
+  product_id uuid NOT NULL,
+  material USER-DEFINED NOT NULL,
+  CONSTRAINT product_materials_pkey PRIMARY KEY (product_id, material),
+  CONSTRAINT product_materials_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.product_sizes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  size USER-DEFINED NOT NULL,
+  CONSTRAINT product_sizes_pkey PRIMARY KEY (id),
+  CONSTRAINT product_sizes_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.product_variants (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  sku character varying UNIQUE,
+  stock_quantity integer NOT NULL DEFAULT 0,
+  price_override numeric,
+  CONSTRAINT product_variants_pkey PRIMARY KEY (id),
+  CONSTRAINT product_variants_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+CREATE TABLE public.seller_products (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  name character varying NOT NULL,
+  price numeric NOT NULL,
+  img_src text NOT NULL,
+  location character varying NOT NULL CHECK (location::text = ANY (ARRAY['NCR'::character varying, 'Luzon'::character varying, 'Visayas'::character varying, 'Mindanao'::character varying]::text[])),
+  type character varying NOT NULL CHECK (type::text = ANY (ARRAY['Kids'::character varying, 'Men'::character varying, 'Women'::character varying]::text[])),
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  is_active boolean NOT NULL DEFAULT true,
+  rating numeric NOT NULL DEFAULT '0'::numeric,
+  sold integer NOT NULL DEFAULT 0,
+  description text,
+  seller_name text,
+  CONSTRAINT seller_products_pkey PRIMARY KEY (id),
+  CONSTRAINT seller_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.service_requests (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  client_id uuid NOT NULL,
+  sewer_id uuid NOT NULL,
+  service_type character varying NOT NULL CHECK (service_type::text = ANY (ARRAY['commission'::character varying::text, 'repair'::character varying::text, 'alteration'::character varying::text])),
+  contact_email character varying NOT NULL,
+  contact_phone character varying NOT NULL,
+  contact_name character varying NOT NULL,
+  request_details text NOT NULL,
+  appointment_date timestamp without time zone NOT NULL,
+  fabric_id uuid,
+  measurement_profile_id uuid,
+  status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying::text, 'accepted'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])),
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT service_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
+  CONSTRAINT service_requests_sewer_id_fkey FOREIGN KEY (sewer_id) REFERENCES public.users(id),
+  CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id),
+  CONSTRAINT service_requests_fabric_id_fkey FOREIGN KEY (fabric_id) REFERENCES public.sewer_fabrics(id)
+);
+CREATE TABLE public.sewer_achievements (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  title character varying NOT NULL,
+  date_earned timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT sewer_achievements_pkey PRIMARY KEY (id),
+  CONSTRAINT sewer_achievements_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewer_fabrics (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  sewer_id uuid NOT NULL,
+  name character varying NOT NULL,
+  description text,
+  image_url character varying,
+  is_available boolean DEFAULT true,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT sewer_fabrics_pkey PRIMARY KEY (id),
+  CONSTRAINT sewer_fabrics_sewer_id_fkey FOREIGN KEY (sewer_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewer_onboarding_surveys (
+  user_id uuid NOT NULL,
+  educational_attainment character varying,
+  monthly_income character varying,
+  reason_for_sewing character varying,
+  favorite_aspect character varying,
+  gives_pride character varying,
+  expresses_self character varying,
+  community_goals character varying,
+  learn_method character varying,
+  teacher_relationship character varying,
+  motivations character varying,
+  is_only_livelihood character varying,
+  owns_machine character varying,
+  machine_owner character varying,
+  makes_traditional_products character varying,
+  common_products_used_for character varying,
+  specific_products character varying,
+  designs_garments character varying,
+  CONSTRAINT sewer_onboarding_surveys_pkey PRIMARY KEY (user_id),
+  CONSTRAINT sewer_onboarding_surveys_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewer_settings (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE,
+  accepting_commissions boolean NOT NULL DEFAULT false,
+  accepting_alterations boolean NOT NULL DEFAULT false,
+  accepting_repairs boolean NOT NULL DEFAULT false,
+  accepting_appointments boolean NOT NULL DEFAULT false,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT sewer_settings_pkey PRIMARY KEY (id),
+  CONSTRAINT sewer_settings_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewer_statistics (
+  user_id uuid NOT NULL,
+  rating_avg numeric DEFAULT 0,
+  rating_count integer DEFAULT 0,
+  total_orders_completed integer DEFAULT 0,
+  profile_views_total integer DEFAULT 0,
+  response_time_minutes integer,
+  last_active_at timestamp with time zone,
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT sewer_statistics_pkey PRIMARY KEY (user_id),
+  CONSTRAINT sewer_statistics_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewer_verifications (
+  user_id uuid NOT NULL,
+  tax_id character varying,
+  dti_sec_number character varying,
+  id_card_url character varying,
+  profile_document_url character varying,
+  verification_status character varying DEFAULT 'pending'::character varying,
+  CONSTRAINT sewer_verifications_pkey PRIMARY KEY (user_id),
+  CONSTRAINT sewer_verifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.user_addresses (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  full_address text NOT NULL,
+  barangay text NOT NULL,
+  city text NOT NULL,
+  zip_code integer NOT NULL,
+  is_primary boolean NOT NULL DEFAULT false,
+  province text NOT NULL,
+  contact_name text,
+  contact_phone text,
+  latitude double precision,
+  longitude double precision,
+  address_type character varying DEFAULT 'shipping'::character varying CHECK (address_type::text = ANY (ARRAY['shipping'::character varying, 'billing'::character varying, 'shop'::character varying]::text[])),
+  CONSTRAINT user_addresses_pkey PRIMARY KEY (id),
+  CONSTRAINT user_addresses_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.user_avatars (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  avatar_url character varying NOT NULL,
+  uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT user_avatars_pkey PRIMARY KEY (id),
+  CONSTRAINT user_avatars_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.user_measurements (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  profile_name character varying DEFAULT 'Profile #1'::character varying,
+  unit character varying DEFAULT 'in'::character varying,
+  chest numeric,
+  shoulder_width numeric,
+  neck numeric,
+  sleeve_length_short numeric,
+  sleeve_length_long numeric,
+  upper_arm_bicep numeric,
+  wrist numeric,
+  shirt_length numeric,
+  waist_shirt numeric,
+  waist_pants numeric,
+  hips numeric,
+  inseam numeric,
+  outseam numeric,
+  thigh numeric,
+  knee numeric,
+  leg_opening numeric,
+  front_rise numeric,
+  back_rise numeric,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT user_measurements_pkey PRIMARY KEY (id),
+  CONSTRAINT user_measurements_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.user_phones (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL UNIQUE,
+  phone character varying NOT NULL,
+  landline character varying,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT user_phones_pkey PRIMARY KEY (id),
+  CONSTRAINT user_phones_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.user_socials (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  platform character varying NOT NULL,
+  handle character varying NOT NULL,
+  CONSTRAINT user_socials_pkey PRIMARY KEY (id),
+  CONSTRAINT user_socials_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.users (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  first_name text,
+  user_type USER-DEFINED NOT NULL,
+  email character varying NOT NULL UNIQUE,
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  birthday date,
+  gender USER-DEFINED,
+  last_name text,
+  latitude double precision,
+  longitude double precision,
+  CONSTRAINT users_pkey PRIMARY KEY (id),
+  CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.variant_attribute_values (
+  variant_id uuid NOT NULL,
+  attribute_type character varying NOT NULL,
+  attribute_value text NOT NULL,
+  CONSTRAINT variant_attribute_values_pkey PRIMARY KEY (variant_id, attribute_type),
+  CONSTRAINT variant_attribute_values_variant_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)
+);
