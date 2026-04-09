@@ -162,27 +162,31 @@ export default function SewerCenterPage() {
         const first_name = nameParts[0] || "";
         const last_name = nameParts.slice(1).join(" ");
 
-        await supabase.from('users').update({ first_name, last_name }).eq('id', user.id);
+        const { error: userError } = await supabase.from('users').update({ first_name, last_name }).eq('id', user.id);
+        if (userError) throw userError;
         
         if (formData.phone) {
-            await supabase.from('user_phones').upsert({ user_id: user.id, phone: formData.phone }, { onConflict: 'user_id' });
+            const { error: phoneError } = await supabase.from('user_phones').upsert({ user_id: user.id, phone: formData.phone }, { onConflict: 'user_id' });
+            if (phoneError) throw phoneError;
         }
 
         if (formData.social_link) {
-            await supabase.from('user_socials').upsert({ 
+            const { error: socialError } = await supabase.from('user_socials').upsert({ 
                 user_id: user.id, 
                 platform: 'Other', 
                 handle: formData.social_link 
             }, { onConflict: 'user_id, platform' });
+            if (socialError) throw socialError;
         }
 
         // Achievements (Simple replacement logic)
         const achievements = [formData.achievement_1, formData.achievement_2, formData.achievement_3].filter(Boolean);
         if (achievements.length > 0) {
             await supabase.from('sewer_achievements').delete().eq('user_id', user.id);
-            await supabase.from('sewer_achievements').insert(
+            const { error: achError } = await supabase.from('sewer_achievements').insert(
                 achievements.map(title => ({ user_id: user.id, title }))
             );
+            if (achError) throw achError;
         }
 
         const { data: shopAddr } = await supabase
@@ -218,9 +222,10 @@ export default function SewerCenterPage() {
         }
 
         if (shopAddr) {
-            await supabase.from('user_addresses').update(addressData).eq('id', shopAddr.id);
+            const { error: addrError } = await supabase.from('user_addresses').update(addressData).eq('id', shopAddr.id);
+            if (addrError) throw addrError;
         } else {
-            await supabase.from('user_addresses').insert({
+            const { error: addrError } = await supabase.from('user_addresses').insert({
                 user_id: user.id,
                 ...addressData,
                 address_type: 'shop',
@@ -229,14 +234,17 @@ export default function SewerCenterPage() {
                 barangay: addressData.barangay || "",
                 province: addressData.province || "",
             });
+            if (addrError) throw addrError;
         }
 
-        await supabase.from('sewer_settings').upsert({
+        const { error: settingsError } = await supabase.from('sewer_settings').upsert({
             user_id: user.id,
             accepting_alterations: services.alterations,
             accepting_repairs: services.repair,
             accepting_commissions: services.commissions
         }, { onConflict: 'user_id' });
+        
+        if (settingsError) throw settingsError;
 
         setIsEditing(false);
     } catch (error: any) {
