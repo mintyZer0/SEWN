@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { 
   CollapsibleProductSection, 
@@ -9,53 +9,109 @@ import {
 import { ProductModal } from "@/components/modals/product-modal";
 import { CommissionsModal } from "@/components/modals/commissions-modal";
 import { ViewPendingsModal } from "@/components/modals/view-pendings-modal";
-
-// Mock data with IDs
-const INITIAL_PRODUCTS: SectionItem[] = [
-  { id: "p1", name: "(Name of Product)" },
-  { id: "p2", name: "(Name of Product)" },
-  { id: "p3", name: "(Name of Product)" },
-  { id: "p4", name: "(Name of Product)" },
-];
-
-const INITIAL_ORDERS: SectionItem[] = [
-  { id: "o1", name: "(Name of Product)" },
-  { id: "o2", name: "(Name of Product)" },
-  { id: "o3", name: "(Name of Product)" },
-  { id: "o4", name: "(Name of Product)" },
-  { id: "o5", name: "(Name of Product)" },
-  { id: "o6", name: "(Name of Product)" },
-  { id: "o7", name: "(Name of Product)" },
-  { id: "o8", name: "(Name of Product)" },
-];
-
-const INITIAL_COMMISSIONS: SectionItem[] = [
-  { id: "c1", name: "(Name of Product)", type: "Alteration" },
-  { id: "c2", name: "(Name of Product)", type: "Sew" },
-  { id: "c3", name: "(Name of Product)", type: "Repair" },
-];
-
-const INITIAL_APPOINTMENTS: SectionItem[] = [
-  { id: "a1", name: "(Name of customer)" },
-  { id: "a2", name: "(Name of customer)" },
-];
+import { ServiceRequestDetailsModal, ServiceRequest } from "@/components/modals/service-request-details-modal";
+import { createClient } from "@/utils/supabase/client";
+import { Loader2 } from "lucide-react";
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
-  const [orders, setOrders] = useState(INITIAL_ORDERS);
-  const [commissions, setCommissions] = useState(INITIAL_COMMISSIONS);
-  const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
+  const supabase = createClient();
+  const [loading, setLoading] = useState(true);
+  
+  const [products, setProducts] = useState<SectionItem[]>([]);
+  const [orders, setOrders] = useState<SectionItem[]>([]);
+  const [commissions, setCommissions] = useState<SectionItem[]>([]);
+  const [appointments, setAppointments] = useState<SectionItem[]>([]);
+  
+  // For details modal
+  const [allServiceRequests, setAllServiceRequests] = useState<ServiceRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCommissionsModalOpen, setIsCommissionsModalOpen] = useState(false);
   const [isViewPendingsModalOpen, setIsViewPendingsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
+  
   const [openSections, setOpenSections] = useState({
     products: true,
     orders: true,
     commissions: true,
     appointments: true,
   });
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Fetch Products
+      const { data: productsData } = await supabase
+        .from('seller_products')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .is('deleted_at', null); // Only fetch active products
+      
+      if (productsData) {
+        setProducts(productsData.map(p => ({ id: p.id, name: p.name })));
+      }
+
+      // 2. Fetch Orders (simplified for now)
+      const { data: ordersData } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          seller_products!inner (
+            name,
+            user_id,
+            deleted_at
+          )
+        `)
+        .eq('seller_products.user_id', user.id)
+        .is('seller_products.deleted_at', null);
+      
+      if (ordersData) {
+        setOrders(ordersData.map((o: any) => ({ 
+          id: o.id, 
+          name: o.seller_products?.name || "Product Order" 
+        })));
+      }
+
+      // 3. Fetch Service Requests (Commissions & Appointments)
+      const { data: requestsData } = await supabase
+        .from('service_requests')
+        .select('*')
+        .eq('sewer_id', user.id)
+        .is('deleted_at', null) // Only fetch non-archived requests
+        .order('created_at', { ascending: false });
+
+      if (requestsData) {
+        setAllServiceRequests(requestsData as ServiceRequest[]);
+        
+        // Filter into Commissions (Commissions, Repairs, Alterations)
+        const commissionsList = requestsData
+          .filter(r => ['commission', 'repair', 'alteration'].includes(r.service_type))
+          .map(r => ({
+            id: r.id,
+            name: `${r.contact_name} - ${r.subject || r.service_type}`,
+            type: r.status
+          }));
+        setCommissions(commissionsList);
+
+        // Clear Appointments for now as requested
+        setAppointments([]);
+      }
+
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -71,32 +127,70 @@ export default function ProductsPage() {
     setIsProductModalOpen(true);
   };
 
-  const handleSaveProduct = async (productData: Partial<SectionItem>) => {
-    if (editingProduct) {
-      // Update existing product
-      setProducts(prev => prev.map(p => 
-        p.id === editingProduct.id ? { ...p, ...productData } as SectionItem : p
-      ));
-    } else {
-      // Add new product
-      const newProduct: SectionItem = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: productData.name || "New Product",
-      };
-      setProducts(prev => [...prev, newProduct]);
+  const handleItemClick = (item: SectionItem, variant: string) => {
+    if (variant === 'commission' || variant === 'appointment') {
+      const request = allServiceRequests.find(r => r.id === item.id);
+      if (request) {
+        setSelectedRequest(request);
+        setIsRequestModalOpen(true);
+      }
     }
   };
 
+  const handleStatusUpdate = (id: string, newStatus: string) => {
+    // Optimistic update or just refetch
+    fetchData();
+  };
+
+  const handleSaveProduct = async (productData: Partial<SectionItem>) => {
+    // Implementation for saving product to Supabase would go here
+    // For now, let's just refetch
+    fetchData();
+    setIsProductModalOpen(false);
+  };
+
   const handleDelete = async (id: string, variant: string) => {
-    console.log(`Deleting ${variant} with id: ${id} from Supabase...`);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    switch(variant) {
-      case 'product': setProducts(prev => prev.filter(i => i.id !== id)); break;
-      case 'order': setOrders(prev => prev.filter(i => i.id !== id)); break;
-      case 'commission': setCommissions(prev => prev.filter(i => i.id !== id)); break;
-      case 'appointment': setAppointments(prev => prev.filter(i => i.id !== id)); break;
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const now = new Date().toISOString();
+
+      if (variant === 'commission' || variant === 'appointment') {
+        // Soft delete Service Request
+        const { error } = await supabase
+          .from('service_requests')
+          .update({ deleted_at: now })
+          .eq('id', id);
+        
+        if (error) throw error;
+      } else if (variant === 'product') {
+        // Soft delete Product
+        const { error } = await supabase
+          .from('seller_products')
+          .update({ deleted_at: now })
+          .eq('id', id);
+        
+        if (error) throw error;
+      }
+
+      await fetchData();
+    } catch (error) {
+      console.error(`Failed to delete ${variant}:`, error);
+      alert(`Failed to delete ${variant}. Please try again.`);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-third" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-12">
@@ -162,6 +256,7 @@ export default function ProductsPage() {
           onToggle={() => toggleSection("commissions")}
           items={commissions}
           onItemDelete={(id) => handleDelete(id, 'commission')}
+          onItemClick={(item) => handleItemClick(item, 'commission')}
         />
 
         {/* Appointments Section */}
@@ -172,6 +267,7 @@ export default function ProductsPage() {
           onToggle={() => toggleSection("appointments")}
           items={appointments}
           onItemDelete={(id) => handleDelete(id, 'appointment')}
+          onItemClick={(item) => handleItemClick(item, 'appointment')}
         />
       </div>
 
@@ -191,6 +287,14 @@ export default function ProductsPage() {
         isOpen={isViewPendingsModalOpen}
         onClose={() => setIsViewPendingsModalOpen(false)}
       />
+
+      <ServiceRequestDetailsModal
+        isOpen={isRequestModalOpen}
+        request={selectedRequest}
+        onClose={() => setIsRequestModalOpen(false)}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }
+

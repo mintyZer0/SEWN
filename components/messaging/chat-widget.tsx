@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { MessageSquare, X, ChevronLeft } from "lucide-react";
-import { cn, getChatRoomId } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { ChatListCompact } from "./chat-list-compact";
 import { RealtimeChat } from "./realtime-chat";
 import { createClient } from "@/utils/supabase/client";
