@@ -79,7 +79,7 @@ export default function UserProfilePage() {
               username: data.first_name || "",
               name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
               email: data.email || user.email || "",
-              phone: data.user_phones?.[0]?.phone || "",
+              phone: data.user_phones.phone || "",
               gender: data.gender || "male",
               dob: data.birthday || "2004-10-06",
               avatar_url: avatar?.avatar_url || "",
