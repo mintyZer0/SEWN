@@ -12,12 +12,14 @@ interface CommissionFormProps {
   sewerImage: string;
   sewerId: string;
   serviceType: "commission" | "repair" | "alteration";
+  disableSubject?: boolean;
   disableEmail?: boolean;
   disableFullName?: boolean;
   disableFabric?: boolean;
   disableOrderDetails?: boolean;
   disableMeasurements?: boolean;
   disableScheduleAppointment?: boolean;
+  disableImages?: boolean;
   orderDetailsLabel?: string;
 }
 
@@ -26,20 +28,23 @@ export default function CommissionForm({
   sewerImage,
   sewerId,
   serviceType,
+  disableSubject = false,
   disableEmail = false,
   disableFullName = false,
   disableFabric = false,
   disableOrderDetails = false,
   disableMeasurements = false,
   disableScheduleAppointment = false,
+  disableImages = false,
   orderDetailsLabel = "Order Details",
-}: CommissionFormProps) {
+  }: CommissionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const supabase = createClient();
 
   const [formData, setFormData] = useState({
+    subject: "",
     email: "",
     fullName: "",
     fabricToUse: "",
@@ -47,6 +52,7 @@ export default function CommissionForm({
     measurements: "",
     scheduleAppointment: "",
     appointmentDate: "",
+    images: [] as File[],
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -117,6 +123,7 @@ export default function CommissionForm({
         client_id: user.id,
         sewer_id: sewerId,
         service_type: serviceType,
+        subject: formData.subject || `New ${serviceType} request`,
         contact_email: formData.email || user.email || "",
         contact_phone: "Not provided", // Add to form later if needed
         contact_name: formData.fullName || user.user_metadata?.full_name || "User",
@@ -177,6 +184,27 @@ export default function CommissionForm({
               {errorMsg}
             </div>
           )}
+        {!disableSubject && (
+          <div>
+            <label
+              htmlFor="subject"
+              className="block text-base font-light text-black mb-1"
+            >
+              Subject <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              required
+              placeholder={`E.g. ${serviceType === 'repair' ? 'Fixing a hole' : 'Custom dress inquiry'}`}
+              value={formData.subject}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
+            />
+          </div>
+        )}
+
         {!disableEmail && (
           <div>
             <label
@@ -305,6 +333,27 @@ export default function CommissionForm({
               min={new Date().toISOString().split("T")[0]}
               className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent cursor-pointer"
             />
+          </div>
+        )}
+
+        {!disableImages && (
+          <div>
+            <label
+              htmlFor="images"
+              className="block text-base font-light text-black mb-1"
+            >
+              Reference Images
+            </label>
+            <input
+              type="file"
+              id="images"
+              name="images"
+              multiple
+              accept="image/*"
+              disabled
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-third file:text-white hover:file:bg-third/90 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500 mt-1">Image uploads are currently being set up. This will be available soon.</p>
           </div>
         )}
 
