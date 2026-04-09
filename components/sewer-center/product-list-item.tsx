@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ProductListItemProps {
   index: number;
@@ -10,6 +11,7 @@ interface ProductListItemProps {
   showEdit?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onClick?: () => void;
 }
 
 export const ProductListItem = ({
@@ -19,20 +21,28 @@ export const ProductListItem = ({
   showEdit = false,
   onEdit,
   onDelete,
+  onClick,
 }: ProductListItemProps) => (
   <div className="bg-white rounded-2xl p-5 mb-4 flex items-center justify-between shadow-md hover:shadow-lg transition-all border border-gray-100/50">
-    <div className="flex items-center gap-4 text-xl text-gray-700">
+    <div 
+      className="flex items-center gap-4 text-xl text-gray-700 flex-1 cursor-pointer"
+      onClick={onClick}
+    >
       <span className="font-medium">{index}.</span>
       <span>{name}</span>
     </div>
 
     <div className="flex items-center gap-4">
       {type && (
-        <span className="text-gray-400 text-lg border-l border-gray-200 pl-6 h-8 w-24 flex items-center">
+        <span className={cn(
+          "text-lg border-l border-gray-200 pl-6 h-8 min-w-24 flex items-center font-bold uppercase tracking-tighter",
+          type === "pending" ? "text-orange-500" : 
+          type === "accepted" ? "text-green-500" : "text-gray-400"
+        )}>
           {type}
         </span>
       )}
-
+...
       {showEdit && (
         <button
           onClick={onEdit}

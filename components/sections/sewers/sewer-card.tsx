@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle } from "react-feather";
 import { supabase } from "@/utils/supabase/client";
+import { getChatRoomId } from "@/lib/utils";
 
 export type Sewer = {
   id: string;
@@ -39,7 +40,6 @@ export default function SewerCard({
   const openChatWithSeller = async (sellerId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     
-
     if (!user) {
       const redirect = `/chat`;
       router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`);
@@ -49,20 +49,17 @@ export default function SewerCard({
     const buyerId = user.id;
     const sellerUUID = sellerId;
 
-    // Try to get existing conversation
+    // Use the stable room ID function
+    const stableConversationId = getChatRoomId(buyerId, sellerUUID);
+
+    // Try to get existing conversation with stable ID
     const { data: existing, error: selectErr } = await supabase
       .from("chat_conversations")
       .select("id")
-      .eq("buyer_id", buyerId)
-      .eq("seller_id", sellerUUID)
-      .single();
+      .eq("id", stableConversationId)
+      .maybeSingle();
 
     let conversationId: string;
-
-    if (selectErr && selectErr.code !== "PGRST116") {
-      console.error("Error checking conversation:", selectErr);
-      return;
-    }
 
     if (existing) {
       conversationId = existing.id;
@@ -70,6 +67,7 @@ export default function SewerCard({
       const { data: newConv, error: insertErr } = await supabase
         .from("chat_conversations")
         .insert({
+          id: stableConversationId,
           buyer_id: buyerId,
           seller_id: sellerUUID,
         })
@@ -77,7 +75,7 @@ export default function SewerCard({
         .single();
 
       if (insertErr) {
-        console.error("Failed to create conversation:", insertErr);
+        console.error("Failed to create conversation with stable ID:", insertErr);
         return;
       }
 
