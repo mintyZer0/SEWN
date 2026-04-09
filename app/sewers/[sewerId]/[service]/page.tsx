@@ -1,24 +1,44 @@
 import { notFound } from "next/navigation";
-import { getSewerById } from "@/data/sewers";
+import { createClient } from "@/utils/supabase/server";
 import CommissionForm from "@/components/service/commission-form";
 import Image from "next/image";
 import SeparatorX from "@/components/ui/separator-x";
 import ProcessSteps from "@/components/service/process-steps";
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     sewerId: string;
     service: string;
-  };
+  }>;
 }
 
 export default async function ServicePage({ params }: ServicePageProps) {
   const { sewerId, service } = await params;
-  const sewer = getSewerById(sewerId);
+  
+  const supabase = await createClient();
+  const { data: user, error } = await supabase
+    .from("users")
+    .select(`
+      id,
+      first_name,
+      last_name,
+      user_type,
+      user_avatars (avatar_url),
+      sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions)
+    `)
+    .eq("id", sewerId)
+    .single();
 
-  if (!sewer) {
+  if (error || !user || user.user_type !== "seller") {
     notFound();
   }
+
+  const settingsArray = Array.isArray(user.sewer_settings) ? user.sewer_settings : [user.sewer_settings].filter(Boolean);
+  const settings = settingsArray[0];
+  const servicesOffered: ("repair" | "alteration" | "commission")[] = [];
+  if (settings?.accepting_repairs) servicesOffered.push("repair");
+  if (settings?.accepting_alterations) servicesOffered.push("alteration");
+  if (settings?.accepting_commissions) servicesOffered.push("commission");
 
   const normalizedService = service.toLowerCase();
   const serviceMap: { [key: string]: string } = {
@@ -31,10 +51,13 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
   if (
     !serviceType ||
-    !sewer.servicesOffered.includes(normalizedService as any)
+    !servicesOffered.includes(normalizedService as any)
   ) {
     notFound();
   }
+  
+  const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewer";
+  const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewer-photos/1.jpg";
 
   const renderServiceContent = () => {
     switch (normalizedService) {
@@ -98,7 +121,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </p>
             </div>
             <SeparatorX />
-            <CommissionForm sewerName={sewer.name} sewerImage={sewer.image} />
+            <CommissionForm sewerName={name} sewerImage={avatar} sewerId={sewerId} serviceType="commission" />
             <ProcessSteps steps={commissionSteps} />
           </div>
         );
@@ -157,8 +180,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
             </div>
             <SeparatorX />
             <CommissionForm
-              sewerName={sewer.name}
-              sewerImage={sewer.image}
+              sewerName={name}
+              sewerImage={avatar}
+              sewerId={sewerId}
+              serviceType="repair"
               disableFabric={true}
               disableMeasurements={true}
               orderDetailsLabel="Repair Details"
@@ -220,7 +245,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </p>
             </div>
             <SeparatorX />
-            <CommissionForm sewerName={sewer.name} sewerImage={sewer.image} />
+            <CommissionForm sewerName={name} sewerImage={avatar} sewerId={sewerId} serviceType="alteration" />
             <ProcessSteps steps={alterationSteps} />
           </div>
         );

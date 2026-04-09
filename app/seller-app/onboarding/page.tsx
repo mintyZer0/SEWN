@@ -214,15 +214,16 @@ export default function OnboardingPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="age" className="text-sm text-third/70">Age</Label>
-                      <Input name="age" id="age" type="number" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
+                      <Label htmlFor="birthday" className="text-sm text-third/70">Birthday</Label>
+                      <Input name="birthday" id="birthday" type="date" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="sex" className="text-sm text-third/70">Sex</Label>
-                      <select name="sex" id="sex" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
-                        <option value="">Select Sex</option>
+                      <Label htmlFor="gender" className="text-sm text-third/70">Gender</Label>
+                      <select name="gender" id="gender" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Gender</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
+                        <option value="Other">Other</option>
                       </select>
                     </div>
                   </div>

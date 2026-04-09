@@ -7,11 +7,13 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 - **Backend:** **Supabase** handles authentication (Email, OAuth), PostgreSQL database management, and image storage.
 - **Styling:** **Tailwind CSS 4** with **DaisyUI** and Radix UI.
 - **Theme:** Colors like `primary`, `secondary`, and `third` (orange) are defined as CSS variables in `globals.css`. Use Tailwind classes like `text-primary`, `bg-secondary`, `border-third`.
-- **User Roles:** Dual-user ecosystem distinguishing between **Customers** (User Profile) and **Sellers** (Sewer Center).
+- **User Roles:** Triple-user ecosystem distinguishing between **Customers** (User Profile), **Sellers** (Sewer Center), and **Admins** (Internal Management).
+- **Database Schema:** Follows a normalized structure where seller-specific data is distributed across specialized tables (`sewer_verifications`, `sewer_onboarding_surveys`, `sewer_achievements`, `sewer_statistics`) rather than a single profile table.
 
 ## Key Features & Components
 - **Marketplace:** Multi-step checkout stepper (`product-details` → `address` → `payment` → `confirmation`).
 - **Sewer Center:** Profile management (Achievements, Services, Location pinning via Google Maps) and Product dashboard.
+- **Admin Dashboard:** **Not yet implemented.** While the `Admin` user type exists in the database, the management UI is currently a future task.
 - **Reusable Components:**
   - `ProfileButton`: Located in `@/components/user-profile/profile-buttons`. Use variants like `orange` (white text) and sizes like `xl` for primary actions.
   - `MapComponent`: Now using Google Maps API via `@vis.gl/react-google-maps`.

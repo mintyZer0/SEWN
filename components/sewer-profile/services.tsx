@@ -3,35 +3,51 @@ import CardBentoGrid from "@/components/ui/card-bento-grid";
 
 interface ServicesProps {
   sewerId: string;
+  servicesOffered: ("repair" | "alteration" | "commission")[];
 }
 
-export default function Services({ sewerId }: ServicesProps) {
-  const cardItems = [
+export default function Services({ sewerId, servicesOffered }: ServicesProps) {
+  const allCardItems = [
     {
       imgSrc: "/assets/services-bento-bg/bento-shop.jpg",
       service: "Repair",
-      href: `/sewer-profiles/${sewerId}/repair`,
+      type: "repair",
+      href: `/sewers/${sewerId}/repair`,
       colSpan: 1,
       id: 1,
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-customize-fit.jpg",
       service: "Alteration",
-      href: `/sewer-profiles/${sewerId}/alteration`,
+      type: "alteration",
+      href: `/sewers/${sewerId}/alteration`,
       colSpan: 1,
       id: 2,
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
       service: "Commision",
-      href: `/sewer-profiles/${sewerId}/commission`,
+      type: "commission",
+      href: `/sewers/${sewerId}/commission`,
       colSpan: 2,
       id: 3,
     },
   ];
+
+  const filteredItems = allCardItems.filter(item => 
+    servicesOffered.includes(item.type as any)
+  );
+
+  // If only 1 item, make it full width (colSpan 2)
+  if (filteredItems.length === 1) {
+    filteredItems[0].colSpan = 2;
+  }
+
+  if (filteredItems.length === 0) return null;
+
   return (
     <>
-      <CardBentoGrid items={cardItems} header="browse" />
+      <CardBentoGrid items={filteredItems} header="Pick a service" />
     </>
   );
 }

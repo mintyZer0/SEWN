@@ -3,31 +3,48 @@
 import { useState } from "react";
 import Image from "next/image";
 import PrimaryButton from "../ui/primary-button";
+import { createClient } from "@/utils/supabase/client";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface CommissionFormProps {
   sewerName: string;
   sewerImage: string;
+  sewerId: string;
+  serviceType: "commission" | "repair" | "alteration";
+  disableSubject?: boolean;
   disableEmail?: boolean;
   disableFullName?: boolean;
   disableFabric?: boolean;
   disableOrderDetails?: boolean;
   disableMeasurements?: boolean;
   disableScheduleAppointment?: boolean;
+  disableImages?: boolean;
   orderDetailsLabel?: string;
 }
 
 export default function CommissionForm({
   sewerName,
   sewerImage,
+  sewerId,
+  serviceType,
+  disableSubject = false,
   disableEmail = false,
   disableFullName = false,
   disableFabric = false,
   disableOrderDetails = false,
   disableMeasurements = false,
   disableScheduleAppointment = false,
+  disableImages = false,
   orderDetailsLabel = "Order Details",
-}: CommissionFormProps) {
+  }: CommissionFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const supabase = createClient();
+
   const [formData, setFormData] = useState({
+    subject: "",
     email: "",
     fullName: "",
     fabricToUse: "",
@@ -35,6 +52,7 @@ export default function CommissionForm({
     measurements: "",
     scheduleAppointment: "",
     appointmentDate: "",
+    images: [] as File[],
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -80,6 +98,53 @@ export default function CommissionForm({
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMsg("");
+
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        throw new Error("You must be logged in to submit a request.");
+      }
+
+      // Format details
+      let finalDetails = formData.orderDetails;
+      if (formData.fabricToUse) {
+        finalDetails += `\nFabric: ${formData.fabricToUse}`;
+      }
+      if (formData.measurements) {
+        finalDetails += `\nMeasurements: ${formData.measurements}`;
+      }
+
+      const { error: submitError } = await supabase.from("service_requests").insert({
+        client_id: user.id,
+        sewer_id: sewerId,
+        service_type: serviceType,
+        subject: formData.subject || `New ${serviceType} request`,
+        contact_email: formData.email || user.email || "",
+        contact_phone: "Not provided", // Add to form later if needed
+        contact_name: formData.fullName || user.user_metadata?.full_name || "User",
+        request_details: finalDetails,
+        appointment_date: formData.scheduleAppointment === "yes" && formData.appointmentDate 
+          ? new Date(formData.appointmentDate).toISOString()
+          : new Date().toISOString(), // Fallback if no date
+        status: "pending"
+      });
+
+      if (submitError) throw submitError;
+      
+      setSuccess(true);
+    } catch (err: any) {
+      console.error("Submission error:", err);
+      setErrorMsg(err.message || "An error occurred while submitting your request.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const fabricOptions = [
     "Cotton",
     "Linen",
@@ -99,7 +164,47 @@ export default function CommissionForm({
         <span className="text-black">Commision</span> {sewerName}
       </h2>
 
-      <form className="space-y-5">
+      {success ? (
+        <div className="text-center space-y-6">
+          <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 className="text-3xl font-medium text-heading">Request Submitted!</h3>
+          <p className="text-xl text-gray-600">The sewer will review your request and get back to you shortly.</p>
+          <Link href={`/sewers/${sewerId}`}>
+            <PrimaryButton className="mt-8">Return to Profile</PrimaryButton>
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {errorMsg && (
+            <div className="p-4 bg-red-50 text-red-500 rounded-md">
+              {errorMsg}
+            </div>
+          )}
+        {!disableSubject && (
+          <div>
+            <label
+              htmlFor="subject"
+              className="block text-base font-light text-black mb-1"
+            >
+              Subject <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              required
+              placeholder={`E.g. ${serviceType === 'repair' ? 'Fixing a hole' : 'Custom dress inquiry'}`}
+              value={formData.subject}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
+            />
+          </div>
+        )}
+
         {!disableEmail && (
           <div>
             <label
@@ -231,12 +336,37 @@ export default function CommissionForm({
           </div>
         )}
 
-        <PrimaryButton type="submit">Confirm Order</PrimaryButton>
+        {!disableImages && (
+          <div>
+            <label
+              htmlFor="images"
+              className="block text-base font-light text-black mb-1"
+            >
+              Reference Images
+            </label>
+            <input
+              type="file"
+              id="images"
+              name="images"
+              multiple
+              accept="image/*"
+              disabled
+              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-third file:text-white hover:file:bg-third/90 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500 mt-1">Image uploads are currently being set up. This will be available soon.</p>
+          </div>
+        )}
+
+        <PrimaryButton type="submit" disabled={isSubmitting} className="flex items-center justify-center gap-2">
+          {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
+          {isSubmitting ? "Submitting..." : "Confirm Order"}
+        </PrimaryButton>
 
         <p className="text-xs text-center text-[#2C2463] mt-4">
           By continuing, you agree to our terms and conditions
         </p>
       </form>
+      )}
     </div>
   );
 }

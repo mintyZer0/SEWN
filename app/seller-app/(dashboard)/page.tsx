@@ -46,6 +46,7 @@ export default function SewerCenterPage() {
     alterations: false,
     repair: false,
     commissions: false,
+    appointments: false,
   });
 
   useEffect(() => {
@@ -61,8 +62,9 @@ export default function SewerCenterPage() {
           email,
           user_phones(phone),
           user_addresses(id, full_address, latitude, longitude, is_primary, address_type, province, city, barangay, zip_code),
-          sewer_profiles(social_link, reason_for_sewing),
-          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions)
+          user_socials(handle),
+          sewer_achievements(title),
+          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions, accepting_appointments)
         `)
         .eq('id', user.id)
         .single();
@@ -76,21 +78,23 @@ export default function SewerCenterPage() {
         const phones = Array.isArray(profileData.user_phones) ? profileData.user_phones : [profileData.user_phones].filter(Boolean);
         const phone = phones[0]?.phone;
 
-        const profiles = Array.isArray(profileData.sewer_profiles) ? profileData.sewer_profiles : [profileData.sewer_profiles].filter(Boolean);
-        const profile = profiles[0];
+        const socials = Array.isArray(profileData.user_socials) ? profileData.user_socials : [profileData.user_socials].filter(Boolean);
+        const social = socials[0];
+
+        const achievements = Array.isArray(profileData.sewer_achievements) ? profileData.sewer_achievements : [profileData.sewer_achievements].filter(Boolean);
 
         const settingsArray = Array.isArray(profileData.sewer_settings) ? profileData.sewer_settings : [profileData.sewer_settings].filter(Boolean);
         const settings = settingsArray[0];
 
         setFormData({
           name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim(),
-          description: profile?.reason_for_sewing || "",
+          description: "", // Shop description is not yet linked to a DB field
           email: profileData.email || "",
-          social_link: profile?.social_link || "",
+          social_link: social?.handle || "",
           phone: phone || "",
-          achievement_1: "", // Mocked as there's no DB schema for this yet
-          achievement_2: "",
-          achievement_3: "",
+          achievement_1: achievements[0]?.title || "",
+          achievement_2: achievements[1]?.title || "",
+          achievement_3: achievements[2]?.title || "",
         });
 
         if (shopAddress) {
@@ -111,6 +115,7 @@ export default function SewerCenterPage() {
                 alterations: settings.accepting_alterations || false,
                 repair: settings.accepting_repairs || false,
                 commissions: settings.accepting_commissions || false,
+                appointments: settings.accepting_appointments || false,
             });
         }
       }
@@ -159,17 +164,32 @@ export default function SewerCenterPage() {
         const first_name = nameParts[0] || "";
         const last_name = nameParts.slice(1).join(" ");
 
-        await supabase.from('users').update({ first_name, last_name }).eq('id', user.id);
+        const { error: userError } = await supabase.from('users').update({ first_name, last_name }).eq('id', user.id);
+        if (userError) throw userError;
         
         if (formData.phone) {
-            await supabase.from('user_phones').upsert({ user_id: user.id, phone: formData.phone }, { onConflict: 'user_id' });
+            const { error: phoneError } = await supabase.from('user_phones').upsert({ user_id: user.id, phone: formData.phone }, { onConflict: 'user_id' });
+            if (phoneError) throw phoneError;
         }
 
-        await supabase.from('sewer_profiles').upsert({ 
-            user_id: user.id, 
-            social_link: formData.social_link,
-            reason_for_sewing: formData.description
-        }, { onConflict: 'user_id' });
+        if (formData.social_link) {
+            const { error: socialError } = await supabase.from('user_socials').upsert({ 
+                user_id: user.id, 
+                platform: 'Other', 
+                handle: formData.social_link 
+            }, { onConflict: 'user_id, platform' });
+            if (socialError) throw socialError;
+        }
+
+        // Achievements (Simple replacement logic)
+        const achievements = [formData.achievement_1, formData.achievement_2, formData.achievement_3].filter(Boolean);
+        if (achievements.length > 0) {
+            await supabase.from('sewer_achievements').delete().eq('user_id', user.id);
+            const { error: achError } = await supabase.from('sewer_achievements').insert(
+                achievements.map(title => ({ user_id: user.id, title }))
+            );
+            if (achError) throw achError;
+        }
 
         const { data: shopAddr } = await supabase
             .from('user_addresses')
@@ -204,9 +224,10 @@ export default function SewerCenterPage() {
         }
 
         if (shopAddr) {
-            await supabase.from('user_addresses').update(addressData).eq('id', shopAddr.id);
+            const { error: addrError } = await supabase.from('user_addresses').update(addressData).eq('id', shopAddr.id);
+            if (addrError) throw addrError;
         } else {
-            await supabase.from('user_addresses').insert({
+            const { error: addrError } = await supabase.from('user_addresses').insert({
                 user_id: user.id,
                 ...addressData,
                 address_type: 'shop',
@@ -215,14 +236,17 @@ export default function SewerCenterPage() {
                 barangay: addressData.barangay || "",
                 province: addressData.province || "",
             });
+            if (addrError) throw addrError;
         }
 
-        await supabase.from('sewer_settings').upsert({
+        const { error: settingsError } = await supabase.from('sewer_settings').upsert({
             user_id: user.id,
             accepting_alterations: services.alterations,
             accepting_repairs: services.repair,
             accepting_commissions: services.commissions
         }, { onConflict: 'user_id' });
+        
+        if (settingsError) throw settingsError;
 
         setIsEditing(false);
     } catch (error: any) {
@@ -468,6 +492,15 @@ export default function SewerCenterPage() {
                 name="services"
                 value="commissions"
                 checked={services.commissions}
+                onChange={handleServiceChange}
+                disabled={!isEditing || isSaving}
+                size="md"
+              />
+              <CustomCheckbox
+                label="Appointments"
+                name="services"
+                value="appointments"
+                checked={services.appointments}
                 onChange={handleServiceChange}
                 disabled={!isEditing || isSaving}
                 size="md"

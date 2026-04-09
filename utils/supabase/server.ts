@@ -5,35 +5,31 @@ import { NextRequest } from "next/server";
 export async function createClient() {
   const cookieStore = await cookies();
   const host = (await headers()).get("host") || "";
-  const domain = host.includes("sewn.local") ? ".sewn.local" : host.includes("localhost") ? "localhost" : undefined;
+  const domain = host.includes("sewn.local") ? ".sewn.local" : undefined;
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({ 
-              name, 
-              value, 
-              ...options,
-              domain: name.startsWith("sb-") ? domain : options.domain 
-            });
-          } catch (error) {}
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set({ 
-              name, 
-              value: "", 
-              ...options,
-              domain: name.startsWith("sb-") ? domain : options.domain 
-            });
-          } catch (error) {}
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set({ 
+                name, 
+                value, 
+                ...options,
+                domain: name.startsWith("sb-") ? domain : options.domain 
+              }),
+            );
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     },

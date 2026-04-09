@@ -99,7 +99,7 @@ export const ViewSewerButton = ({
       className={className}
       {...props}
     >
-      <Link href={`/sewer-profiles/${sewerId}`}>
+      <Link href={`/sewers/${sewerId}`}>
         View Sewer
       </Link>
     </OrderActionButton>

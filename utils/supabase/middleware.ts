@@ -35,33 +35,25 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.rewrite(new URL("/404", request.url));
   }
 
-  const domain = hostname.includes("sewn.local") ? ".sewn.local" : hostname.includes("localhost") ? "localhost" : undefined;
+  const domain = hostname.includes("sewn.local") ? ".sewn.local" : undefined;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
+        getAll() {
+          return request.cookies.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({ name, value, ...options });
-          // If we already have a rewrite/redirect response, we need to update its cookies too
-          response.cookies.set({ 
-            name, 
-            value, 
-            ...options,
-            domain: name.startsWith("sb-") || name.includes("-auth-token") ? domain : options.domain
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({ name, value: "", ...options });
-          response.cookies.set({ 
-            name, 
-            value: "", 
-            ...options,
-            domain: name.startsWith("sb-") || name.includes("-auth-token") ? domain : options.domain
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            request.cookies.set(name, value);
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+              domain: name.startsWith("sb-") ? domain : options.domain,
+            });
           });
         },
       },

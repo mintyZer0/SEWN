@@ -36,7 +36,12 @@ export default function SewersGrid({
             last_name,
             user_type,
             user_avatars (avatar_url),
-            user_addresses (province, city, is_primary)
+            user_addresses (province, city, is_primary),
+            sewer_statistics (rating_avg, total_orders_completed),
+            sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions),
+            sewer_verifications (verification_status),
+            sewer_achievements (title),
+            sewer_onboarding_surveys (reason_for_sewing)
           `)
           .eq("user_type", "seller");
 
@@ -54,6 +59,10 @@ export default function SewersGrid({
         }
 
         const sewersToSet: Sewer[] = data.map((user: any) => {
+          const stats = user.sewer_statistics?.[0];
+          const settings = user.sewer_settings?.[0];
+          const verification = user.sewer_verifications?.[0];
+          const achievements = user.sewer_achievements || [];
 
           const primaryAddress =
             user.user_addresses?.find((addr: any) => addr.is_primary) ||
@@ -62,19 +71,30 @@ export default function SewersGrid({
           const location =
             primaryAddress
               ? `${primaryAddress.city}${primaryAddress.province ? `, ${primaryAddress.province}` : ""}`
-              : user.location || "Location not set";
+              : "Location not set";
 
           const avatar = user.user_avatars?.[0]?.avatar_url;
+
+          const services: string[] = [];
+          if (settings?.accepting_repairs) services.push("Repair");
+          if (settings?.accepting_alterations) services.push("Alteration");
+          if (settings?.accepting_commissions) services.push("Commission");
+
+          const isTesda = achievements.some((a: any) => 
+            a.title?.toLowerCase().includes("tesda")
+          );
 
           return {
             id: user.id,
             name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewer",
             location,
             img_src: avatar || "/assets/sewer-photos/1.jpg",
-            rating: 5.0,
-            completed_orders: 0,
-            services: [],
-            years_of_experience: 0,
+            rating: stats?.rating_avg || 0,
+            completed_orders: stats?.total_orders_completed || 0,
+            services,
+            years_of_experience: 0, // Still mocked
+            is_verified: verification?.verification_status === "verified",
+            is_tesda_certified: isTesda
           };
         });
 

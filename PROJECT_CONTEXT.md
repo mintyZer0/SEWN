@@ -12,11 +12,12 @@ SEWN is a specialized marketplace platform connecting users with local tailors a
 - **State Management:** React Context (CartContext)
 
 ## Core Domain Entities
-- **Sewers:** Profile pages (`/sewer-profiles/[sewerId]`), contact info, map location, services, achievements, and stats.
+- **Sewers:** Profile pages (`/sewers/[sewerId]`), contact info, map location, services, achievements, and stats. Managed via the **Seller Center** dashboard. Metrics are tracked in the `sewer_statistics` table (ratings, clicks, views).
+- **Customers:** Profile management (`/user-profile`), address management, and measurements.
+- **Admins:** System-wide management for verifying sewer documents. **Admin Dashboard is currently not yet implemented.**
 - **Products:** Custom-made garments listed by sewers (`/browse/shop`).
 - **Services:** Tailoring services like alterations, repairs, and commissions.
 - **Checkout:** A multi-step stepper process for garment purchases and service commissions.
-- **Users:** Profile management for customers.
 
 ## Key Directories
 - `app/`: Routing and layouts (App Router).
