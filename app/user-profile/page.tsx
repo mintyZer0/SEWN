@@ -13,6 +13,7 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Use a dedicated folder for avatars in the existing bucket
@@ -30,16 +31,6 @@ export default function UserProfilePage() {
     addImages(file).then((newImages) => uploadImages(newImages));
   };
 
-  const [formData, setFormData] = useState({
-    username: "",
-    name: "",
-    email: "",
-    phone: "",
-    gender: "",
-    dob: "",
-    avatar_url: "",
-  });
-
   const [uploadReady, setUploadReady] = useState(true);
 
   useEffect(() => {
@@ -50,9 +41,19 @@ export default function UserProfilePage() {
 
   // Keep track of the current avatar record to handle deletion of old files
   const [currentAvatarRecord, setCurrentAvatarRecord] = useState<{id?: string, avatar_url: string} | null>(null);
+  
+  const [formData, setFormData] = useState({
+      username: "",
+      name: "",
+      email: "",
+      phone: "",
+      gender: "",
+      dob: "",
+      avatar_url: "",
+    });
 
-  useEffect(() => {
-    async function getProfile() {
+
+  useEffect(() => {async function getProfile() {
       try {
         setLoading(true);
         const {
@@ -72,17 +73,30 @@ export default function UserProfilePage() {
           if (error) {
             console.error("Error fetching profile:", error.message);
           } else if (data) {
-            const avatar = data.user_avatars?.[0] || null;
-            setCurrentAvatarRecord(avatar);
-            
+            const avatar = data.user_avatars;
+
+            let publicAvatarUrl = "";
+
+            if (avatar?.avatar_url) {
+              const { data: publicData } = supabase.storage
+                .from("product-images")
+                .getPublicUrl(avatar.avatar_url);
+
+              publicAvatarUrl = publicData.publicUrl;
+            } else {
+              publicAvatarUrl = "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+            }
+            console.log("FETCHED DATA:", data.user_avatars);
+            setAvatarUrl(publicAvatarUrl);
+
             setFormData({
               username: data.first_name || "",
               name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
               email: data.email || user.email || "",
               phone: data.user_phones.phone || "",
               gender: data.gender || "male",
-              dob: data.birthday || "2004-10-06",
-              avatar_url: avatar?.avatar_url || "",
+              dob: data.birthday || "1999-01-01",
+              avatar_url: publicAvatarUrl,
             });
           }
         }
@@ -141,39 +155,32 @@ export default function UserProfilePage() {
 
       // Handle Avatar Update
       const completedUpload = images.find(img => img.status === 'complete');
-      if (completedUpload?.publicUrl) {
+      const filePath = completedUpload?.filePath;
+
+      if (!filePath?.startsWith("avatars/")) {
+        throw new Error("Invalid file path: " + filePath);
+      }
+
+      const { data: existingAvatar } = await supabase
+        .from("user_avatars")
+        .select("avatar_url")
+        .eq("user_id", user.id)
+        .single();
+
+        if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/Default.jpg") {
+        console.log("Deleting old avatar:", existingAvatar.avatar_url);
+
+        await supabase.storage
+          .from("product-images")
+          .remove([existingAvatar.avatar_url]);
+        }
+
+      if (completedUpload?.filePath && !completedUpload.filePath.endsWith("/")) {
         // Delete old image from storage if it exists
         if (currentAvatarRecord?.avatar_url) {
-          try {
-            console.log("Attempting to delete old avatar:", currentAvatarRecord.avatar_url);
-            let oldPath = "";
-            const decodedUrl = decodeURIComponent(currentAvatarRecord.avatar_url);
-            
-            if (decodedUrl.includes('/public/product-images/')) {
-              oldPath = decodedUrl.split('/public/product-images/')[1];
-            } else if (decodedUrl.includes('product-images/')) {
-              oldPath = decodedUrl.split('product-images/')[1];
-            }
-
-            if (oldPath.includes('?')) {
-              oldPath = oldPath.split('?')[0];
-            }
-
-            if (oldPath) {
-              console.log("Final extracted old path for deletion:", oldPath);
-              const { data: deleteData, error: deleteError } = await supabase.storage.from('product-images').remove([oldPath]);
-              
-              if (deleteError) {
-                console.error("Storage delete error:", deleteError);
-              } else if (deleteData && deleteData.length > 0) {
-                console.log("Successfully deleted old avatar from storage:", deleteData);
-              } else {
-                console.warn("Delete request successful but no files were removed. Check if path exists:", oldPath);
-              }
-            }
-          } catch (err) {
-            console.error("Failed to delete old avatar:", err);
-          }
+          await supabase.storage
+            .from("product-images")
+            .remove([currentAvatarRecord.avatar_url]);
         }
 
         // Update database with new URL
@@ -181,15 +188,31 @@ export default function UserProfilePage() {
           .from("user_avatars")
           .upsert({
             user_id: user.id,
-            avatar_url: completedUpload.publicUrl,
+            avatar_url: completedUpload.filePath,
           }, { onConflict: 'user_id' })
           .select()
           .single();
 
+          console.log("Saved avatar in DB:", newAvatar);
+
+        if (avatarError) throw avatarError;
+        
         if (newAvatar) {
           setCurrentAvatarRecord(newAvatar);
-          setFormData(prev => ({ ...prev, avatar_url: newAvatar.avatar_url }));
+
+          // Convert file path to public URL
+          const { data: publicData } = supabase.storage
+            .from("product-images")
+            .getPublicUrl(newAvatar.avatar_url);
+
+          setAvatarUrl(publicData.publicUrl);
+          setFormData(prev => ({
+            ...prev,
+            avatar_url: publicData.publicUrl
+          }));
+          setAvatarUrl(publicData.publicUrl);
         }
+      console.log("UPLOAD PATH:", completedUpload.filePath);
       }
 
       if (userError || phoneError) {
@@ -215,7 +238,7 @@ export default function UserProfilePage() {
     );
   }
 
-  const currentPreview = images[images.length - 1]?.preview || formData.avatar_url;
+  const currentPreview = images[images.length - 1]?.preview || avatarUrl;
 
   return (
     <ProfileSection
@@ -335,12 +358,19 @@ export default function UserProfilePage() {
         <div className="flex flex-col items-center justify-center gap-8 lg:px-12">
           <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner relative">
             {currentPreview ? (
+            <>
             <img
                 src={currentPreview}
                 alt="Profile"
                 className="w-full h-full object-cover"
-                
+                onLoad={() => console.log('Profile image loaded:', currentPreview)}
+                onError={(e) => {
+                  console.error('Profile image failed to load:', currentPreview);
+
+                }}
+
               />
+            </>
             ) : null}
             {uploading && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
