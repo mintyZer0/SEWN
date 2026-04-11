@@ -69,7 +69,9 @@ export const useImageUpload = (options: UploadOptions = {}) => {
         const fileExt = image.file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
         const filePath = `${folder}/${fileName}`.replace(/\/+/g, '/');
-
+        if (!fileName) {
+            console.error("Invalid file name!");
+          }
         const { data, error } = await supabase.storage
           .from(bucket)
           .upload(filePath, image.file, {
