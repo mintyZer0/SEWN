@@ -2,7 +2,7 @@
 -- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.chat_conversations (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  id text NOT NULL DEFAULT gen_random_uuid(),
   buyer_id uuid NOT NULL,
   seller_id uuid NOT NULL,
   last_message_at timestamp with time zone DEFAULT now(),
@@ -12,15 +12,15 @@ CREATE TABLE public.chat_conversations (
 );
 CREATE TABLE public.chat_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  conversation_id uuid NOT NULL,
+  conversation_id text NOT NULL,
   from_user_id uuid NOT NULL,
   to_user_id uuid NOT NULL,
   content text NOT NULL,
   created_at timestamp with time zone DEFAULT now(),
   CONSTRAINT chat_messages_pkey PRIMARY KEY (id),
-  CONSTRAINT chat_messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.chat_conversations(id),
   CONSTRAINT chat_messages_from_user_id_fkey FOREIGN KEY (from_user_id) REFERENCES auth.users(id),
-  CONSTRAINT chat_messages_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES auth.users(id)
+  CONSTRAINT chat_messages_to_user_id_fkey FOREIGN KEY (to_user_id) REFERENCES auth.users(id),
+  CONSTRAINT chat_messages_conversation_id_fkey FOREIGN KEY (conversation_id) REFERENCES public.chat_conversations(id)
 );
 CREATE TABLE public.notifications (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -113,6 +113,7 @@ CREATE TABLE public.seller_products (
   sold integer NOT NULL DEFAULT 0,
   description text,
   seller_name text,
+  deleted_at timestamp with time zone,
   CONSTRAINT seller_products_pkey PRIMARY KEY (id),
   CONSTRAINT seller_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
@@ -131,6 +132,8 @@ CREATE TABLE public.service_requests (
   status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying::text, 'accepted'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])),
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  subject character varying NOT NULL,
+  deleted_at timestamp with time zone,
   CONSTRAINT service_requests_pkey PRIMARY KEY (id),
   CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
   CONSTRAINT service_requests_sewer_id_fkey FOREIGN KEY (sewer_id) REFERENCES public.users(id),
@@ -154,7 +157,7 @@ CREATE TABLE public.sewer_fabrics (
   is_available boolean DEFAULT true,
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT sewer_fabrics_pkey PRIMARY KEY (id),
-  CONSTRAINT sewer_fabrics_sewer_id_fkey FOREIGN KEY (sewer_id) REFERENCES public.users(id)
+  CONSTRAINT sewer_fabrics_sewer_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.sewer_onboarding_surveys (
   user_id uuid NOT NULL,
@@ -230,8 +233,8 @@ CREATE TABLE public.user_addresses (
 );
 CREATE TABLE public.user_avatars (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  avatar_url character varying NOT NULL,
+  user_id uuid NOT NULL UNIQUE,
+  avatar_url character varying NOT NULL DEFAULT 'avatars/Default.jpg'::character varying,
   uploaded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT user_avatars_pkey PRIMARY KEY (id),
   CONSTRAINT user_avatars_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
