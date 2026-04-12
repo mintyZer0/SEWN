@@ -41,8 +41,18 @@ export function useChatThreads() {
       return;
     }
 
+    const recipientIds = [...new Set(conversations.map((c: any) => c.buyer_id === user.id ? c.seller_id : c.buyer_id))];
+    
+    const { data: usersData } = await supabase
+      .from("users")
+      .select("id, first_name, last_name")
+      .in("id", recipientIds);
+      
+    const usersMap = new Map(usersData?.map(u => [u.id, `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.id.substring(0,8)}`]) || []);
+
     const mapped = conversations.map((c: any) => {
-      const otherId = c.buyer_id === user.id ? c.seller_id : c.buyer_id;
+      const recipientId = c.buyer_id === user.id ? c.seller_id : c.buyer_id;
+      const userName = usersMap.get(recipientId) || `User ${recipientId.substring(0, 8)}`;
       
       const sortedMessages = (c.chat_messages || []).sort(
         (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -51,7 +61,7 @@ export function useChatThreads() {
 
       return {
         id: c.id,
-        name: `User ${otherId.substring(0, 8)}`,
+        name: userName,
         lastMessage: lastMsg,
         last_message_at: c.last_message_at,
         time: c.last_message_at

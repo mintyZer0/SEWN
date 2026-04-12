@@ -100,12 +100,13 @@ export const RealtimeChat = ({
           </div>
         ) : null}
         
-        {allMessages.map((message) => (
+        {allMessages.map((message, index) => (
           <ChatMessageItem
             key={message.id}
             message={message}
             isOwnMessage={message.user.name === username}
             variant={variant}
+            isLatest={index === allMessages.length - 1}
           />
         ))}
       </div>
