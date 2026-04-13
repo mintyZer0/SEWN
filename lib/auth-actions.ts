@@ -64,6 +64,48 @@ export async function loginSewer(formData: FormData) {
   redirect("/");
 }
 
+export async function loginAdmin(formData: FormData) {
+  const supabase = await createClient();
+
+  const email = (formData.get("email") as string).trim().toLowerCase();
+  const password = formData.get("password") as string;
+
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    if (error.message === "Email not confirmed") {
+      redirect(`${protocol}://admin.sewn.local:3000/login?error=email_not_confirmed`);
+    }
+    if (error.message === "Invalid login credentials") {
+      redirect(`${protocol}://admin.sewn.local:3000/login?error=invalid_credentials`);
+    }
+    redirect(`${protocol}://admin.sewn.local:3000/login?error=unknown_error`);
+  }
+
+  // Check if the user is actually an admin
+  const { data: profile } = await supabase
+    .from("users")
+    .select("user_type")
+    .eq("id", authData.user.id)
+    .single();
+
+  if (!profile || profile.user_type !== "admin") {
+    await supabase.auth.signOut();
+    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+    redirect(`${protocol}://admin.sewn.local:3000/login?error=access_denied`);
+  }
+
+  revalidatePath("/", "layout");
+  
+  // Hardcode redirect to the root which middleware rewrites to /admin
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  redirect(`${protocol}://admin.sewn.local:3000/`);
+}
+
 export async function signup(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {

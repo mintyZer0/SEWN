@@ -5,9 +5,10 @@ export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0];
   const isSellerApp = hostname.startsWith("seller.");
+  const isAdminApp = hostname.startsWith("admin.");
   const path = request.nextUrl.pathname;
 
-  console.log("Middleware Request:", { hostname, path, isSellerApp });
+  console.log("Middleware Request:", { hostname, path, isSellerApp, isAdminApp });
 
   // Force seller subdomain auth pages to the seller root equivalents
   if (isSellerApp && path === "/auth/login") {
@@ -21,6 +22,12 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(signupUrl);
   }
 
+  // Force admin subdomain auth pages to the admin root equivalents
+  if (isAdminApp && (path === "/auth/login" || path === "/auth/signup")) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
   let response: NextResponse = NextResponse.next({
     request: { headers: request.headers },
   });
@@ -31,7 +38,14 @@ export async function updateSession(request: NextRequest) {
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
+  } else if (isAdminApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+    const rewriteUrl = new URL(`/admin${path === "/" ? "" : path}`, request.url);
+    response = NextResponse.rewrite(rewriteUrl, {
+      request: { headers: request.headers },
+    });
   } else if (!isSellerApp && path.startsWith("/seller-app")) {
+    return NextResponse.rewrite(new URL("/404", request.url));
+  } else if (!isAdminApp && path.startsWith("/admin")) {
     return NextResponse.rewrite(new URL("/404", request.url));
   }
 
@@ -67,7 +81,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect unauthenticated users
   if (!isPublicRoute && !user) {
-    const loginUrl = new URL(isSellerApp ? "/login" : "/auth/login", request.url);
+    const loginUrl = new URL(isAdminApp ? "/login" : isSellerApp ? "/login" : "/auth/login", request.url);
     // Preserving query params can be dangerous during OAuth, but we'll keep it for now
     // except if it looks like a dead OAuth code
     if (!request.nextUrl.searchParams.has("code")) {
@@ -76,6 +90,30 @@ export async function updateSession(request: NextRequest) {
       });
     }
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Admin App Access Control
+  if (user && isAdminApp && !isPublicRoute && !path.startsWith("/auth") && path !== "/login") {
+    let isAdmin = user.user_metadata?.role === "admin" || user.user_metadata?.user_type === "admin";
+    if (!isAdmin) {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("user_type")
+        .eq("id", user.id)
+        .single();
+      isAdmin = profile?.user_type === "admin";
+    }
+
+    if (!isAdmin) {
+      const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
+      const adminLoginUrl = new URL("/login", `${protocol}://${host}`);
+      adminLoginUrl.searchParams.set("error", "access_denied");
+      
+      console.log("Redirecting non-admin to admin login:", adminLoginUrl.toString());
+      // we must log them out to change users
+      await supabase.auth.signOut();
+      return NextResponse.redirect(adminLoginUrl);
+    }
   }
 
   // Seller App Access Control
