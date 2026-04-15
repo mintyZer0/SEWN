@@ -11,7 +11,7 @@ The central identity table.
 - **Fields:** `id` (UUID), `first_name`, `last_name`, `email` (Unique), `user_type` (USER-DEFINED), `birthday` (Date), `gender` (USER-DEFINED), `created_at`.
 
 ### User Metadata
-- **`user_avatars`**: `id`, `user_id`, `avatar_url`, `uploaded_at`.
+- **`user_avatars`**: `id`, `user_id` (Unique), `avatar_url` (Default: 'avatars/Default.jpg'), `uploaded_at`.
 - **`user_phones`**: `id`, `user_id`, `phone`, `landline`, `is_primary` (Boolean).
 - **`user_addresses`**: `id`, `user_id`, `full_address`, `barangay`, `city`, `zip_code` (Integer), `is_primary`.
 - **`user_socials`**: `id`, `user_id`, `platform`, `handle`.
@@ -27,7 +27,7 @@ The main product catalog.
 - **Constraints:**
   - `location`: NCR, Luzon, Visayas, Mindanao.
   - `type`: Kids, Men, Women.
-- **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `seller_name`.
+- **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `seller_name`, `deleted_at` (Timestamp).
 
 ### Product Attributes & Variants
 - **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Global tags for a product (One-to-Many).
@@ -70,7 +70,7 @@ WHERE variant_id = 'uuid-123';
 The workflow for custom work.
 - **Service Types:** `commission`, `repair`, `alteration`.
 - **Status:** `pending`, `accepted`, `in_progress`, `completed`, `cancelled`.
-- **Fields:** Includes contact info, `request_details`, `appointment_date`, `fabric_id`, and `measurement_profile_id`.
+- **Fields:** Includes contact info, `subject` (Required), `request_details`, `appointment_date`, `fabric_id`, `measurement_profile_id`, and `deleted_at` (Timestamp).
 
 ### Sewer-Specific Config
 - **`sewer_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
@@ -86,7 +86,17 @@ Custom PostgreSQL functions called via `supabase.rpc()`.
 
 ---
 
-## 5. Implementation Notes
+## 5. Messaging & Communication
+
+### `chat_conversations`
+- **Fields:** `id` (text), `buyer_id`, `seller_id`, `last_message_at`.
+
+### `chat_messages`
+- **Fields:** `id`, `conversation_id` (text), `from_user_id`, `to_user_id`, `content`, `created_at`.
+
+---
+
+## 6. Implementation Notes
 
 ### Security & Row Level Security (RLS)
 The database enforces strict privacy using Supabase RLS policies.

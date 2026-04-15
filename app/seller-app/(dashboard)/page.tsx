@@ -3,10 +3,11 @@
 import dynamic from "next/dynamic";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomCheckbox } from "@/components/ui/custom-checkbox";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Loader2 } from "lucide-react";
 import { LocationPicker } from "@/components/ui/location-picker";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 // Dynamically import map components to avoid SSR issues
 const MapComponent = dynamic(() => import("@/components/ui/map-component"), {
@@ -30,7 +31,35 @@ export default function SewerCenterPage() {
   const [location, setLocation] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [dbLocationDisplay, setDbLocationDisplay] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+    
+  // Use a dedicated folder for avatars in the existing bucket
+  const { images, uploading, addImages, uploadImages, clearAll } = useImageUpload({
+    bucket: 'product-images',
+    folder: 'avatars'
+  });
+    
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files;
+    if (!file) return;
+      
+    // Clear any stuck previous uploads first
+    clearAll();
+    addImages(file).then((newImages) => uploadImages(newImages));
+  };
+
+  const [uploadReady, setUploadReady] = useState(true);
   
+  useEffect(() => {
+    const hasPending = images.some(img => img.status === "pending");
+    const uploadReady = !hasPending || images.length === 0;
+    setUploadReady(uploadReady);
+  }, [images]);
+  
+  // Keep track of the current avatar record to handle deletion of old files
+  const [currentAvatarRecord, setCurrentAvatarRecord] = useState<{id?: string, avatar_url: string} | null>(null);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -64,7 +93,8 @@ export default function SewerCenterPage() {
           user_addresses(id, full_address, latitude, longitude, is_primary, address_type, province, city, barangay, zip_code),
           user_socials(handle),
           sewer_achievements(title),
-          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions, accepting_appointments)
+          sewer_settings(accepting_alterations, accepting_repairs, accepting_commissions, accepting_appointments),
+          user_avatars(id,avatar_url)
         `)
         .eq('id', user.id)
         .single();
@@ -85,6 +115,8 @@ export default function SewerCenterPage() {
 
         const settingsArray = Array.isArray(profileData.sewer_settings) ? profileData.sewer_settings : [profileData.sewer_settings].filter(Boolean);
         const settings = settingsArray[0];
+
+        const avatar = profileData.user_avatars;
 
         setFormData({
           name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim(),
@@ -118,10 +150,27 @@ export default function SewerCenterPage() {
                 appointments: settings.accepting_appointments || false,
             });
         }
+
+        if (avatar) {
+          const avatar = profileData.user_avatars;
+          let publicAvatarUrl = "";
+          
+          if (avatar?.avatar_url) {
+            const { data: publicData } = supabase.storage
+              .from("product-images")
+              .getPublicUrl(avatar.avatar_url);
+
+            publicAvatarUrl = publicData.publicUrl;
+            } 
+          else {
+            publicAvatarUrl = "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+            }
+          console.log("FETCHED DATA:", profileData.user_avatars);
+          setAvatarUrl(publicAvatarUrl);
       }
       setLoading(false);
     };
-
+  }
     fetchData();
   }, [supabase]);
 
@@ -159,6 +208,50 @@ export default function SewerCenterPage() {
     if (!user) return;
 
     try {
+        //AVATAR UPLOAD
+        const completedUpload = images.find(img => img.status === "complete");
+        const filePath = completedUpload?.filePath;
+
+        if (filePath && filePath.startsWith("avatars/")) {
+          //Get latest avatar from DB
+          const { data: existingAvatar } = await supabase
+            .from("user_avatars")
+            .select("avatar_url")
+            .eq("user_id", user.id)
+            .single();
+
+          // Delete old avatar 
+          if (
+            existingAvatar?.avatar_url &&
+            existingAvatar.avatar_url !== "avatars/Default.jpg" &&
+            existingAvatar.avatar_url !== filePath
+          ) {
+            await supabase.storage
+              .from("product-images")
+              .remove([existingAvatar.avatar_url]);
+          }
+
+          // Save new avatar
+          const { data: newAvatar, error: avatarError } = await supabase
+            .from("user_avatars")
+            .upsert({
+              user_id: user.id,
+              avatar_url: filePath,
+            }, { onConflict: "user_id" })
+            .select()
+            .single();
+
+          if (avatarError) throw avatarError;
+
+          if (newAvatar) {
+            const { data: publicData } = supabase.storage
+              .from("product-images")
+              .getPublicUrl(newAvatar.avatar_url);
+
+            setAvatarUrl(publicData.publicUrl);
+          }
+        }
+
         setIsSaving(true);
         const nameParts = formData.name.trim().split(" ");
         const first_name = nameParts[0] || "";
@@ -259,6 +352,8 @@ export default function SewerCenterPage() {
   if (loading) {
     return <div className="p-12 text-center text-primary text-xl">Loading profile...</div>;
   }
+
+  const currentPreview = images[images.length - 1]?.preview || avatarUrl;
 
   return (
     <div className="p-12">
@@ -448,19 +543,37 @@ export default function SewerCenterPage() {
           </div>
 
           {/* Right Column: Profile Image */}
-          <div className="flex flex-col items-center pt-8">
-            <div className="w-64 h-64 rounded-full bg-gray-500 flex items-center justify-center relative overflow-hidden group cursor-pointer border-4 border-white shadow-xl">
-              <span className="text-white font-medium text-lg">
-                Select Image
-              </span>
+          <div className="flex flex-col items-center pt-8 gap-4">
+            <div
+              onClick={() => isEditing && fileInputRef.current?.click()}
+              className="w-64 h-64 rounded-full bg-gray-500 flex items-center justify-center relative overflow-hidden group cursor-pointer border-4 border-white shadow-xl"
+            >
+              {currentPreview ? (
+                <img
+                  src={currentPreview}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-medium text-lg">
+                  Select Image
+                </span>
+              )}
+
+              {uploading && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <Loader2 className="w-10 h-10 text-white animate-spin" />
+                </div>
+              )}
+
               <input
+                ref={fileInputRef}
                 type="file"
-                name="profile_image"
-                className="absolute inset-0 opacity-0 cursor-pointer"
-                disabled
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">Image upload coming soon</p>
           </div>
         </div>
 

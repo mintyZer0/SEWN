@@ -36,3 +36,5 @@ SEWN is a specialized marketplace platform connecting users with local tailors a
 - **Theming:** Background image fixed globally in `RootLayout`.
 - **Modals:** Managed via a `modals` folder in components.
 - **Data Fetching:** Hybrid approach with Supabase SSR and client-side helpers.
+- **Soft Deletes:** Use `deleted_at` (Timestamp) for `seller_products` and `service_requests` to preserve historical data while hiding from UI.
+- **Messaging:** Conversation IDs use `text` type to support flexible identifiers.
