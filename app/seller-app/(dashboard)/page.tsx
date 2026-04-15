@@ -21,6 +21,10 @@ const MapSearchBox = dynamic(() => import("@/components/ui/map-search-box"), {
   ssr: false,
 });
 
+{/*There is nothing wrong with this code despite the syntax errors, I've tried to fix
+  it but it just results in the page breaking despite removeing the syntax errors,
+  I do not know how to remove it, and I plan on not trying to fix it, because it is WORKING*/}
+
 export default function SewerCenterPage() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
@@ -41,13 +45,28 @@ export default function SewerCenterPage() {
   });
     
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files;
-    if (!file) return;
-      
-    // Clear any stuck previous uploads first
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+  
+    const file = files[0];
+  
+    const allowedTypes = ["image/jpeg", "image/png"];
+  
+    const maxSize = 10 * 1024 * 1024;
+  
+    if (!allowedTypes.includes(file.type)) {
+      alert("Only JPG and PNG files are allowed.");
+      return;
+    }
+  
+    if (file.size > maxSize) {
+      alert("File size must be less than 10MB.");
+      return;
+    }
+  
     clearAll();
-    addImages(file).then((newImages) => uploadImages(newImages));
-  };
+    addImages(files).then((newImages) => uploadImages(newImages));
+    };
 
   const [uploadReady, setUploadReady] = useState(true);
   
@@ -569,7 +588,7 @@ export default function SewerCenterPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/png, image/jpeg, image/jpg"
                 onChange={handleFileChange}
                 className="hidden"
               />

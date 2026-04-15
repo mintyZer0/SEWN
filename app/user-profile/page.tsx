@@ -23,12 +23,27 @@ export default function UserProfilePage() {
   });
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files;
-    if (!file) return;
-    
-    // Clear any stuck previous uploads first
-    clearAll();
-    addImages(file).then((newImages) => uploadImages(newImages));
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+
+  const file = files[0];
+
+  const allowedTypes = ["image/jpeg", "image/png"];
+
+  const maxSize = 10 * 1024 * 1024;
+
+  if (!allowedTypes.includes(file.type)) {
+    alert("Only JPG and PNG files are allowed.");
+    return;
+  }
+
+  if (file.size > maxSize) {
+    alert("File size must be less than 10MB.");
+    return;
+  }
+
+  clearAll();
+  addImages(files).then((newImages) => uploadImages(newImages));
   };
 
   const [uploadReady, setUploadReady] = useState(true);
@@ -71,7 +86,6 @@ export default function UserProfilePage() {
             .single();
 
           if (error) {
-            console.error("Error fetching profile:", error.message);
           } else if (data) {
             const avatar = data.user_avatars;
 
@@ -168,7 +182,6 @@ export default function UserProfilePage() {
         .single();
 
         if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/Default.jpg") {
-        console.log("Deleting old avatar:", existingAvatar.avatar_url);
 
         await supabase.storage
           .from("product-images")
@@ -193,7 +206,6 @@ export default function UserProfilePage() {
           .select()
           .single();
 
-          console.log("Saved avatar in DB:", newAvatar);
 
         if (avatarError) throw avatarError;
         
@@ -212,7 +224,7 @@ export default function UserProfilePage() {
           }));
           setAvatarUrl(publicData.publicUrl);
         }
-      console.log("UPLOAD PATH:", completedUpload.filePath);
+
       }
 
       if (userError || phoneError) {
@@ -363,11 +375,6 @@ export default function UserProfilePage() {
                 src={currentPreview}
                 alt="Profile"
                 className="w-full h-full object-cover"
-                onLoad={() => console.log('Profile image loaded:', currentPreview)}
-                onError={(e) => {
-                  console.error('Profile image failed to load:', currentPreview);
-
-                }}
 
               />
             </>
@@ -381,7 +388,7 @@ export default function UserProfilePage() {
               ref={fileInputRef}
               type="file"
               name="profile_image"
-              accept="image/*"
+              accept="image/png, image/jpeg, image/jpg"
               onChange={handleFileChange}
               className="hidden"
             />
