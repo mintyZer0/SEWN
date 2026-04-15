@@ -142,11 +142,82 @@ export default function ProductsPage() {
     fetchData();
   };
 
-  const handleSaveProduct = async (productData: Partial<SectionItem>) => {
-    // Implementation for saving product to Supabase would go here
-    // For now, let's just refetch
-    fetchData();
-    setIsProductModalOpen(false);
+  const handleSaveProduct = async (productData: any) => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Insert/Update Product
+      const { data: product, error: productError } = await supabase
+        .from('seller_products')
+        .upsert({
+          id: productData.id,
+          user_id: user.id,
+          name: productData.name,
+          description: productData.description,
+          price: productData.price,
+          location: productData.location,
+          type: productData.type,
+          // Note: Add these if columns exist in DB, otherwise they are ignored by upsert
+          // shipping_time: productData.shippingTime,
+          // weight: productData.weight,
+          // fabric: productData.fabric,
+          // care_instructions: productData.careInstructions,
+          img_src: "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg", // Placeholder
+          is_active: true,
+          seller_name: "Seller", // Should ideally be fetched from profile
+        })
+        .select()
+        .single();
+
+      if (productError) throw productError;
+
+      // 2. Handle Variations Matrix
+      if (productData.variants && productData.variants.length > 0) {
+        for (const variantData of productData.variants) {
+          // A. Create Variant Row (The physical item)
+          const { data: variant, error: variantError } = await supabase
+            .from('product_variants')
+            .insert({
+              product_id: product.id,
+              sku: variantData.sku,
+              stock_quantity: variantData.stock || 0,
+              price_override: variantData.price || null,
+            })
+            .select()
+            .single();
+
+          if (variantError) {
+            console.error("Variant error:", variantError);
+            continue; 
+          }
+
+          // B. Map Attributes for this variant (e.g., this SKU is both 'Red' and 'Small')
+          const attributeEntries = Object.entries(variantData.attributes).map(([type, value]) => ({
+            variant_id: variant.id,
+            attribute_type: type,
+            attribute_value: value as string,
+          }));
+
+          const { error: attrError } = await supabase
+            .from('variant_attribute_values')
+            .insert(attributeEntries);
+
+          if (attrError) {
+            console.error("Attribute mapping error:", attrError);
+          }
+        }
+      }
+
+      await fetchData();
+      setIsProductModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save product:", error);
+      alert("Failed to save product. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id: string, variant: string) => {
