@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, Trash2, Loader2 } from "lucide-react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomField } from "@/components/ui/custom-field";
 import { PhotoSlot } from "@/components/ui/photo-slot";
@@ -15,24 +15,94 @@ interface ProductModalProps {
   onSave?: (product: Partial<SectionItem>) => Promise<void>;
 }
 
+interface VariationGroup {
+  id: string;
+  name: string;
+  options: string[];
+}
+
+interface ProductVariant {
+  id: string;
+  attributes: Record<string, string>; // { "Color": "Red", "Size": "Small" }
+  sku: string;
+  price: string;
+  stock: string;
+}
+
 export const ProductModal = ({
   isOpen,
   onClose,
   product,
   onSave,
 }: ProductModalProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     productName: "",
     description: "",
     price: "",
-    stock: "",
-    category: "tops",
-    subCategory: "formal",
+    category: "Men",
+    location: "NCR",
+    type: "Men",
     shippingTime: "",
     weight: "",
     fabric: "cotton",
     careInstructions: "hand-wash",
   });
+
+  const [variationGroups, setVariationGroups] = useState<VariationGroup[]>([]);
+
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+
+  // Auto-generate variants matrix when groups or options change
+  useEffect(() => {
+    const generateMatrix = () => {
+      if (variationGroups.length === 0) {
+        setVariants([]);
+        return;
+      }
+
+      // Filter groups with valid names and at least one non-empty option
+      const validGroups = variationGroups.filter(g => (g.name || "").trim() !== "" && g.options.some(o => (o || "").trim() !== ""));
+      
+      if (validGroups.length === 0) {
+        setVariants([]);
+        return;
+      }
+
+      // Helper for cartesian product
+      const cartesian = (sets: string[][]) => 
+        sets.reduce<string[][]>((a, b) => a.flatMap(d => b.map(e => [d, e].flat())), [[]]);
+
+      const optionSets = validGroups.map(g => g.options.filter(o => o.trim() !== ""));
+      if (optionSets.some(set => set.length === 0)) {
+        setVariants([]);
+        return;
+      }
+
+      const combinations = cartesian(optionSets);
+      
+      const newVariants = combinations.map((combo, idx) => {
+        const attributes: Record<string, string> = {};
+        validGroups.forEach((group, groupIdx) => {
+          attributes[group.name] = combo[groupIdx];
+        });
+
+        const nameLabel = combo.join("-").toUpperCase();
+
+        return {
+          id: `var-${idx}-${Date.now()}`,
+          attributes,
+          sku: nameLabel,
+          price: "",
+          stock: "0",
+        };
+      });
+
+      setVariants(newVariants);
+    };
+
+    generateMatrix();
+  }, [variationGroups, formData.productName]);
 
   useEffect(() => {
     if (product) {
@@ -45,201 +115,343 @@ export const ProductModal = ({
         productName: "",
         description: "",
         price: "",
-        stock: "",
-        category: "tops",
-        subCategory: "formal",
+        category: "Men",
+        location: "NCR",
+        type: "Men",
         shippingTime: "",
         weight: "",
         fabric: "cotton",
         careInstructions: "hand-wash",
       });
+      setVariationGroups([]);
     }
   }, [product, isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const addVariationGroup = () => {
+    setVariationGroups([...variationGroups, { id: `g-${Date.now()}`, name: "", options: [""] }]);
+  };
+
+  const updateGroup = (id: string, updates: Partial<VariationGroup>) => {
+    setVariationGroups(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
+  };
+
+  const removeGroup = (id: string) => {
+    setVariationGroups(prev => prev.filter(g => g.id !== id));
+  };
+
+  const updateVariant = (id: string, updates: Partial<ProductVariant>) => {
+    setVariants(prev => prev.map(v => v.id === id ? { ...v, ...updates } : v));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const data = new FormData(e.target as HTMLFormElement);
-    const formValues = Object.fromEntries(data.entries());
 
-    if (onSave) {
-      await onSave({
-        id: product?.id,
-        name: formValues.productName as string,
-      });
+    if (!formData.productName?.trim()) {
+      alert("Product name is required");
+      return;
     }
 
-  
-    onClose();
+    if (!formData.price || isNaN(Number(formData.price))) {
+      alert("Valid base price is required");
+      return;
+    }
+    
+    if (onSave) {
+      try {
+        setIsSubmitting(true);
+        await onSave({
+          id: product?.id,
+          ...formData,
+          name: formData.productName, // Map productName to name for DB
+          price: Number(formData.price),
+          variants: variants.map(v => ({
+            sku: v.sku,
+            price: v.price ? Number(v.price) : null,
+            stock: Number(v.stock),
+            attributes: v.attributes
+          })),
+        } as any);
+        onClose();
+      } catch (error) {
+        console.error("Failed to save product:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
   };
 
   const isEdit = !!product;
 
   return (
-    <div className="fixed inset-0 z-1100 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative bg-white rounded-[30px] w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl custom-scrollbar">
+      <div className="relative bg-white rounded-[30px] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl custom-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white z-20 px-10 py-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-3xl font-bold text-primary">
-            {isEdit ? "Edit Product" : "Add Product"}
-          </h2>
+        <div className="sticky top-0 bg-white z-20 px-10 pt-12 pb-6 flex justify-between items-start">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-6xl font-bold text-third">
+              {isEdit ? "Edit Product" : "Add Product"}
+            </h2>
+            <p className="text-third font-medium">
+              Adding new products will be inspected first by SEWN
+            </p>
+          </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ArrowLeft className="w-8 h-8 text-gray-400" />
+            <ArrowLeft className="w-12 h-12 text-third" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-10 space-y-8">
+        <form onSubmit={handleSubmit} className="p-10 space-y-12">
           {/* Photos Section */}
-          <div>
-            <h3 className="text-xl font-bold text-third mb-4">Add photos</h3>
-            <div className="grid grid-cols-4 grid-rows-2 gap-4">
-              <div className="col-span-2 row-span-2 h-full">
-                <PhotoSlot size="lg" />
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-third">Add photos</h3>
+            <div className="grid grid-cols-5 gap-4">
+              {/* Large Main Slot (Left) */}
+              <div className="col-span-2 row-span-2">
+                <PhotoSlot size="lg" className="h-full" />
               </div>
+              {/* 6 Small Slots (Right) */}
+              <PhotoSlot />
+              <PhotoSlot />
               <PhotoSlot />
               <PhotoSlot />
               <PhotoSlot />
               <PhotoSlot />
             </div>
+            <p className="text-sm text-gray-400 italic">* Image uploading coming soon</p>
           </div>
 
           {/* Core Info */}
-          <div className="space-y-6">
-            <CustomField
-              label="Product Name"
-              name="productName"
-              placeholder="SEWN TShirt"
-              defaultValue={formData.productName}
-            />
-            <CustomField
-              label="Description"
-              name="description"
-              placeholder="Best Design"
-              isTextArea
-              defaultValue={formData.description}
-            />
-
-            <div className="grid grid-cols-2 gap-6">
-              <CustomField
-                label="Price"
-                name="price"
-                placeholder="PHP67676"
-                defaultValue={formData.price}
-              />
-              <CustomField
-                label="Stock"
-                name="stock"
-                placeholder="67"
-                defaultValue={formData.stock}
-              />
-              <CustomField
-                label="Category"
-                name="category"
-                isSelect
-                placeholder="Tops"
-                defaultValue={formData.category}
-                options={[
-                  { value: "tops", label: "Tops" },
-                  { value: "bottoms", label: "Bottoms" },
-                  { value: "dresses", label: "Dresses" },
-                ]}
-              />
-              <CustomField
-                label="Sub - Category"
-                name="subCategory"
-                isSelect
-                placeholder="Formal"
-                defaultValue={formData.subCategory}
-                options={[
-                  { value: "formal", label: "Formal" },
-                  { value: "casual", label: "Casual" },
-                  { value: "sportswear", label: "Sportswear" },
-                ]}
-              />
-              <CustomField
-                label="Est. time of shipping"
-                name="shippingTime"
-                placeholder="15 days"
-                defaultValue={formData.shippingTime}
-              />
-              <CustomField
-                label="Weight in grams"
-                name="weight"
-                placeholder="Cotton"
-                defaultValue={formData.weight}
-              />
-              <CustomField
-                label="Fabric"
-                name="fabric"
-                isSelect
-                placeholder="Cotton"
-                defaultValue={formData.fabric}
-                options={[
-                  { value: "cotton", label: "Cotton" },
-                  { value: "linen", label: "Linen" },
-                  { value: "silk", label: "Silk" },
-                  { value: "denim", label: "Denim" },
-                ]}
-              />
-              <CustomField
-                label="Care Instructions"
-                name="careInstructions"
-                isSelect
-                placeholder="Hand wash only"
-                defaultValue={formData.careInstructions}
-                options={[
-                  { value: "hand-wash", label: "Hand wash only" },
-                  { value: "dry-clean", label: "Dry clean" },
-                  { value: "machine-wash", label: "Machine wash" },
-                ]}
-              />
-            </div>
-          </div>
-
-          {/* Variations */}
           <div className="space-y-8">
-            <div>
-              <h3 className="text-3xl font-bold text-third mb-6">
-                Size Variations
-              </h3>
-              <VariationRow label="Size 1" />
-              <VariationRow label="Size 2" />
-              <VariationRow label="Size 3" />
-              <button
-                type="button"
-                className="w-full py-4 border-2 border-third/50 rounded-full flex items-center justify-center hover:bg-third/5 transition-colors bg-gray-50/50"
+             <h3 className="text-2xl font-bold text-third border-b border-third/10 pb-2">Basic Information</h3>
+             <div className="grid grid-cols-1 gap-6">
+                <CustomField
+                  label="Product Name"
+                  placeholder="SEWN TShirt"
+                  value={formData.productName || ""}
+                  onChange={(e: any) => setFormData({...formData, productName: e.target.value})}
+                  required
+                />
+                <CustomField
+                  label="Description"
+                  placeholder="Tell buyers about your product..."
+                  isTextArea
+                  value={formData.description || ""}
+                  onChange={(e: any) => setFormData({...formData, description: e.target.value})}
+                />
+             </div>
+
+             <div className="grid grid-cols-2 gap-6">
+                <CustomField
+                  label="Base Price (PHP)"
+                  placeholder="0.00"
+                  value={formData.price}
+                  onChange={(e: any) => setFormData({...formData, price: e.target.value})}
+                  required
+                />
+                <CustomField
+                  label="Shipping Region"
+                  isSelect
+                  value={formData.location}
+                  onChange={(e: any) => setFormData({...formData, location: e.target.value})}
+                  options={[
+                    { value: "NCR", label: "NCR" },
+                    { value: "Luzon", label: "Luzon" },
+                    { value: "Visayas", label: "Visayas" },
+                    { value: "Mindanao", label: "Mindanao" },
+                  ]}
+                />
+             </div>
+
+             <div className="grid grid-cols-2 gap-6">
+                <CustomField
+                  label="Target Audience"
+                  isSelect
+                  value={formData.type}
+                  onChange={(e: any) => setFormData({...formData, type: e.target.value})}
+                  options={[
+                    { value: "Men", label: "Men" },
+                    { value: "Women", label: "Women" },
+                    { value: "Kids", label: "Kids" },
+                  ]}
+                />
+                <CustomField
+                  label="Est. Shipping Time"
+                  placeholder="e.g. 7-10 days"
+                  value={formData.shippingTime}
+                  onChange={(e: any) => setFormData({...formData, shippingTime: e.target.value})}
+                />
+             </div>
+
+             <div className="grid grid-cols-2 gap-6">
+                <CustomField
+                  label="Weight in grams"
+                  placeholder="0.00"
+                  value={formData.weight}
+                  onChange={(e: any) => setFormData({...formData, weight: e.target.value})}
+                />
+                <CustomField
+                  label="Fabric"
+                  isSelect
+                  value={formData.fabric}
+                  onChange={(e: any) => setFormData({...formData, fabric: e.target.value})}
+                  options={[
+                    { value: "cotton", label: "Cotton" },
+                    { value: "linen", label: "Linen" },
+                    { value: "silk", label: "Silk" },
+                    { value: "denim", label: "Denim" },
+                  ]}
+                />
+             </div>
+
+             <div className="grid grid-cols-1">
+                <CustomField
+                  label="Care Instructions"
+                  isSelect
+                  value={formData.careInstructions}
+                  onChange={(e: any) => setFormData({...formData, careInstructions: e.target.value})}
+                  options={[
+                    { value: "hand-wash", label: "Hand wash only" },
+                    { value: "dry-clean", label: "Dry clean" },
+                    { value: "machine-wash", label: "Machine wash" },
+                  ]}
+                />
+             </div>
+          </div>
+
+          {/* Variation Groups Setup */}
+          <div className="space-y-8">
+            <div className="flex justify-between items-center border-b border-third/10 pb-2">
+              <h3 className="text-2xl font-bold text-third">Variation Groups</h3>
+              <button 
+                type="button" 
+                onClick={addVariationGroup}
+                className="text-primary font-bold hover:underline flex items-center gap-1"
               >
-                <Plus className="text-third w-8 h-8" />
+                <Plus size={16} /> Add Group
               </button>
             </div>
 
-            <div>
-              <h3 className="text-3xl font-bold text-third mb-6">
-                Color Variations
-              </h3>
-              <VariationRow label="Color 1" type="Color" showImageIcon />
-              <VariationRow label="Color 2" type="Color" showImageIcon />
-              <VariationRow label="Color 3" type="Color" showImageIcon />
-              <button
-                type="button"
-                className="w-full py-4 border-2 border-third/50 rounded-full flex items-center justify-center hover:bg-third/5 transition-colors bg-gray-50/50"
-              >
-                <Plus className="text-third w-8 h-8" />
-              </button>
+            <div className="space-y-6">
+              {variationGroups.length === 0 ? (
+                <div className="p-10 border-2 border-dashed border-gray-100 rounded-[30px] bg-gray-50/30 flex flex-col items-center text-center">
+                   <p className="text-gray-400 font-medium mb-1">No variations yet</p>
+                   <p className="text-sm text-gray-400/70">Add groups like "Size" or "Color" to create product variations.</p>
+                </div>
+              ) : (
+                variationGroups.map((group) => (
+                  <div key={group.id} className="p-6 bg-gray-50 rounded-[24px] border border-gray-100 relative group">
+                    <button 
+                      type="button" 
+                      onClick={() => removeGroup(group.id)}
+                      className="absolute top-4 right-4 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start mt-4 ">
+                      <CustomField
+                        label="Variant Category"
+                        placeholder="e.g. Size or Color"
+                        value={group.name}
+                        onChange={(e: any) => updateGroup(group.id, { name: e.target.value })}
+                        containerClassName="mt-0"
+                      />
+                      <div className="md:col-span-2 relative">
+                        <label className="absolute -top-3 left-6 bg-white px-2 text-third font-bold text-sm z-10 whitespace-nowrap uppercase tracking-tight">
+                          Options (separated by commas)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Red, Blue, Green"
+                          value={group.options.join(", ")}
+                          onChange={(e) => updateGroup(group.id, { options: e.target.value.split(",").map(o => o.trim()) })}
+                          className="w-full px-6 py-3 rounded-full border-2 border-third/50 focus:border-third outline-none transition-all bg-white h-14 text-gray-700"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
+
+          {/* The Matrix (Inventory Management) */}
+          {variants.length > 0 && (
+            <div className="space-y-8">
+              <h3 className="text-2xl font-bold text-third border-b border-third/10 pb-2">Variant Inventory Matrix</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full border-separate border-spacing-y-3">
+                  <thead>
+                    <tr className="text-left text-gray-400 text-sm uppercase font-bold tracking-wider">
+                      <th className="px-6 py-2">Variant</th>
+                      <th className="px-6 py-2">SKU</th>
+                      <th className="px-6 py-2">Stock</th>
+                      <th className="px-6 py-2">Price Override</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {variants.map((v) => (
+                      <tr key={v.id} className="bg-white border border-gray-100 shadow-sm rounded-2xl overflow-hidden group">
+                        <td className="px-6 py-4 font-bold text-primary bg-gray-50/50 rounded-l-2xl">
+                          {Object.values(v.attributes).join(" / ")}
+                        </td>
+                        <td className="px-6 py-4">
+                          <input 
+                            type="text" 
+                            value={v.sku} 
+                            onChange={(e) => updateVariant(v.id, { sku: e.target.value })}
+                            className="w-full bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <input 
+                            type="number" 
+                            value={v.stock} 
+                            onChange={(e) => updateVariant(v.id, { stock: e.target.value })}
+                            className="w-32 bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
+                          />
+                        </td>
+                        <td className="px-6 py-4 rounded-r-2xl">
+                          <input 
+                            type="text" 
+                            placeholder="Optional"
+                            value={v.price} 
+                            onChange={(e) => updateVariant(v.id, { price: e.target.value })}
+                            className="w-32 bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* Footer Actions */}
-          <div className="pt-8 flex justify-end gap-6">
+          <div className="pt-8 flex justify-end gap-6 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
@@ -247,7 +459,14 @@ export const ProductModal = ({
             >
               Discard
             </button>
-            <ProfileButton type="submit" variant="orange" size="xl">
+            <ProfileButton 
+              type="submit" 
+              variant="orange" 
+              size="xl"
+              disabled={isSubmitting}
+              className="flex items-center gap-3"
+            >
+              {isSubmitting && <Loader2 className="w-6 h-6 animate-spin" />}
               {isEdit ? "Confirm Changes" : "Confirm Product"}
             </ProfileButton>
           </div>
@@ -256,3 +475,4 @@ export const ProductModal = ({
     </div>
   );
 };
+
