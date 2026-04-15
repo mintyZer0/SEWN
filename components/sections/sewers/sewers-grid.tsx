@@ -35,7 +35,7 @@ export default function SewersGrid({
             first_name,
             last_name,
             user_type,
-            user_avatars (avatar_url),
+            user_avatars (id, avatar_url),
             user_addresses (province, city, is_primary),
             sewer_statistics (rating_avg, total_orders_completed),
             sewer_settings (accepting_alterations, accepting_repairs, accepting_commissions),
@@ -73,7 +73,18 @@ export default function SewersGrid({
               ? `${primaryAddress.city}${primaryAddress.province ? `, ${primaryAddress.province}` : ""}`
               : "Location not set";
 
-          const avatar = user.user_avatars?.[0]?.avatar_url;
+          const avatarArray = user.user_avatars;
+            const avatarObj = Array.isArray(avatarArray) ? avatarArray[0] : avatarArray;
+
+            let avatarUrl = "/assets/sewer-photos/1.jpg";
+
+            if (avatarObj?.avatar_url) {
+              const { data: publicData } = supabase.storage
+                .from("product-images")
+                .getPublicUrl(avatarObj.avatar_url);
+
+              avatarUrl = publicData.publicUrl;
+            }
 
           const services: string[] = [];
           if (settings?.accepting_repairs) services.push("Repair");
@@ -88,7 +99,7 @@ export default function SewersGrid({
             id: user.id,
             name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewer",
             location,
-            img_src: avatar || "/assets/sewer-photos/1.jpg",
+            img_src: avatarUrl || "/assets/sewer-photos/1.jpg",
             rating: stats?.rating_avg || 0,
             completed_orders: stats?.total_orders_completed || 0,
             services,

@@ -1,19 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
 
-interface NewProductProps {
+type NewProductProps = {
   id: string;
-  productName: string;
-  src: string;
-  seller: string;
-  price: string;
+  name: string;
+  price: number;
+  img_src: string;
+  seller?: string;
   className?: string;
-}
+};
 
 export default function NewProductCard({
   id,
-  productName,
-  src,
+  name,
+  img_src,
   seller,
   price,
   className,
@@ -25,20 +25,28 @@ export default function NewProductCard({
     >
       <figure className="relative w-full aspect-3/4">
         <Image
-          src={src}
-          alt="Product"
+          src={img_src}
+          alt={name}
           fill
           sizes="320px"
-          className="object-cover rounded-md group-hover:scale-105 transition-transform transform duration-500"
+          className="object-cover rounded-md group-hover:scale-105 transition-transform duration-500"
         />
       </figure>
 
       <div className="flex flex-col items-center px-4 gap-2">
         <h2 className="card-title text-center text-xl sm:text-3xl pt-4">
-          {productName}
+          {name}
         </h2>
-        <p className="text-center text-muted text-lg sm:text-2xl">{seller}</p>
-        <p className="text-center font-medium text-base">{price}</p>
+
+        {seller && (
+          <p className="text-center text-muted text-lg sm:text-2xl">
+            {seller}
+          </p>
+        )}
+
+        <p className="text-center font-medium text-base">
+          ₱{price.toFixed(2)}
+        </p>
       </div>
     </Link>
   );
