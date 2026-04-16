@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, ArrowLeft, Trash2, Loader2 } from "lucide-react";
+import { Plus, ArrowLeft, Trash2, Loader2, X } from "lucide-react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomField } from "@/components/ui/custom-field";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { VariationRow } from "@/components/sewer-center/variation-row";
 import { SectionItem } from "@/components/sewer-center/collapsible-product-section";
+import { MARKETPLACE_FILTERS } from "@/lib/constants";
 
 interface ProductModalProps {
   isOpen: boolean;
@@ -375,7 +376,7 @@ export const ProductModal = ({
                         label="Variant Category"
                         isSelect
                         value={group.name}
-                        onValueChange={(val) => updateGroup(group.id, { name: val })}
+                        onValueChange={(val) => updateGroup(group.id, { name: val, options: [""] })}
                         options={[
                           { value: "Color", label: "Color" },
                           { value: "Material", label: "Material" },
@@ -385,15 +386,54 @@ export const ProductModal = ({
                       />
                       <div className="md:col-span-2 relative">
                         <label className="absolute -top-3 left-6 bg-white px-2 text-third font-bold text-sm z-10 whitespace-nowrap uppercase tracking-tight">
-                          Options (separated by commas)
+                          Options
                         </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Red, Blue, Green"
-                          value={group.options.join(", ")}
-                          onChange={(e) => updateGroup(group.id, { options: e.target.value.split(",").map(o => o.trim()) })}
-                          className="w-full px-6 py-3 rounded-full border-2 border-third/50 focus:border-third outline-none transition-all bg-white h-14 text-gray-700"
-                        />
+                        
+                        {["Color", "Material", "Size"].includes(group.name) ? (
+                          <div className="space-y-3">
+                            <CustomField
+                              label=""
+                              placeholder={`Select ${group.name}`}
+                              isSelect
+                              value=""
+                              onValueChange={(val) => {
+                                if (!group.options.includes(val)) {
+                                  updateGroup(group.id, { options: [...group.options.filter(o => o !== ""), val] });
+                                }
+                              }}
+                              options={MARKETPLACE_FILTERS[group.name as keyof typeof MARKETPLACE_FILTERS].map(opt => ({ value: opt, label: opt }))}
+                              containerClassName="mt-0"
+                            />
+                            <div className="flex flex-wrap gap-2 px-2">
+                              {group.options.filter(o => o !== "").map((opt) => (
+                                <span 
+                                  key={opt} 
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-third/10 text-third rounded-full text-sm font-bold border border-third/20 animate-in fade-in zoom-in-95 duration-200"
+                                >
+                                  {opt}
+                                  <button 
+                                    type="button"
+                                    onClick={() => updateGroup(group.id, { options: group.options.filter(o => o !== opt) })}
+                                    className="hover:bg-third/20 rounded-full p-0.5 transition-colors"
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                              {group.options.filter(o => o !== "").length === 0 && (
+                                <span className="text-gray-400 text-sm italic py-1">No {group.name.toLowerCase()}s selected</span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="e.g. Red, Blue, Green"
+                            value={group.options.join(", ")}
+                            onChange={(e) => updateGroup(group.id, { options: e.target.value.split(",").map(o => o.trim()) })}
+                            className="w-full px-6 py-3 rounded-full border-2 border-third/50 focus:border-third outline-none transition-all bg-white h-14 text-gray-700"
+                          />
+                        )}
                       </div>
                     </div>
                   </div>
