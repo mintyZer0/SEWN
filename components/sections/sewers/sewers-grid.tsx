@@ -4,6 +4,13 @@
 import { useState, useEffect } from "react";
 import SewerCard, { type Sewer } from "./sewer-card";
 import { createClient } from "@/utils/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Filters = Record<string, string[]>;
 
@@ -176,17 +183,21 @@ export default function SewersGrid({
           {filteredSewers.length} Sewers
         </span>
         <div className="mb-4 mx-4">
-          <select
-            className="px-4 py-2 bg-primary-light rounded-lg border-none text-lg"
+          <Select
             value={sortBy}
-            onChange={(e) =>
-              setSortBy(e.target.value as "most-sold" | "highest-rated" | "most-experienced")
+            onValueChange={(val) =>
+              setSortBy(val as "most-sold" | "highest-rated" | "most-experienced")
             }
           >
-            <option value="most-sold">Filter by most sold</option>
-            <option value="highest-rated">Highest rated</option>
-            <option value="most-experienced">Most experienced</option>
-          </select>
+            <SelectTrigger className="px-4 py-2 bg-primary-light rounded-lg border-none text-lg min-w-[200px]">
+              <SelectValue placeholder="Filter by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="most-sold">Filter by most sold</SelectItem>
+              <SelectItem value="highest-rated">Highest rated</SelectItem>
+              <SelectItem value="most-experienced">Most experienced</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
