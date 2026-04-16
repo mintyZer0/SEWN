@@ -2,44 +2,30 @@
 
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
-
-
+import { MARKETPLACE_FILTERS } from "@/lib/constants";
 
 const collapsibleLables = [
   {
     label: "Categories",
-    options: ["Skirts", "Shirts", "Dresses", "Pants", "Accessories", "Gowns"],
+    options: MARKETPLACE_FILTERS.Categories,
   },
   {
     label: "Size",
-    options: ["XSmall", "Small", "Medium", "Large", "XL", "2XL", "3XL"],
+    options: MARKETPLACE_FILTERS.Size,
   },
   {
     label: "Material",
-    options: ["Linen", "Cotton", "Silk", "Polyester", "Denim", "Bamboo"],
+    options: MARKETPLACE_FILTERS.Material,
   },
   {
     label: "Color",
-    options: [
-      "Black",
-      "Beige",
-      "Red",
-      "Blue",
-      "Yellow",
-      "Green",
-      "Purple",
-      "White",
-      "Orange",
-      "Brown",
-      "Gray",
-      "Pink"
-    ],
+    options: MARKETPLACE_FILTERS.Color,
   },
   {
     label: "Sewer Location",
-    options: ["NCR", "Luzon", "Visayas", "Mindanao"],
+    options: MARKETPLACE_FILTERS["Sewer Location"],
   },
-  { label: "Type", options: ["Kids", "Men", "Women"] },
+  { label: "Type", options: MARKETPLACE_FILTERS.Type },
 ];
 
 interface FilterTabProps {
