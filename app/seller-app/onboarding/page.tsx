@@ -18,13 +18,6 @@ import { ArrowLeft, ChevronRight, Check, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { LocationPicker } from "@/components/ui/location-picker";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const STEPS = [
   { id: 1, name: "Shop Information" },
@@ -151,17 +144,12 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="suffix" className="text-sm text-third/70">Suffix</Label>
-                      <Select name="suffix">
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="None" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="None">None</SelectItem>
-                          <SelectItem value="Jr.">Jr.</SelectItem>
-                          <SelectItem value="Sr.">Sr.</SelectItem>
-                          <SelectItem value="III">III</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="suffix" id="suffix" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700">
+                        <option value="">None</option>
+                        <option value="Jr.">Jr.</option>
+                        <option value="Sr.">Sr.</option>
+                        <option value="III">III</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -231,53 +219,41 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="gender" className="text-sm text-third/70">Gender</Label>
-                      <Select name="gender" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Gender" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="gender" id="gender" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="educational-attainment" className="text-sm text-third/70">Educational Attainment</Label>
-                    <Select name="educational-attainment" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select Educational Attainment" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Elementary Level">Elementary Level</SelectItem>
-                        <SelectItem value="Elementary Graduate">Elementary Graduate</SelectItem>
-                        <SelectItem value="High School Level">High School Level</SelectItem>
-                        <SelectItem value="High School Graduate">High School Graduate</SelectItem>
-                        <SelectItem value="College Level">College Level</SelectItem>
-                        <SelectItem value="College Graduate">College Graduate</SelectItem>
-                        <SelectItem value="Vocational or Trade Course">Vocational or Trade Course</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="educational-attainment" id="educational-attainment" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select Educational Attainment</option>
+                      <option value="Elementary Level">Elementary Level</option>
+                      <option value="Elementary Graduate">Elementary Graduate</option>
+                      <option value="High School Level">High School Level</option>
+                      <option value="High School Graduate">High School Graduate</option>
+                      <option value="College Level">College Level</option>
+                      <option value="College Graduate">College Graduate</option>
+                      <option value="Vocational or Trade Course">Vocational or Trade Course</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="monthly-income" className="text-sm text-third/70">Monthly income as Sewer (Php)</Label>
-                    <Select name="monthly-income" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select Monthly Income" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="5,000 – below">5,000 – below</SelectItem>
-                        <SelectItem value="5000 – 10,000">5000 – 10,000</SelectItem>
-                        <SelectItem value="10,001 – 15,000">10,001 – 15,000</SelectItem>
-                        <SelectItem value="15,000 – 20,000">15,000 – 20,000</SelectItem>
-                        <SelectItem value="25,000 – 30,000">25,000 – 30,000</SelectItem>
-                        <SelectItem value="30,000 – above">30,000 – above</SelectItem>
-                        <SelectItem value="Others">Others</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="monthly-income" id="monthly-income" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select Monthly Income</option>
+                      <option value="5,000 – below">5,000 – below</option>
+                      <option value="5000 – 10,000">5000 – 10,000</option>
+                      <option value="10,001 – 15,000">10,001 – 15,000</option>
+                      <option value="15,000 – 20,000">15,000 – 20,000</option>
+                      <option value="25,000 – 30,000">25,000 – 30,000</option>
+                      <option value="30,000 – above">30,000 – above</option>
+                      <option value="Others">Others</option>
+                    </select>
                   </div>
                 </div>
 
@@ -304,78 +280,58 @@ export default function OnboardingPage() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="why-sew" className="text-sm text-third/70">Why do you continue to sew today?</Label>
-                    <Select name="why-sew" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select reason" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Source of Income">Source of Income</SelectItem>
-                        <SelectItem value="Community Tradition">Community Tradition</SelectItem>
-                        <SelectItem value="Continue Family’s Legacy">Continue Family’s Legacy</SelectItem>
-                        <SelectItem value="Part-Time Job">Part-Time Job</SelectItem>
-                        <SelectItem value="Provide for the Needs of the Family">Provide for the Needs of the Family</SelectItem>
-                        <SelectItem value="No Alternative Options for Employment">No Alternative Options for Employment</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="why-sew" id="why-sew" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select reason</option>
+                      <option value="Source of Income">Source of Income</option>
+                      <option value="Community Tradition">Community Tradition</option>
+                      <option value="Continue Family’s Legacy">Continue Family’s Legacy</option>
+                      <option value="Part-Time Job">Part-Time Job</option>
+                      <option value="Provide for the Needs of the Family">Provide for the Needs of the Family</option>
+                      <option value="No Alternative Options for Employment">No Alternative Options for Employment</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="like-sewing" className="text-sm text-third/70">What do you like about sewing?</Label>
-                    <Select name="like-sewing" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select reason" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Gives Relaxation / Reduce Stress">Gives Relaxation / Reduce Stress</SelectItem>
-                        <SelectItem value="Generates Income">Generates Income</SelectItem>
-                        <SelectItem value="Satisfaction">Satisfaction</SelectItem>
-                        <SelectItem value="Others">Others</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="like-sewing" id="like-sewing" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select reason</option>
+                      <option value="Gives Relaxation / Reduce Stress">Gives Relaxation / Reduce Stress</option>
+                      <option value="Generates Income">Generates Income</option>
+                      <option value="Satisfaction">Satisfaction</option>
+                      <option value="Others">Others</option>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="give-pride" className="text-sm text-third/70">Does it give you pride?</Label>
-                      <Select name="give-pride" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Yes/No" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="give-pride" id="give-pride" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="express-yourself" className="text-sm text-third/70">Were you able to express yourself through sewing?</Label>
-                      <Select name="express-yourself" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Yes/No" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="express-yourself" id="express-yourself" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="goals" className="text-sm text-third/70">What are your goals as a sewer for other people?</Label>
-                    <Select name="goals" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select Goal" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Share my Knowledge">Share my Knowledge</SelectItem>
-                        <SelectItem value="Help in Generating Income">Help in Generating Income</SelectItem>
-                        <SelectItem value="Recognized our Tradition">Recognized our Tradition</SelectItem>
-                        <SelectItem value="Promote the Business">Promote the Business</SelectItem>
-                        <SelectItem value="Build the Community">Build the Community</SelectItem>
-                        <SelectItem value="Others">Others</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="goals" id="goals" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select Goal</option>
+                      <option value="Share my Knowledge">Share my Knowledge</option>
+                      <option value="Help in Generating Income">Help in Generating Income</option>
+                      <option value="Recognized our Tradition">Recognized our Tradition</option>
+                      <option value="Promote the Business">Promote the Business</option>
+                      <option value="Build the Community">Build the Community</option>
+                      <option value="Others">Others</option>
+                    </select>
                   </div>
                 </div>
 
@@ -395,19 +351,15 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="motivations" className="text-sm text-third/70">What are your motivations for pursuing sewing as a livelihood?</Label>
-                    <Select name="motivations" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select Motivation" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="To provide for the needs of the family">To provide for the needs of the family</SelectItem>
-                        <SelectItem value="Acquire comprehensive knowledge in sewing">Acquire comprehensive knowledge in sewing</SelectItem>
-                        <SelectItem value="Skills Enhancement">Skills Enhancement</SelectItem>
-                        <SelectItem value="Satisfaction of being able to produce a woven fabric">Satisfaction of being able to produce a woven fabric</SelectItem>
-                        <SelectItem value="For customer’s satisfaction">For customer’s satisfaction</SelectItem>
-                        <SelectItem value="Others">Others</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="motivations" id="motivations" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select Motivation</option>
+                      <option value="To provide for the needs of the family">To provide for the needs of the family</option>
+                      <option value="Acquire comprehensive knowledge in sewing">Acquire comprehensive knowledge in sewing</option>
+                      <option value="Skills Enhancement">Skills Enhancement</option>
+                      <option value="Satisfaction of being able to produce a woven fabric">Satisfaction of being able to produce a woven fabric</option>
+                      <option value="For customer’s satisfaction">For customer’s satisfaction</option>
+                      <option value="Others">Others</option>
+                    </select>
                   </div>
 
                   <div className="space-y-2">
@@ -418,15 +370,11 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="own-machine" className="text-sm text-third/70">Do you own a Sewing Machine?</Label>
-                      <Select name="own-machine" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Yes/No" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="own-machine" id="own-machine" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="machine-owner" className="text-sm text-third/70">Who owned the Machine?</Label>
@@ -440,59 +388,43 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="traditional-products" className="text-sm text-third/70">Are the sewn products you produced traditional products of your community?</Label>
-                    <Select name="traditional-products" required={step === 2}>
-                      <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                        <SelectValue placeholder="Select Yes/No" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="Yes">Yes</SelectItem>
-                        <SelectItem value="No">No</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select name="traditional-products" id="traditional-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                      <option value="">Select Yes/No</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="products-used-for" className="text-sm text-third/70">What products are the sewn usually used for?</Label>
-                      <Select name="products-used-for" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Product Type" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Apparel">Apparel</SelectItem>
-                          <SelectItem value="Masks">Masks</SelectItem>
-                          <SelectItem value="Bags">Bags</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="products-used-for" id="products-used-for" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Product Type</option>
+                        <option value="Apparel">Apparel</option>
+                        <option value="Masks">Masks</option>
+                        <option value="Bags">Bags</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="specific-products" className="text-sm text-third/70">Specific products sewed are used for if applicable?</Label>
-                      <Select name="specific-products">
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Specific Product" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Shawls">Shawls</SelectItem>
-                          <SelectItem value="Uniforms">Uniforms</SelectItem>
-                          <SelectItem value="Barong">Barong</SelectItem>
-                          <SelectItem value="Dress">Dress</SelectItem>
-                          <SelectItem value="Table Runners">Table Runners</SelectItem>
-                          <SelectItem value="Gowns">Gowns</SelectItem>
-                          <SelectItem value="Blankets">Blankets</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="specific-products" id="specific-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700">
+                        <option value="">Select Specific Product</option>
+                        <option value="Shawls">Shawls</option>
+                        <option value="Uniforms">Uniforms</option>
+                        <option value="Barong">Barong</option>
+                        <option value="Dress">Dress</option>
+                        <option value="Table Runners">Table Runners</option>
+                        <option value="Gowns">Gowns</option>
+                        <option value="Blankets">Blankets</option>
+                      </select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="design-products" className="text-sm text-third/70">Do you design the garment products?</Label>
-                      <Select name="design-products" required={step === 2}>
-                        <SelectTrigger className="h-12 rounded-xl border-third/20 focus:border-third bg-white px-3 text-gray-700">
-                          <SelectValue placeholder="Select Yes/No" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl">
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select name="design-products" id="design-products" className="w-full h-12 rounded-xl border border-third/20 focus:border-third bg-white px-3 text-gray-700" required={step === 2}>
+                        <option value="">Select Yes/No</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                      </select>
                     </div>
                   </div>
                 </div>
