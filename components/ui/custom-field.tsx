@@ -22,6 +22,7 @@ interface CustomFieldProps
   containerClassName?: string;
   onChange?: (e: any) => void;
   onValueChange?: (value: string) => void;
+  variant?: "orange" | "purple";
 }
 
 export const CustomField = ({
@@ -36,17 +37,24 @@ export const CustomField = ({
   value,
   onChange,
   onValueChange,
+  variant = "orange",
   ...props
 }: CustomFieldProps) => {
   const commonClasses = cn(
-    "w-full border-2 border-third/50 px-6 py-3 outline-none focus:border-third transition-colors text-gray-700 h-14 appearance-none",
+    "w-full border-2 px-6 py-3 outline-none transition-colors text-gray-700 h-14 appearance-none",
+    variant === "orange" 
+      ? "border-third/50 focus:border-third" 
+      : "border-primary/50 focus:border-primary",
     isTextArea ? "rounded-3xl py-4 h-auto resize-none" : "rounded-full",
     className
   );
 
   return (
     <div className={cn("relative mt-4", containerClassName)}>
-      <label className="absolute -top-3 left-6 bg-white px-2 text-third font-bold text-sm z-10 whitespace-nowrap">
+      <label className={cn(
+        "absolute -top-3 left-6 bg-white px-2 font-bold text-sm z-10 whitespace-nowrap",
+        variant === "orange" ? "text-third" : "text-primary"
+      )}>
         {label}
       </label>
       {isTextArea ? (
@@ -60,6 +68,7 @@ export const CustomField = ({
         />
       ) : isSelect ? (
         <Select
+          variant={variant}
           value={value as string}
           onValueChange={(val) => {
             if (onValueChange) onValueChange(val);
@@ -91,7 +100,10 @@ export const CustomField = ({
           {(label.includes("Category") ||
             label.includes("Fabric") ||
             label.includes("Instructions")) && (
-            <ChevronDown className="absolute right-4 text-third w-6 h-6 pointer-events-none" />
+            <ChevronDown className={cn(
+              "absolute right-4 w-6 h-6 pointer-events-none",
+              variant === "orange" ? "text-third" : "text-primary"
+            )} />
           )}
         </div>
       )}

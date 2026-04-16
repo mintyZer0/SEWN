@@ -184,6 +184,7 @@ export default function SewersGrid({
         </span>
         <div className="mb-4 mx-4">
           <Select
+            variant="purple"
             value={sortBy}
             onValueChange={(val) =>
               setSortBy(val as "most-sold" | "highest-rated" | "most-experienced")

@@ -261,6 +261,7 @@ export default function CommissionForm({
               Fabric to be Used <span className="text-red-500">*</span>
             </label>
             <Select 
+              variant="purple"
               value={formData.fabricToUse} 
               onValueChange={(val) => setFormData(prev => ({ ...prev, fabricToUse: val }))}
               required
