@@ -71,15 +71,22 @@ export function AdminFilterBar({
 
 export function PageHeader({ 
   title, 
+  total,
   stats 
 }: { 
   title: string; 
+  total?: number;
   stats: { label: string; count: number | string }[] 
 }) {
   return (
     <div className="flex flex-col gap-10 mb-8">
       <div className="flex justify-between items-center w-full">
-        <h1 className="text-4xl font-extrabold text-primary tracking-tight">{title}</h1>
+        <div className="flex items-baseline gap-4">
+          <h1 className="text-4xl font-extrabold text-primary tracking-tight">{title}</h1>
+          {total !== undefined && (
+            <span className="text-2xl font-bold text-gray-300">({total})</span>
+          )}
+        </div>
       </div>
       
       <div className="flex justify-between items-center px-12">

@@ -3,16 +3,25 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CustomFieldProps
-  extends React.InputHTMLAttributes<
+  extends Omit<React.InputHTMLAttributes<
     HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-  > {
+  >, 'onChange'> {
   label: string;
   isTextArea?: boolean;
   isSelect?: boolean;
   options?: { value: string; label: string }[];
   containerClassName?: string;
+  onChange?: (e: any) => void;
+  onValueChange?: (value: string) => void;
 }
 
 export const CustomField = ({
@@ -24,11 +33,14 @@ export const CustomField = ({
   options = [],
   containerClassName,
   className,
+  value,
+  onChange,
+  onValueChange,
   ...props
 }: CustomFieldProps) => {
   const commonClasses = cn(
-    "w-full border-2 border-third/50 px-6 py-3 outline-none focus:border-third transition-colors text-gray-700 h-[54px] appearance-none",
-    isTextArea ? "rounded-[22px] py-4 h-auto resize-none" : "rounded-full",
+    "w-full border-2 border-third/50 px-6 py-3 outline-none focus:border-third transition-colors text-gray-700 h-14 appearance-none",
+    isTextArea ? "rounded-3xl py-4 h-auto resize-none" : "rounded-full",
     className
   );
 
@@ -42,31 +54,38 @@ export const CustomField = ({
           placeholder={placeholder}
           rows={4}
           className={commonClasses}
+          value={value as string}
+          onChange={onChange}
           {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
         />
       ) : isSelect ? (
-        <div className="relative flex items-center">
-          <select
-            className={cn(commonClasses, "bg-white cursor-pointer")}
-            {...(props as React.SelectHTMLAttributes<HTMLSelectElement>)}
-          >
-            <option value="" disabled hidden>
-              {placeholder}
-            </option>
+        <Select
+          value={value as string}
+          onValueChange={(val) => {
+            if (onValueChange) onValueChange(val);
+            if (onChange) onChange({ target: { value: val, name: props.name } } as any);
+          }}
+          disabled={props.disabled}
+        >
+          <SelectTrigger className={className}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
-              </option>
+              </SelectItem>
             ))}
-          </select>
-          <ChevronDown className="absolute right-4 text-third w-6 h-6 pointer-events-none" />
-        </div>
+          </SelectContent>
+        </Select>
       ) : (
         <div className="relative flex items-center">
           <input
             type={type}
             placeholder={placeholder}
             className={commonClasses}
+            value={value as string}
+            onChange={onChange}
             {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
           />
           {(label.includes("Category") ||

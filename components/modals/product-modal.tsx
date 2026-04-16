@@ -142,7 +142,7 @@ export const ProductModal = ({
   if (!isOpen) return null;
 
   const addVariationGroup = () => {
-    setVariationGroups([...variationGroups, { id: `g-${Date.now()}`, name: "", options: [""] }]);
+    setVariationGroups([...variationGroups, { id: `g-${Date.now()}`, name: "Color", options: [""] }]);
   };
 
   const updateGroup = (id: string, updates: Partial<VariationGroup>) => {
@@ -197,13 +197,13 @@ export const ProductModal = ({
   const isEdit = !!product;
 
   return (
-    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative bg-white rounded-[30px] w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl custom-scrollbar">
+      <div className="relative bg-white rounded-3xl w-full max-w-4xl max-h-full overflow-y-auto shadow-2xl custom-scrollbar">
         {/* Header */}
         <div className="sticky top-0 bg-white z-20 px-10 pt-12 pb-6 flex justify-between items-start">
           <div className="flex flex-col gap-2">
@@ -355,13 +355,13 @@ export const ProductModal = ({
 
             <div className="space-y-6">
               {variationGroups.length === 0 ? (
-                <div className="p-10 border-2 border-dashed border-gray-100 rounded-[30px] bg-gray-50/30 flex flex-col items-center text-center">
+                <div className="p-10 border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/30 flex flex-col items-center text-center">
                    <p className="text-gray-400 font-medium mb-1">No variations yet</p>
                    <p className="text-sm text-gray-400/70">Add groups like "Size" or "Color" to create product variations.</p>
                 </div>
               ) : (
                 variationGroups.map((group) => (
-                  <div key={group.id} className="p-6 bg-gray-50 rounded-[24px] border border-gray-100 relative group">
+                  <div key={group.id} className="p-6 bg-gray-50 rounded-3xl border border-gray-100 relative group">
                     <button 
                       type="button" 
                       onClick={() => removeGroup(group.id)}
@@ -373,9 +373,14 @@ export const ProductModal = ({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start mt-4 ">
                       <CustomField
                         label="Variant Category"
-                        placeholder="e.g. Size or Color"
+                        isSelect
                         value={group.name}
-                        onChange={(e: any) => updateGroup(group.id, { name: e.target.value })}
+                        onValueChange={(val) => updateGroup(group.id, { name: val })}
+                        options={[
+                          { value: "Color", label: "Color" },
+                          { value: "Material", label: "Material" },
+                          { value: "Size", label: "Size" },
+                        ]}
                         containerClassName="mt-0"
                       />
                       <div className="md:col-span-2 relative">

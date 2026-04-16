@@ -171,13 +171,13 @@ export default function SewerCenterPage() {
         }
 
         if (avatar) {
-          const avatar = profileData.user_avatars;
+          const avatarObj = Array.isArray(avatar) ? avatar[0] : avatar;
           let publicAvatarUrl = "";
           
-          if (avatar?.avatar_url) {
+          if (avatarObj?.avatar_url) {
             const { data: publicData } = supabase.storage
               .from("product-images")
-              .getPublicUrl(avatar.avatar_url);
+              .getPublicUrl(avatarObj.avatar_url);
 
             publicAvatarUrl = publicData.publicUrl;
             } 
