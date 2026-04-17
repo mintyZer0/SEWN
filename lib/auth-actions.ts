@@ -256,9 +256,39 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   const location = formData.get("location") as string;
   const zipCode = formData.get("zip-code") as string;
   const registeredAddress = (formData.get("address") || formData.get("customer-address")) as string;
-  const taxId = (formData.get("tax-id") || formData.get("tin")) as string;
+  const rawTaxId = (formData.get("tax-id") || formData.get("tin")) as string;
+  const taxId = rawTaxId ? rawTaxId.replace(/[\s-]/g, "") : "";
+  const rawDtiSecNumber = formData.get("dti-sec-number") as string;
+  const dtiSecNumber = rawDtiSecNumber ? rawDtiSecNumber.replace(/[\s-]/g, "") : "";
   const birthday = formData.get("birthday") as string;
   const gender = formData.get("gender") as string;
+  const city = formData.get("city") as string;
+  const province = formData.get("province") as string;
+  
+  // Survey Form Data
+  const educationalAttainment = (formData.get("educational-attainment") || formData.get("education")) as string;
+  const monthlyIncome = (formData.get("monthly-income") || formData.get("income")) as string;
+  const reasonForSewing = (formData.get("why-sew") || formData.get("whySew")) as string;
+  const favoriteAspect = (formData.get("like-sewing") || formData.get("likeSewing")) as string;
+  const givesPride = (formData.get("give-pride") || formData.get("givePride")) as string;
+  const expressesSelf = (formData.get("express-yourself") || formData.get("expressYourself")) as string;
+  const communityGoals = formData.get("goals") as string;
+  const learnMethod = (formData.get("learn-craft") || formData.get("learnCraft")) as string;
+  const teacherRelationship = (formData.get("who-taught") || formData.get("whoTaught")) as string;
+  const motivations = formData.get("motivations") as string;
+  const isOnlyLivelihood = (formData.get("only-livelihood") || formData.get("onlyLivelihood")) as string;
+  const ownsMachine = (formData.get("own-machine") || formData.get("ownMachine")) as string;
+  const machineOwner = (formData.get("machine-owner") || formData.get("machineOwner")) as string;
+  const makesTraditionalProducts = (formData.get("traditional-products") || formData.get("traditionalProducts")) as string;
+  const commonProductsUsedFor = (formData.get("products-used-for") || formData.get("productsUsedFor")) as string;
+  const specificProducts = (formData.get("specific-products") || formData.get("specificProducts")) as string;
+  const designsGarments = (formData.get("design-products") || formData.get("designProducts")) as string;
+  const socialLink = formData.get("social-link") as string;
+
+  // 1.5 Validate Required Fields
+  if (!firstName || !lastName || !shopName || !zipCode || !registeredAddress || !taxId || !dtiSecNumber || !birthday || !gender || (!location && (!city || !province))) {
+    return { success: false, error: "Missing required fields" };
+  }
 
   // 2. Update Core User Info
   const { error: userError } = await supabase
@@ -283,13 +313,13 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
 
   if (location) {
     const parts = location.split(" / ").map(s => s.trim());
-    const [region, province, city, barangay] = parts;
-    finalProvince = province || region || "";
-    finalCity = city || "";
-    finalBarangay = barangay || "";
+    const [region, provincePart, cityPart, barangayPart] = parts;
+    finalProvince = provincePart || region || "";
+    finalCity = cityPart || "";
+    finalBarangay = barangayPart || "";
   } else {
-    finalCity = formData.get("city") as string;
-    finalProvince = formData.get("province") as string;
+    finalCity = city;
+    finalProvince = province;
   }
 
   // Check if they already have a shop address to update it
@@ -340,7 +370,7 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   const { error: verificationError } = await supabase.from("sewer_verifications").upsert({
     user_id: user.id,
     tax_id: taxId,
-    dti_sec_number: formData.get("dti-sec-number") as string,
+    dti_sec_number: dtiSecNumber,
   }, { onConflict: "user_id" });
 
   if (verificationError) {
@@ -350,23 +380,23 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   // 6. Upsert into sewer_onboarding_surveys
   const { error: surveyError } = await supabase.from("sewer_onboarding_surveys").upsert({
     user_id: user.id,
-    educational_attainment: (formData.get("educational-attainment") || formData.get("education")) as string,
-    monthly_income: (formData.get("monthly-income") || formData.get("income")) as string,
-    reason_for_sewing: (formData.get("why-sew") || formData.get("whySew")) as string,
-    favorite_aspect: (formData.get("like-sewing") || formData.get("likeSewing")) as string,
-    gives_pride: (formData.get("give-pride") || formData.get("givePride")) as string,
-    expresses_self: (formData.get("express-yourself") || formData.get("expressYourself")) as string,
-    community_goals: formData.get("goals") as string,
-    learn_method: (formData.get("learn-craft") || formData.get("learnCraft")) as string,
-    teacher_relationship: (formData.get("who-taught") || formData.get("whoTaught")) as string,
-    motivations: formData.get("motivations") as string,
-    is_only_livelihood: (formData.get("only-livelihood") || formData.get("onlyLivelihood")) as string,
-    owns_machine: (formData.get("own-machine") || formData.get("ownMachine")) as string,
-    machine_owner: (formData.get("machine-owner") || formData.get("machineOwner")) as string,
-    makes_traditional_products: (formData.get("traditional-products") || formData.get("traditionalProducts")) as string,
-    common_products_used_for: (formData.get("products-used-for") || formData.get("productsUsedFor")) as string,
-    specific_products: (formData.get("specific-products") || formData.get("specificProducts")) as string,
-    designs_garments: (formData.get("design-products") || formData.get("designProducts")) as string,
+    educational_attainment: educationalAttainment,
+    monthly_income: monthlyIncome,
+    reason_for_sewing: reasonForSewing,
+    favorite_aspect: favoriteAspect,
+    gives_pride: givesPride,
+    expresses_self: expressesSelf,
+    community_goals: communityGoals,
+    learn_method: learnMethod,
+    teacher_relationship: teacherRelationship,
+    motivations: motivations,
+    is_only_livelihood: isOnlyLivelihood,
+    owns_machine: ownsMachine,
+    machine_owner: machineOwner,
+    makes_traditional_products: makesTraditionalProducts,
+    common_products_used_for: commonProductsUsedFor,
+    specific_products: specificProducts,
+    designs_garments: designsGarments,
   }, { onConflict: "user_id" });
 
   if (surveyError) {
@@ -380,7 +410,6 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   ]);
 
   // 8. Insert social link if provided
-  const socialLink = formData.get("social-link") as string;
   if (socialLink) {
     await supabase.from("user_socials").upsert({
       user_id: user.id,

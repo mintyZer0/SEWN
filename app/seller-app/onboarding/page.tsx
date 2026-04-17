@@ -139,15 +139,15 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="first-name" className="text-sm text-third/70">First Name</Label>
-                      <Input name="first-name" id="first-name" defaultValue={profile?.first_name} className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                      <Input name="first-name" id="first-name" defaultValue={profile?.first_name} className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[a-zA-Z\s\-']+$" title="Only letters, spaces, hyphens, and apostrophes allowed" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="last-name" className="text-sm text-third/70">Last Name</Label>
-                      <Input name="last-name" id="last-name" defaultValue={profile?.last_name} className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                      <Input name="last-name" id="last-name" defaultValue={profile?.last_name} className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[a-zA-Z\s\-']+$" title="Only letters, spaces, hyphens, and apostrophes allowed" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="middle-name" className="text-sm text-third/70">Middle Name</Label>
-                      <Input name="middle-name" id="middle-name" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" />
+                      <Input name="middle-name" id="middle-name" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" pattern="^[a-zA-Z\s\-']+$" title="Only letters, spaces, hyphens, and apostrophes allowed" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="suffix" className="text-sm text-third/70">Suffix</Label>
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="shop-name" className="text-lg text-third font-semibold">Business Name / Trade Name</Label>
-                  <Input name="shop-name" id="shop-name" placeholder="e.g. Maria's Custom Stitches" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                  <Input name="shop-name" id="shop-name" placeholder="e.g. Maria's Custom Stitches" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[a-zA-Z0-9\s\-'\.,&]+$" title="Only letters, numbers, spaces, and basic punctuation allowed" />
                   <p className="text-xs text-third/50 italic">If Business Name is not applicable, please enter your name as indicated on your BIR Certificate of Registration.</p>
                 </div>
 
@@ -179,7 +179,7 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="business-phone" className="text-lg text-third font-semibold">Business Phone Number</Label>
-                    <Input name="business-phone" id="business-phone" placeholder="09XX XXX XXXX" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                    <Input name="business-phone" id="business-phone" placeholder="09XX XXX XXXX" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[0-9\s\-\+\(\)]+$" title="Only numbers, spaces, and phone symbols (+, -, ()) allowed" />
                   </div>
                 </div>
 
@@ -190,7 +190,7 @@ export default function OnboardingPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="zip-code" className="text-lg text-third font-semibold">Zip Code</Label>
-                    <Input name="zip-code" id="zip-code" placeholder="2300" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                    <Input name="zip-code" id="zip-code" placeholder="2300" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[0-9]{4}$" title="Zip code must be exactly 4 digits" maxLength={4} minLength={4} />
                   </div>
                 </div>
 
@@ -202,11 +202,11 @@ export default function OnboardingPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="tax-id" className="text-lg text-third font-semibold">Tax Identification Number (TIN)</Label>
-                    <Input name="tax-id" id="tax-id" placeholder="000-000-000-000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                    <Input name="tax-id" id="tax-id" placeholder="000-000-000-000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[0-9\-\s]+$" title="Only numbers, spaces, and dashes allowed" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="dti-sec-number" className="text-lg text-third font-semibold">DTI / SEC Registration Number</Label>
-                    <Input name="dti-sec-number" id="dti-sec-number" placeholder="00000000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} />
+                    <Input name="dti-sec-number" id="dti-sec-number" placeholder="00000000" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 1} pattern="^[a-zA-Z0-9\-\s]+$" title="Only alphanumeric characters, spaces, and dashes allowed" />
                   </div>
                 </div>
 
@@ -227,7 +227,7 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="birthday" className="text-sm text-third/70">Birthday</Label>
-                      <Input name="birthday" id="birthday" type="date" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
+                      <Input name="birthday" id="birthday" type="date" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="gender" className="text-sm text-third/70">Gender</Label>
@@ -236,9 +236,9 @@ export default function OnboardingPage() {
                           <SelectValue placeholder="Select Gender" />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl">
-                          <SelectItem value="Male">Male</SelectItem>
-                          <SelectItem value="Female">Female</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -385,11 +385,11 @@ export default function OnboardingPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="learn-craft" className="text-sm text-third/70">How did you learn the craft?</Label>
-                      <Input name="learn-craft" id="learn-craft" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
+                      <Input name="learn-craft" id="learn-craft" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} maxLength={255} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="who-taught" className="text-sm text-third/70">Who taught you? (Indicate the relationship)</Label>
-                      <Input name="who-taught" id="who-taught" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
+                      <Input name="who-taught" id="who-taught" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} maxLength={255} />
                     </div>
                   </div>
 
@@ -412,7 +412,7 @@ export default function OnboardingPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="only-livelihood" className="text-sm text-third/70">Is it the only livelihood available in your area?</Label>
-                    <Input name="only-livelihood" id="only-livelihood" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} />
+                    <Input name="only-livelihood" id="only-livelihood" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" required={step === 2} maxLength={255} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -430,7 +430,7 @@ export default function OnboardingPage() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="machine-owner" className="text-sm text-third/70">Who owned the Machine?</Label>
-                      <Input name="machine-owner" id="machine-owner" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" />
+                      <Input name="machine-owner" id="machine-owner" className="h-12 rounded-xl border-third/20 focus:border-third bg-white" maxLength={255} />
                     </div>
                   </div>
                 </div>
