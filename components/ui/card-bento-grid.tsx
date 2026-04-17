@@ -6,6 +6,7 @@ type CardBentoGridProps = {
   href: string;
   colSpan: number;
   id: number;
+  isDisabled?: boolean;
 };
 
 interface CardBentoGridComponentProps {
@@ -31,6 +32,7 @@ export default function CardBentoGrid({
             service={item.service}
             href={item.href}
             colSpan={item.colSpan}
+            isDisabled={item.isDisabled}
             key={item.id}
           />
         ))}

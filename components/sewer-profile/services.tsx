@@ -15,6 +15,7 @@ export default function Services({ sewerId, servicesOffered }: ServicesProps) {
       href: `/sewers/${sewerId}/repair`,
       colSpan: 1,
       id: 1,
+      isDisabled: !servicesOffered.includes("repair"),
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-customize-fit.jpg",
@@ -23,6 +24,7 @@ export default function Services({ sewerId, servicesOffered }: ServicesProps) {
       href: `/sewers/${sewerId}/alteration`,
       colSpan: 1,
       id: 2,
+      isDisabled: !servicesOffered.includes("alteration"),
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
@@ -31,23 +33,15 @@ export default function Services({ sewerId, servicesOffered }: ServicesProps) {
       href: `/sewers/${sewerId}/commission`,
       colSpan: 2,
       id: 3,
+      isDisabled: !servicesOffered.includes("commission"),
     },
   ];
 
-  const filteredItems = allCardItems.filter(item => 
-    servicesOffered.includes(item.type as any)
-  );
-
-  // If only 1 item, make it full width (colSpan 2)
-  if (filteredItems.length === 1) {
-    filteredItems[0].colSpan = 2;
-  }
-
-  if (filteredItems.length === 0) return null;
+  if (servicesOffered.length === 0) return null;
 
   return (
     <>
-      <CardBentoGrid items={filteredItems} header="Pick a service" />
+      <CardBentoGrid items={allCardItems} header="Pick a service" />
     </>
   );
 }
