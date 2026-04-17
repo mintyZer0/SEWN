@@ -182,21 +182,27 @@ export default function ProductsPage() {
       // 2. Handle Variations Matrix
       if (productData.variants && productData.variants.length > 0) {
         for (const variantData of productData.variants) {
-          // A. Create Variant Row (The physical item)
+          // A. Create/Update Variant Row (The physical item)
+          const variantPayload: any = {
+            product_id: product.id,
+            sku: variantData.sku,
+            stock_quantity: variantData.stock !== undefined && variantData.stock !== null && !isNaN(variantData.stock) ? Number(variantData.stock) : 0,
+            price_override: variantData.price !== undefined && variantData.price !== null && !isNaN(variantData.price) ? Number(variantData.price) : null,
+          };
+
+          if (variantData.id && !variantData.id.startsWith('var-')) {
+            variantPayload.id = variantData.id;
+          }
+
           const { data: variant, error: variantError } = await supabase
             .from('product_variants')
-            .insert({
-              product_id: product.id,
-              sku: variantData.sku,
-              stock_quantity: variantData.stock || 0,
-              price_override: variantData.price || null,
-            })
+            .upsert(variantPayload)
             .select()
             .single();
 
           if (variantError) {
             console.error("Variant error:", variantError);
-            continue; 
+            continue;
           }
 
           // B. Map Attributes for this variant (e.g., this SKU is both 'Red' and 'Small')
@@ -208,14 +214,13 @@ export default function ProductsPage() {
 
           const { error: attrError } = await supabase
             .from('variant_attribute_values')
-            .insert(attributeEntries);
+            .upsert(attributeEntries);
 
           if (attrError) {
             console.error("Attribute mapping error:", attrError);
           }
         }
       }
-
       await fetchData();
       setIsProductModalOpen(false);
     } catch (error) {

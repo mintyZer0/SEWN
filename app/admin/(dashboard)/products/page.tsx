@@ -64,45 +64,94 @@ export default function ProductsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = createClient();
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const { data, error } = await supabase
         .from('seller_products')
         .select(`
           id,
           name,
           price,
+          description,
+          location,
+          type,
+          img_src,
           created_at,
           verification_status,
           seller_name,
-          type
+          user_id,
+          users (
+            first_name,
+            last_name,
+            created_at
+          ),
+          product_variants (
+            id,
+            sku,
+            stock_quantity,
+            price_override,
+            variant_attribute_values (
+              attribute_type,
+              attribute_value
+            )
+          )
         `)
+        .neq('verification_status', 'draft')
         .order('created_at', { ascending: false });
 
       if (data) {
-        const mapped: ProductData[] = data.map(p => ({
+        const mapped: any[] = data.map(p => ({
           id: p.id,
           name: p.name,
           category: p.type,
-          sellerName: p.seller_name || "Unknown Seller",
+          sellerName: p.seller_name || `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Seller",
           dateAdded: new Date(p.created_at).toLocaleDateString(),
           price: `₱${p.price.toLocaleString()}`,
-          stock: "Check Details", // Stock details usually in variants
-          status: p.verification_status === 'approved' ? 'Accepted' : (p.verification_status === 'rejected' ? 'Declined' : 'Pending') as StatusType
-        }));
-        setProducts(mapped);
+          stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
+          status: p.verification_status === 'approved' ? 'Accepted' : (p.verification_status === 'rejected' ? 'Declined' : 'Pending') as StatusType,
+          // Full fields for modal
+          description: p.description,
+          location: p.location,
+          imageUrl: p.img_src,
+          sellerJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
+          variants: p.product_variants || [],
+        }));        setProducts(mapped);
       }
     } catch (err) {
       console.error("Error fetching admin products:", err);
     } finally {
-      setLoading(false);
+      if (!isSilent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+
+    // Set up Realtime subscription
+    const channel = supabase
+      .channel('admin-products-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'seller_products' },
+        () => fetchProducts(true)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'product_variants' },
+        () => fetchProducts(true)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'variant_attribute_values' },
+        () => fetchProducts(true)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
 
   const stats = [
     { label: "Active", count: products.filter(p => p.status === 'Accepted').length, color: "text-emerald-500" },
@@ -116,20 +165,13 @@ export default function ProductsPage() {
   };
 
   const handleApprove = async (id: string) => {
-    const res = await approveProduct(id);
-    if (res.success) {
-      await fetchProducts();
-      setIsModalOpen(false);
-    }
+    await fetchProducts();
+    setIsModalOpen(false);
   };
 
-  const handleDecline = async (id: string, reason: string) => {
-    // Note: AdminDetailModal needs to pass reason and comment
-    const res = await rejectProduct(id, reason, "Declined by admin via dashboard");
-    if (res.success) {
-      await fetchProducts();
-      setIsModalOpen(false);
-    }
+  const handleDecline = async (id: string) => {
+    await fetchProducts();
+    setIsModalOpen(false);
   };
 
   const modalData = selectedProduct ? {

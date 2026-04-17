@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { AdminRevenueChart } from "@/components/admin/admin-revenue-chart";
 import { AdminTopCategories } from "@/components/admin/admin-top-categories";
@@ -7,29 +10,85 @@ import { AdminConversionRate } from "@/components/admin/admin-conversion-rate";
 import { 
   ShoppingBag, 
   PhilippinePeso, 
-  Search
+  Search,
+  Loader2
 } from "lucide-react";
-import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AdminDashboardPage() {
-  const stats = [
+  const [stats, setStats] = useState([
     {
       title: "Total Sales",
-      value: "PHP1,259,252,355",
-      change: "+5.34%",
+      value: "PHP 0",
+      change: "0%",
       isPositive: true,
       icon: PhilippinePeso,
-      href: "/orders",
+      href: "/admin/orders",
     },
     {
       title: "Total Orders",
-      value: "2,563",
-      change: "+5.34%",
+      value: "0",
+      change: "0%",
       isPositive: true,
       icon: ShoppingBag,
-      href: "/orders",
+      href: "/admin/orders",
     },
-  ];
+  ]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchDashboardStats() {
+      try {
+        setLoading(true);
+        // 1. Fetch Total Sales
+        const { data: orders } = await supabase
+          .from('orders')
+          .select('total')
+          .neq('status', 'cancelled');
+        
+        const totalSales = orders?.reduce((acc, curr) => acc + Number(curr.total), 0) || 0;
+        
+        // 2. Fetch Total Order Count
+        const { count: totalOrders } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true });
+
+        setStats([
+          {
+            title: "Total Sales",
+            value: `PHP ${totalSales.toLocaleString()}`,
+            change: "+0%", // Needs historical data for comparison
+            isPositive: true,
+            icon: PhilippinePeso,
+            href: "/admin/orders",
+          },
+          {
+            title: "Total Orders",
+            value: (totalOrders || 0).toString(),
+            change: "+0%",
+            isPositive: true,
+            icon: ShoppingBag,
+            href: "/admin/orders",
+          },
+        ]);
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardStats();
+  }, [supabase]);
+
+  if (loading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12 w-full max-w-[1400px] mx-auto px-6">

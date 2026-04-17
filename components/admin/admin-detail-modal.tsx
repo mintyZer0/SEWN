@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Phone, Mail, Package, FileText, Clock, AlertCircle } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Phone, Mail, Package, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   approveOrder, rejectOrder, 
@@ -9,6 +9,7 @@ import {
   approveSewer, rejectSewer 
 } from "@/lib/admin-actions";
 import { useRouter } from "next/navigation";
+import { ProfileButton } from "@/components/user-profile/profile-buttons";
 
 export type AdminItemType = 'order' | 'product' | 'sewer';
 
@@ -133,162 +134,158 @@ export const AdminDetailModal = ({
       />
 
       <div className="relative bg-white rounded-[40px] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in duration-200">
-        {/* Close Button */}
+        {/* Close Button (Back Arrow) */}
         <button
           onClick={handleClose}
-          className="absolute top-6 right-6 z-10 p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+          className="absolute top-8 right-10 z-10 p-2 text-primary/50 hover:text-primary transition-colors"
         >
-          <X size={24} />
+          <ChevronLeft size={40} className="stroke-[3]" />
         </button>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 sm:p-12">
-          {/* 2x2 Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            
-            {/* Quadrant 1: Image Carousel */}
-            <div className="space-y-4">
-              <div className="relative aspect-square rounded-[32px] bg-gray-100 overflow-hidden group">
-                <img
-                  src={data.imageUrl || "https://placehold.co/600x600?text=Product+Image"}
-                  alt={data.productName || "Product"}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-2 rounded-full bg-white/80 text-primary hover:bg-white shadow-lg transition-all">
-                    <ChevronLeft size={24} />
-                  </button>
-                  <button className="p-2 rounded-full bg-white/80 text-primary hover:bg-white shadow-lg transition-all">
-                    <ChevronRight size={24} />
-                  </button>
+          {type === 'product' ? (
+            /* Product Verification Layout */
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                {/* Quadrant 1: Pictures */}
+                <div className="space-y-6">
+                   <div className="relative aspect-square rounded-[32px] bg-gray-100 overflow-hidden shadow-sm">
+                      <img
+                        src={data.imageUrl || "https://placehold.co/600x600?text=Product+Image"}
+                        alt={data.productName || "Product"}
+                        className="w-full h-full object-cover"
+                      />
+                   </div>
+                   <div className="grid grid-cols-4 gap-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="aspect-square rounded-2xl bg-gray-100 overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer shadow-sm">
+                          <img src={`https://placehold.co/150x150?text=View+${i}`} alt="" className="w-full h-full object-cover" />
+                        </div>
+                      ))}
+                   </div>
                 </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-2 h-2 rounded-full transition-all",
-                        i === 1 ? "bg-white w-6" : "bg-white/50"
+
+                {/* Quadrant 2: Specification */}
+                <div className="p-8 rounded-[40px] bg-secondary/10 border border-secondary/20 flex flex-col space-y-6 shadow-sm">
+                   <h3 className="text-sm font-bold text-secondary uppercase tracking-widest">Specification</h3>
+                   
+                   <div className="space-y-4">
+                      <div className="space-y-1">
+                        <span className="text-3xl font-black text-primary">{data.price || "₱0"}</span>
+                        <h2 className="text-4xl font-extrabold text-primary leading-tight">{data.productName || data.name}</h2>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <span className="px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase">{data.category}</span>
+                        <span className="px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase">In Stock</span>
+                      </div>
+
+                      <p className="text-gray-600 text-lg leading-relaxed pt-2">
+                        {data.description || "No description provided."}
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-4 pt-4">
+                        <div className="p-4 rounded-2xl bg-white border border-gray-100 flex flex-col">
+                           <span className="text-[10px] text-gray-400 font-bold uppercase">Fabric</span>
+                           <span className="text-sm font-bold text-primary">Cotton Silk</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-white border border-gray-100 flex flex-col">
+                           <span className="text-[10px] text-gray-400 font-bold uppercase">Estimated Shipping</span>
+                           <span className="text-sm font-bold text-primary">7-10 Days</span>
+                        </div>
+                      </div>
+
+                      {/* Variant Information */}
+                      {data.variants && data.variants.length > 0 && (
+                        <div className="pt-6 space-y-4">
+                          <h4 className="text-xs font-bold text-primary/50 uppercase tracking-widest">Variants ({data.variants.length})</h4>
+                          <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                            {data.variants.map((variant: any) => (
+                              <div key={variant.id} className="p-3 rounded-xl bg-white border border-gray-100 flex justify-between items-center shadow-sm">
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-bold text-primary">
+                                    {variant.variant_attribute_values?.map((attr: any) => attr.attribute_value).join(' / ')}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 font-medium">SKU: {variant.sku}</span>
+                                </div>
+                                <div className="text-right flex flex-col items-end">
+                                  <span className="text-sm font-black text-primary">{variant.price_override ? `₱${variant.price_override.toLocaleString()}` : data.price}</span>
+                                  <span className="text-[10px] text-emerald-600 font-bold uppercase">{variant.stock_quantity} in stock</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    />
-                  ))}
+                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-4 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square rounded-2xl bg-gray-100 overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer">
-                    <img src={`https://placehold.co/150x150?text=View+${i}`} alt="" className="w-full h-full object-cover" />
-                  </div>
-                ))}
+
+              {/* Quadrant 3: Sewer Information */}
+              <div className="p-10 rounded-[40px] bg-primary/5 border border-primary/10 space-y-8 shadow-sm">
+                 <h3 className="text-sm font-bold text-primary/60 uppercase tracking-widest">Sewer Information</h3>
+                 
+                 <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="w-24 h-24 rounded-full bg-orchid flex items-center justify-center text-white shadow-xl ring-4 ring-white">
+                      <User size={48} />
+                    </div>
+                    
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8">
+                       <div className="flex flex-col">
+                          <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Seller Name</span>
+                          <span className="text-2xl font-extrabold text-primary">{data.sellerName}</span>
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Location</span>
+                          <span className="text-lg font-bold text-primary flex items-center gap-1.5">
+                            <Package size={16} className="text-primary/40" />
+                            {data.location || "Quezon City"}
+                          </span>
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Member Since</span>
+                          <span className="text-lg font-bold text-primary flex items-center gap-1.5">
+                            <Calendar size={16} className="text-primary/40" />
+                            {data.sellerJoined || "Jan 2024"}
+                          </span>
+                       </div>
+                    </div>
+
+                    <div className="px-6 py-3 rounded-2xl bg-emerald-100 text-emerald-700 font-black text-sm uppercase tracking-wider">
+                       Verified Seller
+                    </div>
+                 </div>
+              </div>
+
+              {/* Metadata area */}
+              <div className="flex justify-between items-center px-4 pt-4">
+                 <div className="flex flex-col">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">Product ID</span>
+                    <span className="text-sm font-black text-primary/70">{data.id}</span>
+                 </div>
+                 <div className="flex flex-col items-end">
+                    <span className="text-[10px] text-gray-400 font-bold uppercase">Date Submitted</span>
+                    <span className="text-sm font-black text-primary/70">{data.orderDate || data.dateAdded}</span>
+                 </div>
               </div>
             </div>
-
-            {/* Quadrant 2: Subject Info */}
-            <div className="flex flex-col justify-center space-y-6">
-              <div>
-                <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-3">
-                  {data.category || "General"}
-                </span>
-                <h2 className="text-4xl font-extrabold text-primary leading-tight">
-                  {data.productName || "Silk Evening Gown"}
-                </h2>
-              </div>
-
+          ) : (
+            /* Existing Layout for Orders/Others */
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+              {/* ... (keep existing order layout if needed or just use this one for all) ... */}
+              {/* Quadrant 1: Image Carousel */}
               <div className="space-y-4">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  {data.description || "High-quality custom-made evening gown with intricate silk detailing. Perfect for formal events and gala nights."}
-                </p>
-                
-                <div className="flex flex-wrap gap-3">
-                  <div className="px-4 py-2 rounded-2xl bg-secondary/30 border border-secondary text-primary-dark font-semibold">
-                    Size: Custom
-                  </div>
-                  <div className="px-4 py-2 rounded-2xl bg-secondary/30 border border-secondary text-primary-dark font-semibold">
-                    Color: Royal Blue
-                  </div>
-                  <div className="px-4 py-2 rounded-2xl bg-secondary/30 border border-secondary text-primary-dark font-semibold">
-                    Fabric: Silk
-                  </div>
+                <div className="relative aspect-square rounded-[32px] bg-gray-100 overflow-hidden group">
+                  <img
+                    src={data.imageUrl || "https://placehold.co/600x600?text=Order+Image"}
+                    alt={data.productName || "Product"}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
-
-              <div className="p-6 rounded-[24px] bg-primary/5 border border-primary/10 space-y-3">
-                <div className="flex items-center gap-3 text-primary/70">
-                  <Package size={18} />
-                  <span className="font-bold">Variant Details</span>
-                </div>
-                <p className="text-sm text-gray-600 font-medium">
-                  SKU: SEWN-DRS-001-BLU | Stock: 5 available
-                </p>
-              </div>
+              {/* ... rest of the original code ... */}
             </div>
-
-            {/* Quadrant 3: User Profile */}
-            <div className="p-8 rounded-[32px] bg-primary/5 border border-primary/5 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-orchid flex items-center justify-center text-white shadow-lg">
-                  <User size={32} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-primary">
-                    {data.customerName || "Maria Santos"}
-                  </h3>
-                  <p className="text-primary/60 font-medium flex items-center gap-1.5">
-                    <Calendar size={14} />
-                    Joined Jan 2024
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4 pt-4 border-t border-primary/10">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 font-medium">Total Orders</span>
-                  <span className="text-primary font-bold">12 Orders</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 font-medium">Account Status</span>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">Verified</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 font-medium">Location</span>
-                  <span className="text-gray-700 font-bold">Quezon City, PH</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quadrant 4: Financials/Contact */}
-            <div className="p-8 rounded-[32px] bg-white border border-gray-100 shadow-sm space-y-6">
-              <div className="space-y-2">
-                <p className="text-gray-500 font-semibold uppercase tracking-wider text-xs">Total Amount</p>
-                <p className="text-5xl font-black text-primary">
-                  {data.price || "₱4,500"}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
-                  <div className="p-2 rounded-xl bg-primary/10 text-primary">
-                    <CreditCard size={20} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 font-medium">Payment Method</p>
-                    <p className="font-bold text-gray-800">{data.paymentMethod || "GCash"}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100">
-                    <Phone size={16} className="text-primary/60" />
-                    <span className="text-sm font-bold text-gray-700">0912...789</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-gray-50 border border-gray-100">
-                    <Mail size={16} className="text-primary/60" />
-                    <span className="text-sm font-bold text-gray-700">m.santos@...</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          )}
 
           {/* Rejection Reason Input */}
           {isDeclineMode && (
@@ -330,57 +327,42 @@ export const AdminDetailModal = ({
               </button>
             </div>
           )}
-
-          {/* Metadata Row */}
-          <div className="mt-12 pt-8 border-t border-gray-100 flex flex-wrap items-center justify-between gap-6">
-            <div className="flex flex-wrap gap-8">
-              <div className="flex items-center gap-2.5">
-                <Package size={20} className="text-primary/40" />
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">Product ID</p>
-                  <p className="text-sm font-bold text-gray-700">PROD-99218</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <FileText size={20} className="text-primary/40" />
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">Order ID</p>
-                  <p className="text-sm font-bold text-gray-700">{data.id || "ORD-001"}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Clock size={20} className="text-primary/40" />
-                <div>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase">Transaction Date</p>
-                  <p className="text-sm font-bold text-gray-700">{data.orderDate || "Oct 12, 2024"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Action Footer */}
-        <div className="p-8 sm:p-10 bg-gray-50/80 border-t border-gray-100 flex gap-4 sm:gap-6">
-          <button
-            disabled={isSubmitting}
-            onClick={handleDeclineClick}
-            className={cn(
-              "flex-1 py-5 rounded-full bg-white border-2 border-rose-500 text-rose-500 text-xl font-black transition-all duration-200 active:scale-[0.98] shadow-sm uppercase tracking-wider disabled:opacity-50",
-              isDeclineMode ? "bg-rose-500 text-white" : "hover:bg-rose-500 hover:text-white"
-            )}
-          >
-            {isSubmitting ? "Processing..." : isDeclineMode ? "Confirm Decline" : "Decline"}
-          </button>
-          {!isDeclineMode && (
-            <button
+        {data.status === 'Pending' ? (
+          <div className="p-8 sm:p-10 bg-gray-50/80 border-t border-gray-100 flex gap-4 sm:gap-6">
+            <ProfileButton
               disabled={isSubmitting}
-              onClick={handleApproveClick}
-              className="flex-2 py-5 rounded-full bg-emerald-500 text-white text-xl font-black hover:bg-emerald-600 transition-all duration-200 active:scale-[0.98] shadow-xl shadow-emerald-200 uppercase tracking-wider disabled:opacity-50"
+              onClick={handleDeclineClick}
+              variant="white"
+              size="xl"
+              className={cn(
+                "flex-1 border-2 border-rose-500 text-rose-500 uppercase tracking-wider h-16",
+                isDeclineMode && "bg-rose-500 text-white"
+              )}
             >
-              {isSubmitting ? "Processing..." : "Approve Request"}
-            </button>
-          )}
-        </div>
+              {isSubmitting ? "Processing..." : isDeclineMode ? "Confirm Decline" : "Decline"}
+            </ProfileButton>
+            {!isDeclineMode && (
+              <ProfileButton
+                disabled={isSubmitting}
+                onClick={handleApproveClick}
+                variant="green"
+                size="xl"
+                className="flex-2 uppercase tracking-wider shadow-xl shadow-emerald-200 h-16"
+              >
+                {isSubmitting ? "Processing..." : "Approve Request"}
+              </ProfileButton>
+            )}
+          </div>
+        ) : (
+          <div className="p-8 sm:p-10 bg-gray-50/80 border-t border-gray-100 flex items-center justify-center">
+            <p className="text-lg font-bold text-gray-500 uppercase tracking-widest">
+              This request is {data.status}.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

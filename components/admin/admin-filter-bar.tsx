@@ -40,7 +40,7 @@ export function AdminFilterBar({
       <div className="flex items-center gap-3">
         {/* Status Dropdown */}
         <Select variant="purple" onValueChange={(val) => onStatusChange?.(val)}>
-          <SelectTrigger className="pl-10 pr-4 h-10 bg-primary/80 text-white rounded-xl border-none text-sm font-medium w-[140px] shadow-sm">
+          <SelectTrigger className="relative pl-10 pr-4 h-10 bg-primary/80 text-white rounded-xl border-none text-sm font-medium w-[140px] shadow-sm">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </div>
@@ -56,7 +56,7 @@ export function AdminFilterBar({
 
         {/* Date Dropdown */}
         <Select variant="purple" onValueChange={(val) => onDateChange?.(val)}>
-          <SelectTrigger className="pl-10 pr-4 h-10 bg-primary/80 text-white rounded-xl border-none text-sm font-medium w-[240px] shadow-sm">
+          <SelectTrigger className="relative pl-10 pr-4 h-10 bg-primary/80 text-white rounded-xl border-none text-sm font-medium w-[240px] shadow-sm">
             <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-white" size={16} />
             <SelectValue placeholder="Date Range" />
           </SelectTrigger>

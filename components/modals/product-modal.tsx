@@ -54,6 +54,8 @@ export const ProductModal = ({
   const [variationGroups, setVariationGroups] = useState<VariationGroup[]>([]);
 
   const [variants, setVariants] = useState<ProductVariant[]>([]);
+  
+  const supabase = createClient();
 
   // Auto-generate variants matrix when groups or options change
   useEffect(() => {
@@ -83,51 +85,164 @@ export const ProductModal = ({
 
       const combinations = cartesian(optionSets);
       
-      const newVariants = combinations.map((combo, idx) => {
-        const attributes: Record<string, string> = {};
-        validGroups.forEach((group, groupIdx) => {
-          attributes[group.name] = combo[groupIdx];
+      setVariants(prevVariants => {
+        const newVariants = combinations.map((combo, idx) => {
+          const attributes: Record<string, string> = {};
+          validGroups.forEach((group, groupIdx) => {
+            attributes[group.name] = combo[groupIdx];
+          });
+
+          // Generate a unique SKU prefix using the product name
+          const productPrefix = (formData.productName || "PROD").substring(0, 5).toUpperCase().replace(/\s+/g, '');
+          const nameLabel = `${productPrefix}-${combo.join("-").toUpperCase()}`;
+
+          const existingVariant = prevVariants.find(v => {
+             const existingKeys = Object.keys(v.attributes);
+             
+             // Lenient match for single variant: if both have 1 attribute and values match
+             if (prevVariants.length === 1 && combinations.length === 1 && existingKeys.length === 1 && validGroups.length === 1) {
+                const matches = String(Object.values(v.attributes)[0] || "").trim().toLowerCase() === String(combo[0] || "").trim().toLowerCase();
+                return matches;
+             }
+
+             if (existingKeys.length !== validGroups.length) {
+                return false;
+             }
+             
+             const isMatch = existingKeys.every(k => {
+                const targetKey = Object.keys(attributes).find(ak => ak.trim().toLowerCase() === k.trim().toLowerCase());
+                if (!targetKey) {
+                   return false;
+                }
+                const vValue = String(v.attributes[k] || "").trim().toLowerCase();
+                const aValue = String(attributes[targetKey] || "").trim().toLowerCase();
+                const matches = vValue === aValue;
+                return matches;
+             });
+
+             return isMatch;
+          });
+
+          if (existingVariant) {
+            return {
+              ...existingVariant,
+              attributes // Update attributes to match the current group names exactly
+            };
+          }
+
+          // Add a short random suffix to new SKUs to ensure global uniqueness
+          const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+          const uniqueSku = `${nameLabel}-${randomSuffix}`;
+
+          return {
+            id: `var-${idx}-${Date.now()}`,
+            attributes,
+            sku: uniqueSku,
+            price: "",
+            stock: "0",
+          };
         });
-
-        const nameLabel = combo.join("-").toUpperCase();
-
-        return {
-          id: `var-${idx}-${Date.now()}`,
-          attributes,
-          sku: nameLabel,
-          price: "",
-          stock: "0",
-        };
+        return newVariants;
       });
-
-      setVariants(newVariants);
     };
 
     generateMatrix();
   }, [variationGroups, formData.productName]);
 
   useEffect(() => {
-    if (product) {
-      setFormData((prev) => ({
-        ...prev,
-        productName: product.name,
-      }));
-    } else {
-      setFormData({
-        productName: "",
-        description: "",
-        price: "",
-        category: "Men",
-        location: "NCR",
-        type: "Men",
-        shippingTime: "",
-        weight: "",
-        fabric: "cotton",
-        careInstructions: "hand-wash",
-      });
-      setVariationGroups([]);
+    async function fetchFullProduct() {
+      if (product && isOpen) {
+        const { data, error } = await supabase
+          .from('seller_products')
+          .select(`
+            *,
+            product_variants (
+              id,
+              sku,
+              stock_quantity,
+              price_override,
+              variant_attribute_values (
+                attribute_type,
+                attribute_value
+              )
+            )
+          `)
+          .eq('id', product.id)
+          .single();
+
+        if (data) {
+          setFormData((prev) => ({
+            ...prev,
+            productName: data.name || product.name || "",
+            description: data.description || "",
+            price: data.price ? String(data.price) : "",
+            location: data.location || "NCR",
+            type: data.type || "Men",
+            weight: data.weight ? String(data.weight) : "",
+            fabric: data.fabric || "cotton",
+            careInstructions: data.care_instructions || "hand-wash",
+            shippingTime: data.shipping_time || "",
+          }));
+
+          if (data.product_variants && data.product_variants.length > 0) {
+            const fetchedVariants: ProductVariant[] = data.product_variants.map((v: any) => {
+              const attributes: Record<string, string> = {};
+              v.variant_attribute_values?.forEach((attr: any) => {
+                attributes[attr.attribute_type] = attr.attribute_value;
+              });
+              return {
+                id: v.id,
+                sku: v.sku || "",
+                stock: v.stock_quantity !== undefined && v.stock_quantity !== null ? String(v.stock_quantity) : "0",
+                price: v.price_override !== undefined && v.price_override !== null ? String(v.price_override) : "",
+                attributes
+              };
+            });
+            setVariants(fetchedVariants);
+
+            const groupsMap: Record<string, Set<string>> = {};
+            data.product_variants.forEach((v: any) => {
+              v.variant_attribute_values?.forEach((attr: any) => {
+                if (!groupsMap[attr.attribute_type]) {
+                  groupsMap[attr.attribute_type] = new Set();
+                }
+                groupsMap[attr.attribute_type].add(attr.attribute_value);
+              });
+            });
+
+            const fetchedGroups: VariationGroup[] = Object.entries(groupsMap).map(([name, optionsSet], idx) => ({
+              id: `g-fetch-${idx}-${Date.now()}`,
+              name,
+              options: Array.from(optionsSet as Set<string>)
+            }));
+            
+            setVariationGroups(fetchedGroups);
+          } else {
+            setVariationGroups([]);
+            setVariants([]);
+          }
+        } else {
+          setFormData((prev) => ({ ...prev, productName: product.name }));
+        }
+      } else if (!product && isOpen) {
+        setFormData({
+          productName: "",
+          description: "",
+          price: "",
+          category: "Men",
+          location: "NCR",
+          type: "Men",
+          shippingTime: "",
+          weight: "",
+          fabric: "cotton",
+          careInstructions: "hand-wash",
+        });
+        setVariationGroups([]);
+        setVariants([]);
+      }
     }
-  }, [product, isOpen]);
+    fetchFullProduct();
+  }, [product, isOpen, supabase]);
 
   useEffect(() => {
     if (isOpen) {
@@ -142,7 +257,6 @@ export const ProductModal = ({
   }, [isOpen]);
 
   const [rejectionReason, setRejectionReason] = useState<{ reason: string, comment: string } | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     async function fetchRejectionReason() {
@@ -169,7 +283,15 @@ export const ProductModal = ({
   if (!isOpen) return null;
 
   const addVariationGroup = () => {
-    setVariationGroups([...variationGroups, { id: `g-${Date.now()}`, name: "Color", options: [""] }]);
+    const usedNames = variationGroups.map(g => g.name);
+    const availableNames = ["Color", "Material", "Size"].filter(name => !usedNames.includes(name));
+    
+    if (availableNames.length === 0) {
+      alert("All variation categories have been added.");
+      return;
+    }
+    
+    setVariationGroups([...variationGroups, { id: `g-${Date.now()}`, name: availableNames[0], options: [""] }]);
   };
 
   const updateGroup = (id: string, updates: Partial<VariationGroup>) => {
@@ -211,6 +333,7 @@ export const ProductModal = ({
           name: formData.productName, // Map productName to name for DB
           price: Number(formData.price),
           variants: variants.map(v => ({
+            id: v.id,
             sku: v.sku,
             price: v.price ? Number(v.price) : null,
             stock: Number(v.stock),
@@ -410,18 +533,23 @@ export const ProductModal = ({
                     </button>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start mt-4 ">
-                      <CustomField
-                        label="Variant Category"
-                        isSelect
-                        value={group.name}
-                        onValueChange={(val) => updateGroup(group.id, { name: val, options: [""] })}
-                        options={[
-                          { value: "Color", label: "Color" },
-                          { value: "Material", label: "Material" },
-                          { value: "Size", label: "Size" },
-                        ]}
-                        containerClassName="mt-0"
-                      />
+                      <div className="flex flex-col gap-1">
+                        <CustomField
+                          label="Variant Category"
+                          isSelect
+                          value={group.name}
+                          onValueChange={(val) => updateGroup(group.id, { name: val, options: [""] })}
+                          options={[
+                            { value: "Color", label: "Color", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Color") },
+                            { value: "Material", label: "Material", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Material") },
+                            { value: "Size", label: "Size", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Size") },
+                          ]}
+                          containerClassName="mt-0"
+                        />
+                        {variationGroups.some(g => g.id !== group.id && g.name === group.name) && (
+                          <span className="text-[10px] text-rose-500 font-bold uppercase ml-4">Already selected</span>
+                        )}
+                      </div>
                       <div className="md:col-span-2 relative">
                         <label className="absolute -top-3 left-6 bg-white px-2 text-third font-bold text-sm z-10 whitespace-nowrap uppercase tracking-tight">
                           Options
@@ -504,15 +632,21 @@ export const ProductModal = ({
                           <input 
                             type="text" 
                             value={v.sku} 
-                            onChange={(e) => updateVariant(v.id, { sku: e.target.value })}
-                            className="w-full bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
+                            readOnly
+                            className="w-full bg-transparent border-b border-gray-200 outline-none text-sm py-1 text-gray-400 cursor-not-allowed"
                           />
                         </td>
                         <td className="px-6 py-4">
                           <input 
                             type="number" 
+                            min="0"
                             value={v.stock} 
-                            onChange={(e) => updateVariant(v.id, { stock: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              // Prevent negative values
+                              if (val !== "" && Number(val) < 0) return;
+                              updateVariant(v.id, { stock: val });
+                            }}
                             className="w-32 bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
                           />
                         </td>
@@ -544,7 +678,7 @@ export const ProductModal = ({
             </button>
             <ProfileButton 
               type="button"
-              variant="outline"
+              variant="white"
               size="xl"
               onClick={(e: any) => handleSubmit(e, 'draft')}
               disabled={isSubmitting || product?.type === 'pending'}
