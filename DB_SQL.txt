@@ -99,6 +99,23 @@ CREATE TABLE public.product_variants (
   CONSTRAINT product_variants_pkey PRIMARY KEY (id),
   CONSTRAINT product_variants_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
 );
+
+-- 1. Create verification_status enum
+CREATE TYPE public.product_verification_status AS ENUM ('draft', 'pending', 'approved', 'rejected');
+
+-- 2. Create product_rejection_logs table
+CREATE TABLE public.product_rejection_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  product_id uuid NOT NULL,
+  admin_id uuid NOT NULL,
+  reason_code character varying NOT NULL,
+  custom_comment text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_rejection_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT product_rejection_logs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES auth.users(id),
+  CONSTRAINT product_rejection_logs_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+);
+
 CREATE TABLE public.seller_products (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
@@ -114,6 +131,8 @@ CREATE TABLE public.seller_products (
   description text,
   seller_name text,
   deleted_at timestamp with time zone,
+  verification_status public.product_verification_status DEFAULT 'draft',
+  latest_rejection_log_id uuid REFERENCES public.product_rejection_logs(id),
   CONSTRAINT seller_products_pkey PRIMARY KEY (id),
   CONSTRAINT seller_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
