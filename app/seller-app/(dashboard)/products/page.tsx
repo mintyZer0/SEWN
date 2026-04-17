@@ -48,12 +48,17 @@ export default function ProductsPage() {
       // 1. Fetch Products
       const { data: productsData } = await supabase
         .from('seller_products')
-        .select('id, name')
+        .select('id, name, verification_status, latest_rejection_log_id')
         .eq('user_id', user.id)
         .is('deleted_at', null); // Only fetch active products
       
       if (productsData) {
-        setProducts(productsData.map(p => ({ id: p.id, name: p.name })));
+        setProducts(productsData.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          type: p.verification_status,
+          rejectionLogId: p.latest_rejection_log_id
+        })));
       }
 
       // 2. Fetch Orders (simplified for now)
@@ -142,7 +147,7 @@ export default function ProductsPage() {
     fetchData();
   };
 
-  const handleSaveProduct = async (productData: any) => {
+  const handleSaveProduct = async (productData: any, targetStatus: string = 'pending') => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -159,6 +164,7 @@ export default function ProductsPage() {
           price: productData.price,
           location: productData.location,
           type: productData.type,
+          verification_status: targetStatus,
           // Note: Add these if columns exist in DB, otherwise they are ignored by upsert
           // shipping_time: productData.shippingTime,
           // weight: productData.weight,

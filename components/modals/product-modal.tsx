@@ -8,12 +8,13 @@ import { PhotoSlot } from "@/components/ui/photo-slot";
 import { VariationRow } from "@/components/sewer-center/variation-row";
 import { SectionItem } from "@/components/sewer-center/collapsible-product-section";
 import { MARKETPLACE_FILTERS } from "@/lib/constants";
+import { createClient } from "@/utils/supabase/client";
 
 interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  product?: SectionItem | null;
-  onSave?: (product: Partial<SectionItem>) => Promise<void>;
+  product?: (SectionItem & { rejectionLogId?: string }) | null;
+  onSave?: (product: Partial<SectionItem>, targetStatus: 'draft' | 'pending') => Promise<void>;
 }
 
 interface VariationGroup {
@@ -140,6 +141,31 @@ export const ProductModal = ({
     };
   }, [isOpen]);
 
+  const [rejectionReason, setRejectionReason] = useState<{ reason: string, comment: string } | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchRejectionReason() {
+      if (product?.rejectionLogId && product?.type === 'rejected') {
+        const { data } = await supabase
+          .from('product_rejection_logs')
+          .select('reason_code, custom_comment')
+          .eq('id', product.rejectionLogId)
+          .single();
+        
+        if (data) {
+          setRejectionReason({ reason: data.reason_code, comment: data.custom_comment });
+        }
+      } else {
+        setRejectionReason(null);
+      }
+    }
+
+    if (isOpen) {
+      fetchRejectionReason();
+    }
+  }, [product, isOpen, supabase]);
+
   if (!isOpen) return null;
 
   const addVariationGroup = () => {
@@ -158,8 +184,8 @@ export const ProductModal = ({
     setVariants(prev => prev.map(v => v.id === id ? { ...v, ...updates } : v));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, targetStatus: 'draft' | 'pending' = 'pending') => {
+    if (e) e.preventDefault();
 
     if (!formData.productName?.trim()) {
       alert("Product name is required");
@@ -168,6 +194,11 @@ export const ProductModal = ({
 
     if (!formData.price || isNaN(Number(formData.price))) {
       alert("Valid base price is required");
+      return;
+    }
+
+    if (variants.length === 0) {
+      alert("At least one product variant is required. Please add variation groups (e.g., Size or Color).");
       return;
     }
     
@@ -185,7 +216,7 @@ export const ProductModal = ({
             stock: Number(v.stock),
             attributes: v.attributes
           })),
-        } as any);
+        } as any, targetStatus);
         onClose();
       } catch (error) {
         console.error("Failed to save product:", error);
@@ -206,11 +237,18 @@ export const ProductModal = ({
 
       <div className="relative bg-white rounded-3xl w-full max-w-4xl max-h-full overflow-y-auto shadow-2xl custom-scrollbar">
         {/* Header */}
-        <div className="sticky top-0 bg-white z-20 px-10 pt-12 pb-6 flex justify-between items-start">
+        <div className="sticky top-0 bg-white z-20 px-10 pt-12 pb-6 flex justify-between items-start border-b border-gray-100">
           <div className="flex flex-col gap-2">
             <h2 className="text-6xl font-bold text-third">
               {isEdit ? "Edit Product" : "Add Product"}
             </h2>
+            {product?.type === 'rejected' && rejectionReason && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mt-2">
+                <p className="text-red-700 font-bold text-sm uppercase">Rejection Feedback:</p>
+                <p className="text-red-600 font-medium text-sm">Reason: {rejectionReason.reason}</p>
+                {rejectionReason.comment && <p className="text-red-500 text-xs mt-1 italic">"{rejectionReason.comment}"</p>}
+              </div>
+            )}
             <p className="text-third font-medium">
               Adding new products will be inspected first by SEWN
             </p>
@@ -223,7 +261,7 @@ export const ProductModal = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-10 space-y-12">
+        <form onSubmit={(e) => handleSubmit(e, 'pending')} className="p-10 space-y-12">
           {/* Photos Section */}
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-third">Add photos</h3>
@@ -505,14 +543,23 @@ export const ProductModal = ({
               Discard
             </button>
             <ProfileButton 
+              type="button"
+              variant="outline"
+              size="xl"
+              onClick={(e: any) => handleSubmit(e, 'draft')}
+              disabled={isSubmitting || product?.type === 'pending'}
+            >
+              Save as Draft
+            </ProfileButton>
+            <ProfileButton 
               type="submit" 
               variant="orange" 
               size="xl"
-              disabled={isSubmitting}
+              disabled={isSubmitting || product?.type === 'pending'}
               className="flex items-center gap-3"
             >
               {isSubmitting && <Loader2 className="w-6 h-6 animate-spin" />}
-              {isEdit ? "Confirm Changes" : "Confirm Product"}
+              {product?.type === 'pending' ? "Under Review" : (product?.type === 'rejected' ? "Resubmit for Review" : "Submit for Review")}
             </ProfileButton>
           </div>
         </form>

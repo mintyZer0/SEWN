@@ -17,6 +17,7 @@ interface Product {
   is_active: boolean;
   rating: number;
   sold: number;
+  verification_status: string;
   description?: string;
   seller_name?: string;
 
@@ -55,6 +56,7 @@ export default function ShopGrid({ filters }: Props) {
             product_variants (stock_quantity)
           `)
           .eq("is_active", true)
+          .eq("verification_status", "approved")
           .order("sold", { ascending: false });
 
         console.log('✅ Products loaded:', data?.[0]); // DEBUG

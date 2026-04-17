@@ -103,7 +103,7 @@ export const CollapsibleProductSection = ({
               key={item.id}
               index={index + 1}
               name={item.name}
-              type={variant === "commission" ? item.type : undefined}
+              type={item.type}
               showEdit={variant === "product"}
               onEdit={() => onItemEdit?.(item)}
               onDelete={() => handleDeleteClick(item)}

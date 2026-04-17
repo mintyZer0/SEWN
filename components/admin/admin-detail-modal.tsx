@@ -32,9 +32,18 @@ export const AdminDetailModal = ({
   const router = useRouter();
   const [isDeclineMode, setIsDeclineMode] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionCode, setRejectionCode] = useState("INAPPROPRIATE_CONTENT");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen || !data) return null;
+
+  const rejectionReasons = [
+    { code: "INAPPROPRIATE_CONTENT", label: "Inappropriate Content" },
+    { code: "POOR_IMAGE_QUALITY", label: "Poor Image Quality" },
+    { code: "INCORRECT_PRICING", label: "Incorrect Pricing" },
+    { code: "MISSING_DETAILS", label: "Missing Details" },
+    { code: "OTHER", label: "Other" },
+  ];
 
   const handleApproveClick = async () => {
     setIsSubmitting(true);
@@ -86,7 +95,7 @@ export const AdminDetailModal = ({
           result = await rejectOrder(data.id, rejectionReason);
           break;
         case 'product':
-          result = await rejectProduct(data.id, rejectionReason);
+          result = await rejectProduct(data.id, rejectionCode, rejectionReason);
           break;
         case 'sewer':
           result = await rejectSewer(data.id, rejectionReason);
@@ -288,6 +297,25 @@ export const AdminDetailModal = ({
                 <AlertCircle size={24} />
                 <h4 className="text-xl font-bold">Reason for Declining</h4>
               </div>
+              
+              {type === 'product' && (
+                <div className="mb-4">
+                  <label className="block text-sm font-bold text-rose-700 mb-2 uppercase">Reason Category</label>
+                  <select 
+                    value={rejectionCode}
+                    onChange={(e) => setRejectionCode(e.target.value)}
+                    className="w-full p-4 rounded-2xl border-2 border-rose-200 focus:border-rose-400 focus:outline-none bg-white text-gray-700 font-medium mb-4"
+                  >
+                    {rejectionReasons.map(r => (
+                      <option key={r.code} value={r.code}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <label className="block text-sm font-bold text-rose-700 mb-2 uppercase">
+                {type === 'product' ? 'Additional Comments' : 'Rejection Message'}
+              </label>
               <textarea
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
