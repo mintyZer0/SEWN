@@ -149,6 +149,20 @@ export async function updateSession(request: NextRequest) {
       console.log("Redirecting non-seller to seller login:", sellerLoginUrl.toString());
       return NextResponse.redirect(sellerLoginUrl);
     }
+
+    const { data: verification } = await supabase
+      .from("sewer_verifications")
+      .select("verification_status")
+      .eq("user_id", user.id)
+      .single();
+
+    if (verification?.verification_status !== "verified") {
+      const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
+      const sellerLoginUrl = new URL("/login", `${protocol}://${host}`);
+      sellerLoginUrl.searchParams.set("error", "must_be_verified");
+      await supabase.auth.signOut();
+      return NextResponse.redirect(sellerLoginUrl);
+    }
   }
 
   return response;

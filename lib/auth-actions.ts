@@ -60,8 +60,19 @@ export async function loginSewer(formData: FormData) {
     redirect("/onboarding");
   }
 
+  const { data: verification } = await supabase
+    .from("sewer_verifications")
+    .select("verification_status")
+    .eq("user_id", authData.user.id)
+    .single();
+
+  if (verification?.verification_status !== "verified") {
+    await supabase.auth.signOut();
+    redirect("/login?error=must_be_verified");
+  }
+
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/seller-app");
 }
 
 export async function loginAdmin(formData: FormData) {

@@ -59,6 +59,17 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/onboarding`);
         }
 
+        const { data: verification } = await supabase
+          .from("sewer_verifications")
+          .select("verification_status")
+          .eq("user_id", authData.user.id)
+          .single();
+
+        if (verification?.verification_status !== "verified") {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(`${origin}/login?error=must_be_verified`);
+        }
+
         return NextResponse.redirect(`${origin}/`);
       } else {
         // Normal Buyer flow

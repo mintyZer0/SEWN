@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { upgradeToSewer } from "@/lib/auth-actions";
-import { ArrowLeft, ChevronRight, Check, Info } from "lucide-react";
+import { ArrowLeft, ChevronRight, Check, Info, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 import { LocationPicker } from "@/components/ui/location-picker";
@@ -35,6 +35,8 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showVerificationTransition, setShowVerificationTransition] = useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -65,6 +67,28 @@ export default function OnboardingPage() {
   }, [supabase, router]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-third">Loading profile...</div>;
+
+  if (showVerificationTransition) {
+    return (
+      <div className="relative min-h-screen font-jost overflow-x-hidden">
+        <div className="fixed inset-0 -z-10 bg-[url(/assets/signup-sewer/signup-sewer-bg.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <Card className="w-full max-w-2xl bg-white/95 backdrop-blur-md border-0 shadow-2xl rounded-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            <CardContent className="p-10 md:p-14 text-center">
+              <div className="mx-auto w-20 h-20 rounded-full bg-third/10 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-third animate-spin" />
+              </div>
+              <h2 className="mt-6 text-4xl text-third font-normal">You are being verified</h2>
+              <p className="mt-3 text-lg text-third/70">
+                Your onboarding was submitted successfully. Please wait for admin approval.
+              </p>
+              <p className="mt-6 text-sm text-third/60">Redirecting to login...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen font-jost overflow-x-hidden">
@@ -122,11 +146,15 @@ export default function OnboardingPage() {
                 setStep(step + 1);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               } else {
+                setIsSubmitting(true);
                 const result = await upgradeToSewer(formData);
                 if (result.success) {
-                  // Force a full hard reload to ensure middleware catches the updated session metadata
-                  window.location.href = "/";
+                  setShowVerificationTransition(true);
+                  setTimeout(() => {
+                    router.replace("/login");
+                  }, 2200);
                 } else {
+                  setIsSubmitting(false);
                   console.error(result.error);
                   alert(result.error || "An error occurred during upgrade.");
                 }
@@ -511,11 +539,12 @@ export default function OnboardingPage() {
 
                 <ProfileButton
                   type="submit"
+                  disabled={isSubmitting}
                   variant="orange"
                   size="xl"
                   className="px-12 shadow-xl hover:scale-[1.02]"
                 >
-                  {step === 2 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
+                  {isSubmitting ? "SUBMITTING..." : step === 2 ? "COMPLETE ONBOARDING" : "NEXT STEP"}
                   {step < 2 && <ChevronRight size={28} className="ml-2" />}
                 </ProfileButton>
               </div>
