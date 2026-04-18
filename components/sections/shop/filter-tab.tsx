@@ -2,7 +2,7 @@
 
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
-import { MARKETPLACE_FILTERS } from "@/lib/constants";
+import { MARKETPLACE_FILTERS, SEWER_FILTERS } from "@/lib/constants";
 
 const collapsibleLables = [
   {
@@ -26,32 +26,24 @@ const collapsibleLables = [
   },
 
   {
-    label: "Sewer Location",
+    label: "Location",
     options: MARKETPLACE_FILTERS["Sewer Location"],
   },
 
   { label: "Type", 
-    options: MARKETPLACE_FILTERS.Type 
+    options: MARKETPLACE_FILTERS.Type
   },
 ];
 
 const tailorFilters = [
   {
     label: "Experience",
-    options: [
-      "Beginner", 
-      "Intermediate", 
-      "Expert"
-    ]
+    options: SEWER_FILTERS.Experience
   },
 
   {
     label: "Services",
-    options: [
-      "Commission", 
-      "Alteration", 
-      "Repair"
-    ]
+    options: SEWER_FILTERS.Services
   },
 ];
 
@@ -88,7 +80,7 @@ export default function FilterTab({ setFilters, type }: FilterTabProps) {
 
       <PriceRange onPriceChange={handlePriceChange} />
 
-      {collapsibleLables.map((section) => (
+      {filtersToUse.map((section) => (
         <FilterCollapsibleSection
         key={section.label}
         section={section}
