@@ -8,16 +8,41 @@ import PriceRange from "@/components/ui/price-range";
 const collapsibleLables = [
   {
     label: "Categories",
-    options: ["Skirts", "Shirts", "Dresses", "Pants", "Accessories", "Gowns"],
+    options: [
+      "Skirts", 
+      "Shirts", 
+      "Dresses", 
+      "Pants", 
+      "Accessories", 
+      "Gowns"
+    ],
   },
+
   {
     label: "Size",
-    options: ["XSmall", "Small", "Medium", "Large", "XL", "2XL", "3XL"],
+    options: [
+      "XSmall", 
+      "Small", 
+      "Medium", 
+      "Large", 
+      "XL", 
+      "2XL", 
+      "3XL"
+    ],
   },
+
   {
     label: "Material",
-    options: ["Linen", "Cotton", "Silk", "Polyester", "Denim", "Bamboo"],
+    options: [
+      "Linen", 
+      "Cotton", 
+      "Silk", 
+      "Polyester", 
+      "Denim", 
+      "Bamboo"
+    ],
   },
+
   {
     label: "Color",
     options: [
@@ -35,18 +60,54 @@ const collapsibleLables = [
       "Pink"
     ],
   },
+
   {
     label: "Sewer Location",
-    options: ["NCR", "Luzon", "Visayas", "Mindanao"],
+    options: [
+      "NCR", 
+      "Luzon", 
+      "Visayas", 
+      "Mindanao"
+    ],
   },
-  { label: "Type", options: ["Kids", "Men", "Women"] },
+
+  { label: "Type", 
+    options: [
+      "Kids", 
+      "Men", 
+      "Women"
+    ] 
+  },
+];
+
+const tailorFilters = [
+  {
+    label: "Experience",
+    options: [
+      "Beginner", 
+      "Intermediate", 
+      "Expert"
+    ]
+  },
+
+  {
+    label: "Services",
+    options: [
+      "Commission", 
+      "Alteration", 
+      "Repair"
+    ]
+  },
 ];
 
 interface FilterTabProps {
   setFilters: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
+  type: "products" | "sewers";
 }
 
-export default function FilterTab({ setFilters }: FilterTabProps) {
+export default function FilterTab({ setFilters, type }: FilterTabProps) {
+
+  const filtersToUse = type === "products" ? collapsibleLables : tailorFilters;
 
   const handleFilterChange = (section: string, values: string[]) => {
   setFilters((prev) => ({

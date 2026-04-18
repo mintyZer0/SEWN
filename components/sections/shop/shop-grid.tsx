@@ -17,19 +17,20 @@ interface Product {
   is_active: boolean;
   rating: number;
   sold: number;
+  verification_status: string;
   description?: string;
   seller_name?: string;
 
   // Schema-correct relations (single objects or arrays)
   product_categories?: { category: string } | { category: string }[];
   product_colors?: { color: string }[];
-  product_materials?: { material: string }[];
   product_sizes?: { size: string }[];
   product_variants?: { stock_quantity: number }[];
 }
 
 interface Props {
   filters: Record<string, string[]>;
+  type: "products" | "sewers";
 }
 
 export default function ShopGrid({ filters }: Props) {
@@ -39,7 +40,6 @@ export default function ShopGrid({ filters }: Props) {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("most-sold");
 
-  // SCHEMA-CORRECT FETCH with explicit FK relations
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -49,12 +49,16 @@ export default function ShopGrid({ filters }: Props) {
           .select(`
             *,
             product_categories (category),
-            product_colors (color),
-            product_materials (material),
-            product_sizes (size),
-            product_variants (stock_quantity)
+            product_variants (
+              stock_quantity,
+              variant_attribute_values (
+                attribute_type,
+                attribute_value
+              )
+            )
           `)
           .eq("is_active", true)
+          .eq("verification_status", "approved")
           .order("sold", { ascending: false });
 
         console.log('✅ Products loaded:', data?.[0]); // DEBUG
@@ -99,12 +103,6 @@ export default function ShopGrid({ filters }: Props) {
     if (filters["Color"]?.length) {
       result = result.filter(p =>
         p.product_colors?.some(c => filters["Color"].includes(c.color))
-      );
-    }
-
-    if (filters["Material"]?.length) {
-      result = result.filter(p =>
-        p.product_materials?.some(m => filters["Material"].includes(m.material))
       );
     }
 
@@ -165,7 +163,7 @@ export default function ShopGrid({ filters }: Props) {
         <span className="text-2xl mx-5 font-bold text-gray-700">
           {filteredProducts.length} Products
         </span>
-        <ProductFilter onSortChange={setSortBy} />
+        <ProductFilter onSortChange={setSortBy} type="products" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
