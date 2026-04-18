@@ -12,12 +12,20 @@ interface CustomerData {
   userType: "buyer" | "seller";
   roleLabel: string;
   email: string;
+  createdAt: string;
   createdDate: string;
   purchaseCount: number;
   purchaseTotal: number;
   purchaseCountLabel: string;
   purchaseTotalLabel: string;
   verificationStatus: string | null;
+  idCardUrl: string | null;
+  profileDocumentUrl: string | null;
+  avatarUrl: string | null;
+  hasCustomerRegistrationInfo: boolean;
+  hasSewerRegistrationInfo: boolean;
+  hasQuestionnaires: boolean;
+  sewerOnboardingSurvey: Record<string, string>;
   location: string;
   status: StatusType;
 }
@@ -96,7 +104,31 @@ export default function CustomersPage() {
           email,
           created_at,
           sewer_verifications (
-            verification_status
+            verification_status,
+            id_card_url,
+            profile_document_url
+          ),
+          sewer_onboarding_surveys (
+            educational_attainment,
+            monthly_income,
+            reason_for_sewing,
+            favorite_aspect,
+            gives_pride,
+            expresses_self,
+            community_goals,
+            learn_method,
+            teacher_relationship,
+            motivations,
+            is_only_livelihood,
+            owns_machine,
+            machine_owner,
+            makes_traditional_products,
+            common_products_used_for,
+            specific_products,
+            designs_garments
+          ),
+          user_avatars (
+            avatar_url
           ),
           user_addresses (
             city,
@@ -128,10 +160,17 @@ export default function CustomersPage() {
       }
 
       const mapped: CustomerData[] = (users ?? []).map((u: any) => {
+        const verification = Array.isArray(u.sewer_verifications)
+          ? u.sewer_verifications[0]
+          : u.sewer_verifications;
+        const survey = Array.isArray(u.sewer_onboarding_surveys)
+          ? u.sewer_onboarding_surveys[0]
+          : u.sewer_onboarding_surveys;
+        const avatar = Array.isArray(u.user_avatars) ? u.user_avatars[0] : u.user_avatars;
         const purchaseSummary = purchasesByUser.get(u.id) ?? { count: 0, total: 0 };
         const fullName = `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() || "Unnamed user";
         const userType: "buyer" | "seller" = u.user_type === "seller" ? "seller" : "buyer";
-        const verificationStatus = u.sewer_verifications?.[0]?.verification_status ?? null;
+        const verificationStatus = verification?.verification_status ?? null;
         const status: StatusType =
           userType === "seller"
             ? verificationStatus === "verified"
@@ -141,18 +180,77 @@ export default function CustomersPage() {
                 : "Pending"
             : "Accepted";
 
+        const avatarPath = avatar?.avatar_url as string | undefined;
+        const avatarUrl = avatarPath
+          ? supabase.storage.from("product-images").getPublicUrl(avatarPath).data.publicUrl
+          : "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+        const customerRegistrationFields = [
+          survey?.educational_attainment,
+          survey?.monthly_income,
+          survey?.reason_for_sewing,
+          survey?.favorite_aspect,
+          survey?.gives_pride,
+          survey?.expresses_self,
+          survey?.community_goals,
+        ];
+        const sewerRegistrationFields = [
+          survey?.learn_method,
+          survey?.teacher_relationship,
+          survey?.motivations,
+          survey?.is_only_livelihood,
+          survey?.owns_machine,
+          survey?.machine_owner,
+          survey?.makes_traditional_products,
+          survey?.common_products_used_for,
+          survey?.specific_products,
+          survey?.designs_garments,
+        ];
+        const hasSurveyField = [...customerRegistrationFields, ...sewerRegistrationFields].some(
+          (value) => typeof value === "string" && value.trim().length > 0
+        );
+
         return {
           id: u.id,
           name: fullName,
           userType,
           roleLabel: userType === "seller" ? "Sewer" : "Customer",
           email: u.email,
+          createdAt: u.created_at,
           createdDate: `Account created ${new Date(u.created_at).toLocaleDateString()}`,
           purchaseCount: purchaseSummary.count,
           purchaseTotal: purchaseSummary.total,
           purchaseCountLabel: `${purchaseSummary.count} purchase${purchaseSummary.count === 1 ? "" : "s"}`,
           purchaseTotalLabel: `Php ${purchaseSummary.total.toLocaleString()}`,
           verificationStatus,
+          idCardUrl: verification?.id_card_url ?? null,
+          profileDocumentUrl: verification?.profile_document_url ?? null,
+          avatarUrl: avatarUrl ?? null,
+          hasCustomerRegistrationInfo: customerRegistrationFields.some(
+            (value) => typeof value === "string" && value.trim().length > 0
+          ),
+          hasSewerRegistrationInfo: sewerRegistrationFields.some(
+            (value) => typeof value === "string" && value.trim().length > 0
+          ),
+          hasQuestionnaires: hasSurveyField,
+          sewerOnboardingSurvey: {
+            educational_attainment: survey?.educational_attainment ?? "",
+            monthly_income: survey?.monthly_income ?? "",
+            reason_for_sewing: survey?.reason_for_sewing ?? "",
+            favorite_aspect: survey?.favorite_aspect ?? "",
+            gives_pride: survey?.gives_pride ?? "",
+            expresses_self: survey?.expresses_self ?? "",
+            community_goals: survey?.community_goals ?? "",
+            learn_method: survey?.learn_method ?? "",
+            teacher_relationship: survey?.teacher_relationship ?? "",
+            motivations: survey?.motivations ?? "",
+            is_only_livelihood: survey?.is_only_livelihood ?? "",
+            owns_machine: survey?.owns_machine ?? "",
+            machine_owner: survey?.machine_owner ?? "",
+            makes_traditional_products: survey?.makes_traditional_products ?? "",
+            common_products_used_for: survey?.common_products_used_for ?? "",
+            specific_products: survey?.specific_products ?? "",
+            designs_garments: survey?.designs_garments ?? "",
+          },
           location: u.user_addresses?.[0] ? `${u.user_addresses[0].city}, ${u.user_addresses[0].province}` : "N/A",
           status,
         };
@@ -217,8 +315,16 @@ export default function CustomersPage() {
     customerName: selectedCustomer.name,
     description: `Sewer from ${selectedCustomer.location}. Joined on ${selectedCustomer.createdDate.replace("Account created ", "")}.`,
     orderDate: selectedCustomer.createdDate.replace("Account created ", ""),
+    submittedAt: selectedCustomer.createdAt,
     price: `Php ${selectedCustomer.purchaseTotal.toLocaleString()}`,
     paymentMethod: "ID Verification",
+    profileImageUrl: selectedCustomer.profileDocumentUrl,
+    idCardImageUrl: selectedCustomer.idCardUrl,
+    avatarUrl: selectedCustomer.avatarUrl,
+    hasCustomerRegistrationInfo: selectedCustomer.hasCustomerRegistrationInfo,
+    hasSewerRegistrationInfo: selectedCustomer.hasSewerRegistrationInfo,
+    hasQuestionnaires: selectedCustomer.hasQuestionnaires,
+    sewerOnboardingSurvey: selectedCustomer.sewerOnboardingSurvey,
   } : null;
 
   return (

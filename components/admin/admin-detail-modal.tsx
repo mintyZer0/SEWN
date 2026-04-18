@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Phone, Mail, Package, AlertCircle } from "lucide-react";
+import { ChevronLeft, User, Calendar, Package, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   approveOrder, rejectOrder, 
@@ -46,6 +46,30 @@ export const AdminDetailModal = ({
     { code: "OTHER", label: "Other" },
   ];
 
+  const submittedAt = data.submittedAt ? new Date(data.submittedAt) : null;
+  const surveyFieldLabels: Record<string, string> = {
+    educational_attainment: "Educational Attainment",
+    monthly_income: "Monthly Income",
+    reason_for_sewing: "Reason for Sewing",
+    favorite_aspect: "Favorite Aspect of Sewing",
+    gives_pride: "What Gives Pride",
+    expresses_self: "How Sewing Expresses Self",
+    community_goals: "Community Goals",
+    learn_method: "How They Learned Sewing",
+    teacher_relationship: "Teacher Relationship",
+    motivations: "Motivations",
+    is_only_livelihood: "Only Livelihood",
+    owns_machine: "Owns Sewing Machine",
+    machine_owner: "Machine Owner",
+    makes_traditional_products: "Makes Traditional Products",
+    common_products_used_for: "Common Product Use",
+    specific_products: "Specific Products",
+    designs_garments: "Designs Garments",
+  };
+  const onboardingSurveyEntries = Object.entries(
+    (data.sewerOnboardingSurvey ?? {}) as Record<string, string | null | undefined>
+  ).filter(([, value]) => typeof value === "string" && value.trim().length > 0);
+
   const handleApproveClick = async () => {
     setIsSubmitting(true);
     try {
@@ -78,6 +102,28 @@ export const AdminDetailModal = ({
   };
 
   const handleDeclineClick = async () => {
+    if (type === "sewer") {
+      setIsSubmitting(true);
+      try {
+        const result = await rejectSewer(data.id, "Declined by admin");
+        if (result?.success) {
+          onDecline?.(data.id);
+          router.refresh();
+          onClose();
+        } else {
+          alert("Failed to decline: " + (result?.error || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("Decline error:", error);
+        alert("An error occurred during rejection.");
+      } finally {
+        setIsSubmitting(false);
+        setIsDeclineMode(false);
+        setRejectionReason("");
+      }
+      return;
+    }
+
     if (!isDeclineMode) {
       setIsDeclineMode(true);
       return;
@@ -97,9 +143,6 @@ export const AdminDetailModal = ({
           break;
         case 'product':
           result = await rejectProduct(data.id, rejectionCode, rejectionReason);
-          break;
-        case 'sewer':
-          result = await rejectSewer(data.id, rejectionReason);
           break;
       }
 
@@ -269,6 +312,57 @@ export const AdminDetailModal = ({
                  </div>
               </div>
             </div>
+          ) : type === "sewer" ? (
+            <div className="space-y-5">
+              <div className="rounded-3xl border-2 border-sky-500 bg-primary/60 p-5 min-h-[520px] relative">
+                <div className="flex items-start gap-4">
+                  <div className="h-44 w-48 rounded-2xl bg-gray-300 overflow-hidden">
+                    <img
+                      src={data.avatarUrl || "https://placehold.co/320x280?text=Avatar"}
+                      alt={data.customerName || "User avatar"}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+
+                  <div className="min-h-44 flex-1 rounded-2xl bg-white/20 p-4 text-white">
+                    <p className="text-xs font-bold uppercase tracking-wide text-white/70">Sewer Profile</p>
+                    <p className="mt-2 text-2xl font-black">{data.customerName || "Unnamed user"}</p>
+                    <div className="mt-3 space-y-1 text-sm font-semibold">
+                      <p>{data.email || "No email"}</p>
+                      <p>{data.location || "No location"}</p>
+                      <p>Member since {data.orderDate || "-"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-white/95 p-4 text-primary">
+                  <p className="text-sm font-black uppercase tracking-wide">
+                    Sewer Onboarding Survey
+                  </p>
+                  {onboardingSurveyEntries.length > 0 ? (
+                    <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {onboardingSurveyEntries.map(([key, value]) => (
+                        <div key={key} className="rounded-xl border border-primary/10 bg-white p-3">
+                          <p className="text-xs font-bold uppercase tracking-wide text-primary/60">
+                            {surveyFieldLabels[key] ?? key.replaceAll("_", " ")}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm font-semibold text-primary/70">
+                      No onboarding survey data submitted.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-between text-primary/70 px-1 font-bold">
+                <span>Customer ID: {data.id}</span>
+                <span>Date: {submittedAt ? submittedAt.toLocaleDateString() : "-"}</span>
+              </div>
+            </div>
           ) : (
             /* Existing Layout for Orders/Others */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
@@ -288,7 +382,7 @@ export const AdminDetailModal = ({
           )}
 
           {/* Rejection Reason Input */}
-          {isDeclineMode && (
+          {isDeclineMode && type !== "sewer" && (
             <div className="mt-12 p-8 rounded-[32px] bg-rose-50 border-2 border-rose-100 animate-in slide-in-from-top-4 duration-300">
               <div className="flex items-center gap-3 mb-4 text-rose-600">
                 <AlertCircle size={24} />
@@ -352,7 +446,7 @@ export const AdminDetailModal = ({
                 size="xl"
                 className="flex-2 uppercase tracking-wider shadow-xl shadow-emerald-200 h-16"
               >
-                {isSubmitting ? "Processing..." : "Approve Request"}
+                {isSubmitting ? "Processing..." : type === "sewer" ? "Approve" : "Approve Request"}
               </ProfileButton>
             )}
           </div>

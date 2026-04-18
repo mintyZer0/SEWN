@@ -76,8 +76,13 @@ export async function approveSewer(id: string) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("sewer_verifications")
-    .update({ verification_status: "verified" })
-    .eq("user_id", id);
+    .upsert(
+      {
+        user_id: id,
+        verification_status: "verified",
+      },
+      { onConflict: "user_id" }
+    );
   
   if (error) return { success: false, error: error.message };
   return { success: true };
@@ -87,8 +92,13 @@ export async function rejectSewer(id: string, reason: string) {
   const supabase = await createClient();
   const { error } = await supabase
     .from("sewer_verifications")
-    .update({ verification_status: "rejected" })
-    .eq("user_id", id);
+    .upsert(
+      {
+        user_id: id,
+        verification_status: "rejected",
+      },
+      { onConflict: "user_id" }
+    );
   
   if (error) return { success: false, error: error.message };
   return { success: true };
