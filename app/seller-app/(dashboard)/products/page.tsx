@@ -179,7 +179,17 @@ export default function ProductsPage() {
 
       if (productError) throw productError;
 
-      // 2. Handle Variations Matrix
+      // 2. Save selected product category.
+      const { error: categoryError } = await supabase
+        .from("product_categories")
+        .upsert({
+          product_id: product.id,
+          category: String(productData.category ?? "").toLowerCase(),
+        });
+
+      if (categoryError) throw categoryError;
+
+      // 3. Handle Variations Matrix
       if (productData.variants && productData.variants.length > 0) {
         for (const variantData of productData.variants) {
           // A. Create/Update Variant Row (The physical item)
@@ -208,7 +218,7 @@ export default function ProductsPage() {
           // B. Map Attributes for this variant (e.g., this SKU is both 'Red' and 'Small')
           const attributeEntries = Object.entries(variantData.attributes).map(([type, value]) => ({
             variant_id: variant.id,
-            attribute_type: type,
+            attribute_type: String(type).trim().toLowerCase(),
             attribute_value: value as string,
           }));
 
@@ -379,4 +389,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-

@@ -31,6 +31,32 @@ interface ProductVariant {
   stock: string;
 }
 
+const CATEGORY_OPTIONS = MARKETPLACE_FILTERS.Categories.map((category) => ({
+  value: category.toLowerCase(),
+  label: category,
+}));
+
+const VARIATION_GROUP_OPTIONS = (["Color", "Material", "Size"] as const).map((label) => ({
+  value: label,
+  label,
+}));
+
+const toAttributeTypeLabel = (value: string) => {
+  const normalized = value.trim().toLowerCase();
+  const matched = VARIATION_GROUP_OPTIONS.find(
+    (option) => option.value.toLowerCase() === normalized
+  );
+  return matched?.value ?? value;
+};
+
+const normalizeStockInput = (value: string) => value.replace(/\D/g, "");
+const normalizeDecimalInput = (value: string) => {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const [whole, ...fractionParts] = cleaned.split(".");
+  const fraction = fractionParts.join("").slice(0, 2);
+  return fractionParts.length > 0 ? `${whole}.${fraction}` : whole;
+};
+
 export const ProductModal = ({
   isOpen,
   onClose,
@@ -42,7 +68,7 @@ export const ProductModal = ({
     productName: "",
     description: "",
     price: "",
-    category: "Men",
+    category: CATEGORY_OPTIONS[0].value,
     location: "NCR",
     type: "Men",
     shippingTime: "",
@@ -156,6 +182,7 @@ export const ProductModal = ({
           .from('seller_products')
           .select(`
             *,
+            product_categories (category),
             product_variants (
               id,
               sku,
@@ -171,11 +198,22 @@ export const ProductModal = ({
           .single();
 
         if (data) {
+          const rawCategoryValue = Array.isArray(data.product_categories)
+            ? data.product_categories[0]?.category
+            : data.product_categories?.category;
+          const normalizedCategory = typeof rawCategoryValue === "string"
+            ? rawCategoryValue.toLowerCase()
+            : "";
+          const categoryValue = CATEGORY_OPTIONS.some((option) => option.value === normalizedCategory)
+            ? normalizedCategory
+            : CATEGORY_OPTIONS[0].value;
+
           setFormData((prev) => ({
             ...prev,
             productName: data.name || product.name || "",
             description: data.description || "",
             price: data.price ? String(data.price) : "",
+            category: categoryValue,
             location: data.location || "NCR",
             type: data.type || "Men",
             weight: data.weight ? String(data.weight) : "",
@@ -188,7 +226,8 @@ export const ProductModal = ({
             const fetchedVariants: ProductVariant[] = data.product_variants.map((v: any) => {
               const attributes: Record<string, string> = {};
               v.variant_attribute_values?.forEach((attr: any) => {
-                attributes[attr.attribute_type] = attr.attribute_value;
+                const label = toAttributeTypeLabel(String(attr.attribute_type ?? ""));
+                attributes[label] = attr.attribute_value;
               });
               return {
                 id: v.id,
@@ -203,10 +242,11 @@ export const ProductModal = ({
             const groupsMap: Record<string, Set<string>> = {};
             data.product_variants.forEach((v: any) => {
               v.variant_attribute_values?.forEach((attr: any) => {
-                if (!groupsMap[attr.attribute_type]) {
-                  groupsMap[attr.attribute_type] = new Set();
+                const label = toAttributeTypeLabel(String(attr.attribute_type ?? ""));
+                if (!groupsMap[label]) {
+                  groupsMap[label] = new Set();
                 }
-                groupsMap[attr.attribute_type].add(attr.attribute_value);
+                groupsMap[label].add(attr.attribute_value);
               });
             });
 
@@ -229,7 +269,7 @@ export const ProductModal = ({
           productName: "",
           description: "",
           price: "",
-          category: "Men",
+          category: CATEGORY_OPTIONS[0].value,
           location: "NCR",
           type: "Men",
           shippingTime: "",
@@ -308,19 +348,50 @@ export const ProductModal = ({
 
   const handleSubmit = async (e?: React.FormEvent, targetStatus: 'draft' | 'pending' = 'pending') => {
     if (e) e.preventDefault();
+    const decimalPattern = /^\d+(\.\d{1,2})?$/;
 
     if (!formData.productName?.trim()) {
       alert("Product name is required");
       return;
     }
 
-    if (!formData.price || isNaN(Number(formData.price))) {
+    if (!formData.price || !decimalPattern.test(formData.price) || Number(formData.price) <= 0) {
       alert("Valid base price is required");
+      return;
+    }
+
+    if (!formData.category?.trim()) {
+      alert("Product category is required");
       return;
     }
 
     if (variants.length === 0) {
       alert("At least one product variant is required. Please add variation groups (e.g., Size or Color).");
+      return;
+    }
+
+    const hasInvalidStock = variants.some((variant) => {
+      const stock = variant.stock?.trim() ?? "";
+      return stock === "" || !/^\d+$/.test(stock);
+    });
+
+    if (hasInvalidStock) {
+      alert("Stock must be a whole number (0 or greater) for every variant.");
+      return;
+    }
+
+    const hasInvalidVariantPrice = variants.some((variant) => {
+      const variantPrice = variant.price?.trim() ?? "";
+      return variantPrice !== "" && !decimalPattern.test(variantPrice);
+    });
+
+    if (hasInvalidVariantPrice) {
+      alert("Price override must be a valid number with up to 2 decimal places.");
+      return;
+    }
+
+    if (formData.weight?.trim() && !decimalPattern.test(formData.weight.trim())) {
+      alert("Weight must be a valid number with up to 2 decimal places.");
       return;
     }
     
@@ -429,7 +500,8 @@ export const ProductModal = ({
                   label="Base Price (PHP)"
                   placeholder="0.00"
                   value={formData.price}
-                  onChange={(e: any) => setFormData({...formData, price: e.target.value})}
+                  onChange={(e: any) => setFormData({...formData, price: normalizeDecimalInput(e.target.value)})}
+                  inputMode="decimal"
                   required
                 />
                 <CustomField
@@ -446,7 +518,7 @@ export const ProductModal = ({
                 />
              </div>
 
-             <div className="grid grid-cols-2 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <CustomField
                   label="Target Audience"
                   isSelect
@@ -457,6 +529,13 @@ export const ProductModal = ({
                     { value: "Women", label: "Women" },
                     { value: "Kids", label: "Kids" },
                   ]}
+                />
+                <CustomField
+                  label="Category"
+                  isSelect
+                  value={formData.category}
+                  onChange={(e: any) => setFormData({...formData, category: e.target.value})}
+                  options={CATEGORY_OPTIONS}
                 />
                 <CustomField
                   label="Est. Shipping Time"
@@ -471,7 +550,8 @@ export const ProductModal = ({
                   label="Weight in grams"
                   placeholder="0.00"
                   value={formData.weight}
-                  onChange={(e: any) => setFormData({...formData, weight: e.target.value})}
+                  onChange={(e: any) => setFormData({...formData, weight: normalizeDecimalInput(e.target.value)})}
+                  inputMode="decimal"
                 />
                 <CustomField
                   label="Fabric"
@@ -539,11 +619,12 @@ export const ProductModal = ({
                           isSelect
                           value={group.name}
                           onValueChange={(val) => updateGroup(group.id, { name: val, options: [""] })}
-                          options={[
-                            { value: "Color", label: "Color", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Color") },
-                            { value: "Material", label: "Material", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Material") },
-                            { value: "Size", label: "Size", disabled: variationGroups.some(g => g.id !== group.id && g.name === "Size") },
-                          ]}
+                          options={VARIATION_GROUP_OPTIONS.map((option) => ({
+                            ...option,
+                            disabled: variationGroups.some(
+                              (g) => g.id !== group.id && g.name === option.value
+                            ),
+                          }))}
                           containerClassName="mt-0"
                         />
                         {variationGroups.some(g => g.id !== group.id && g.name === group.name) && (
@@ -638,14 +719,12 @@ export const ProductModal = ({
                         </td>
                         <td className="px-6 py-4">
                           <input 
-                            type="number" 
-                            min="0"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
                             value={v.stock} 
                             onChange={(e) => {
-                              const val = e.target.value;
-                              // Prevent negative values
-                              if (val !== "" && Number(val) < 0) return;
-                              updateVariant(v.id, { stock: val });
+                              updateVariant(v.id, { stock: normalizeStockInput(e.target.value) });
                             }}
                             className="w-32 bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
                           />
@@ -655,7 +734,8 @@ export const ProductModal = ({
                             type="text" 
                             placeholder="Optional"
                             value={v.price} 
-                            onChange={(e) => updateVariant(v.id, { price: e.target.value })}
+                            onChange={(e) => updateVariant(v.id, { price: normalizeDecimalInput(e.target.value) })}
+                            inputMode="decimal"
                             className="w-32 bg-transparent border-b border-gray-200 focus:border-third outline-none text-sm py-1"
                           />
                         </td>
@@ -701,4 +781,3 @@ export const ProductModal = ({
     </div>
   );
 };
-
