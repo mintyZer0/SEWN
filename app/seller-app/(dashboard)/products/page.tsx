@@ -48,12 +48,17 @@ export default function ProductsPage() {
       // 1. Fetch Products
       const { data: productsData } = await supabase
         .from('seller_products')
-        .select('id, name')
+        .select('id, name, verification_status, latest_rejection_log_id')
         .eq('user_id', user.id)
         .is('deleted_at', null); // Only fetch active products
       
       if (productsData) {
-        setProducts(productsData.map(p => ({ id: p.id, name: p.name })));
+        setProducts(productsData.map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          type: p.verification_status,
+          rejectionLogId: p.latest_rejection_log_id
+        })));
       }
 
       // 2. Fetch Orders (simplified for now)
@@ -142,11 +147,88 @@ export default function ProductsPage() {
     fetchData();
   };
 
-  const handleSaveProduct = async (productData: Partial<SectionItem>) => {
-    // Implementation for saving product to Supabase would go here
-    // For now, let's just refetch
-    fetchData();
-    setIsProductModalOpen(false);
+  const handleSaveProduct = async (productData: any, targetStatus: string = 'pending') => {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Insert/Update Product
+      const { data: product, error: productError } = await supabase
+        .from('seller_products')
+        .upsert({
+          id: productData.id,
+          user_id: user.id,
+          name: productData.name,
+          description: productData.description,
+          price: productData.price,
+          location: productData.location,
+          type: productData.type,
+          verification_status: targetStatus,
+          // Note: Add these if columns exist in DB, otherwise they are ignored by upsert
+          // shipping_time: productData.shippingTime,
+          // weight: productData.weight,
+          // fabric: productData.fabric,
+          // care_instructions: productData.careInstructions,
+          img_src: "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg", // Placeholder
+          is_active: true,
+          seller_name: "Seller", // Should ideally be fetched from profile
+        })
+        .select()
+        .single();
+
+      if (productError) throw productError;
+
+      // 2. Handle Variations Matrix
+      if (productData.variants && productData.variants.length > 0) {
+        for (const variantData of productData.variants) {
+          // A. Create/Update Variant Row (The physical item)
+          const variantPayload: any = {
+            product_id: product.id,
+            sku: variantData.sku,
+            stock_quantity: variantData.stock !== undefined && variantData.stock !== null && !isNaN(variantData.stock) ? Number(variantData.stock) : 0,
+            price_override: variantData.price !== undefined && variantData.price !== null && !isNaN(variantData.price) ? Number(variantData.price) : null,
+          };
+
+          if (variantData.id && !variantData.id.startsWith('var-')) {
+            variantPayload.id = variantData.id;
+          }
+
+          const { data: variant, error: variantError } = await supabase
+            .from('product_variants')
+            .upsert(variantPayload)
+            .select()
+            .single();
+
+          if (variantError) {
+            console.error("Variant error:", variantError);
+            continue;
+          }
+
+          // B. Map Attributes for this variant (e.g., this SKU is both 'Red' and 'Small')
+          const attributeEntries = Object.entries(variantData.attributes).map(([type, value]) => ({
+            variant_id: variant.id,
+            attribute_type: type,
+            attribute_value: value as string,
+          }));
+
+          const { error: attrError } = await supabase
+            .from('variant_attribute_values')
+            .upsert(attributeEntries);
+
+          if (attrError) {
+            console.error("Attribute mapping error:", attrError);
+          }
+        }
+      }
+      await fetchData();
+      setIsProductModalOpen(false);
+    } catch (error) {
+      console.error("Failed to save product:", error);
+      alert("Failed to save product. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id: string, variant: string) => {

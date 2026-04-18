@@ -74,14 +74,21 @@ CREATE TABLE public.product_images (
   is_main boolean DEFAULT false,
   display_order integer NOT NULL DEFAULT 0,
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  variant_id uuid,
   CONSTRAINT product_images_pkey PRIMARY KEY (id),
-  CONSTRAINT product_images_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+  CONSTRAINT product_images_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id),
+  CONSTRAINT product_images_variant_id_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)
 );
-CREATE TABLE public.product_materials (
+CREATE TABLE public.product_rejection_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   product_id uuid NOT NULL,
-  material USER-DEFINED NOT NULL,
-  CONSTRAINT product_materials_pkey PRIMARY KEY (product_id, material),
-  CONSTRAINT product_materials_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
+  admin_id uuid NOT NULL,
+  reason_code character varying NOT NULL,
+  custom_comment text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT product_rejection_logs_pkey PRIMARY KEY (id),
+  CONSTRAINT product_rejection_logs_admin_id_fkey FOREIGN KEY (admin_id) REFERENCES auth.users(id),
+  CONSTRAINT product_rejection_logs_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.seller_products(id)
 );
 CREATE TABLE public.product_sizes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -114,8 +121,11 @@ CREATE TABLE public.seller_products (
   description text,
   seller_name text,
   deleted_at timestamp with time zone,
+  verification_status USER-DEFINED DEFAULT 'draft'::product_verification_status,
+  latest_rejection_log_id uuid,
   CONSTRAINT seller_products_pkey PRIMARY KEY (id),
-  CONSTRAINT seller_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+  CONSTRAINT seller_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT seller_products_latest_rejection_log_id_fkey FOREIGN KEY (latest_rejection_log_id) REFERENCES public.product_rejection_logs(id)
 );
 CREATE TABLE public.service_requests (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -137,8 +147,7 @@ CREATE TABLE public.service_requests (
   CONSTRAINT service_requests_pkey PRIMARY KEY (id),
   CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
   CONSTRAINT service_requests_sewer_id_fkey FOREIGN KEY (sewer_id) REFERENCES public.users(id),
-  CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id),
-  CONSTRAINT service_requests_fabric_id_fkey FOREIGN KEY (fabric_id) REFERENCES public.sewer_fabrics(id)
+  CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id)
 );
 CREATE TABLE public.sewer_achievements (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -147,17 +156,6 @@ CREATE TABLE public.sewer_achievements (
   date_earned timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT sewer_achievements_pkey PRIMARY KEY (id),
   CONSTRAINT sewer_achievements_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
-);
-CREATE TABLE public.sewer_fabrics (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  sewer_id uuid NOT NULL,
-  name character varying NOT NULL,
-  description text,
-  image_url character varying,
-  is_available boolean DEFAULT true,
-  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT sewer_fabrics_pkey PRIMARY KEY (id),
-  CONSTRAINT sewer_fabrics_sewer_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.sewer_onboarding_surveys (
   user_id uuid NOT NULL,
@@ -300,7 +298,7 @@ CREATE TABLE public.users (
 );
 CREATE TABLE public.variant_attribute_values (
   variant_id uuid NOT NULL,
-  attribute_type character varying NOT NULL,
+  attribute_type USER-DEFINED NOT NULL,
   attribute_value text NOT NULL,
   CONSTRAINT variant_attribute_values_pkey PRIMARY KEY (variant_id, attribute_type),
   CONSTRAINT variant_attribute_values_variant_fkey FOREIGN KEY (variant_id) REFERENCES public.product_variants(id)

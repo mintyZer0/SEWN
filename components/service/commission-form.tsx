@@ -6,6 +6,13 @@ import PrimaryButton from "../ui/primary-button";
 import { createClient } from "@/utils/supabase/client";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CommissionFormProps {
   sewerName: string;
@@ -253,25 +260,23 @@ export default function CommissionForm({
             >
               Fabric to be Used <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select
-                id="fabricToUse"
-                name="fabricToUse"
-                required
-                value={formData.fabricToUse}
-                onChange={handleChange}
-                className="w-full px-4 py-2 pr-12 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent appearance-none cursor-pointer"
-              >
-                <option value="" disabled>
-                  Select fabric type
-                </option>
+            <Select 
+              variant="purple"
+              value={formData.fabricToUse} 
+              onValueChange={(val) => setFormData(prev => ({ ...prev, fabricToUse: val }))}
+              required
+            >
+              <SelectTrigger className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent">
+                <SelectValue placeholder="Select fabric type" />
+              </SelectTrigger>
+              <SelectContent className="rounded-md">
                 {fabricOptions.map((fabric) => (
-                  <option key={fabric} value={fabric}>
+                  <SelectItem key={fabric} value={fabric}>
                     {fabric}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
         )}
 

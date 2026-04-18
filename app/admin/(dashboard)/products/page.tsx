@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminDataTable, TwoLineCell, StatusBadge, type StatusType, type Column } from "@/components/admin/admin-data-table";
 import { AdminFilterBar, PageHeader } from "@/components/admin/admin-filter-bar";
 import { AdminDetailModal } from "@/components/admin/admin-detail-modal";
+import { createClient } from "@/utils/supabase/client";
+import { approveProduct, rejectProduct } from "@/lib/admin-actions";
 
 interface ProductData {
   id: string;
@@ -15,59 +17,6 @@ interface ProductData {
   stock: string;
   status: StatusType;
 }
-
-const mockProducts: ProductData[] = [
-  {
-    id: "PROD-001",
-    name: "Classic Silk Scarf",
-    category: "Accessories",
-    sellerName: "Althea's Creations",
-    dateAdded: "Oct 12, 2024",
-    price: "₱850",
-    stock: "15 in stock",
-    status: "Accepted",
-  },
-  {
-    id: "PROD-002",
-    name: "Embroidered Table Runner",
-    category: "Home Decor",
-    sellerName: "Lola's Traditional",
-    dateAdded: "Oct 11, 2024",
-    price: "₱1,200",
-    stock: "5 in stock",
-    status: "Pending",
-  },
-  {
-    id: "PROD-003",
-    name: "Denim Jacket Patching",
-    category: "Services",
-    sellerName: "Modern Stitch",
-    dateAdded: "Oct 09, 2024",
-    price: "₱500",
-    stock: "Service",
-    status: "Accepted",
-  },
-  {
-    id: "PROD-004",
-    name: "Custom Prom Dress",
-    category: "Dressmaking",
-    sellerName: "Couture by Cara",
-    dateAdded: "Oct 07, 2024",
-    price: "₱15,000",
-    stock: "Pre-order",
-    status: "Pending",
-  },
-  {
-    id: "PROD-005",
-    name: "Vintage Lace Blouse",
-    category: "Clothing",
-    sellerName: "Retro Fits",
-    dateAdded: "Oct 05, 2024",
-    price: "₱2,100",
-    stock: "Out of stock",
-    status: "Declined",
-  },
-];
 
 const columns: Column<ProductData>[] = [
   {
@@ -109,13 +58,105 @@ const columns: Column<ProductData>[] = [
 ];
 
 export default function ProductsPage() {
+  const [products, setProducts] = useState<ProductData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<ProductData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const supabase = createClient();
+
+  const fetchProducts = async (isSilent = false) => {
+    try {
+      if (!isSilent) setLoading(true);
+      const { data, error } = await supabase
+        .from('seller_products')
+        .select(`
+          id,
+          name,
+          price,
+          description,
+          location,
+          type,
+          img_src,
+          created_at,
+          verification_status,
+          seller_name,
+          user_id,
+          users (
+            first_name,
+            last_name,
+            created_at
+          ),
+          product_variants (
+            id,
+            sku,
+            stock_quantity,
+            price_override,
+            variant_attribute_values (
+              attribute_type,
+              attribute_value
+            )
+          )
+        `)
+        .neq('verification_status', 'draft')
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        const mapped: any[] = data.map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.type,
+          sellerName: p.seller_name || `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Seller",
+          dateAdded: new Date(p.created_at).toLocaleDateString(),
+          price: `₱${p.price.toLocaleString()}`,
+          stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
+          status: p.verification_status === 'approved' ? 'Accepted' : (p.verification_status === 'rejected' ? 'Declined' : 'Pending') as StatusType,
+          // Full fields for modal
+          description: p.description,
+          location: p.location,
+          imageUrl: p.img_src,
+          sellerJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
+          variants: p.product_variants || [],
+        }));        setProducts(mapped);
+      }
+    } catch (err) {
+      console.error("Error fetching admin products:", err);
+    } finally {
+      if (!isSilent) setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+
+    // Set up Realtime subscription
+    const channel = supabase
+      .channel('admin-products-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'seller_products' },
+        () => fetchProducts(true)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'product_variants' },
+        () => fetchProducts(true)
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'variant_attribute_values' },
+        () => fetchProducts(true)
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase]);
 
   const stats = [
-    { label: "Active", count: 124, color: "text-emerald-500" },
-    { label: "Pending", count: 18, color: "text-amber-500" },
-    { label: "Rejected", count: 5, color: "text-rose-500" },
+    { label: "Active", count: products.filter(p => p.status === 'Accepted').length, color: "text-emerald-500" },
+    { label: "Pending", count: products.filter(p => p.status === 'Pending').length, color: "text-amber-500" },
+    { label: "Rejected", count: products.filter(p => p.status === 'Declined').length, color: "text-rose-500" },
   ];
 
   const handleDetailsClick = (product: ProductData) => {
@@ -123,15 +164,16 @@ export default function ProductsPage() {
     setIsModalOpen(true);
   };
 
-  const handleApprove = (id: string) => {
-    console.log("Approved product:", id);
+  const handleApprove = async (id: string) => {
+    await fetchProducts();
+    setIsModalOpen(false);
   };
 
-  const handleDecline = (id: string) => {
-    console.log("Declined product:", id);
+  const handleDecline = async (id: string) => {
+    await fetchProducts();
+    setIsModalOpen(false);
   };
 
-  // Map product data to match modal expectations
   const modalData = selectedProduct ? {
     ...selectedProduct,
     productName: selectedProduct.name,
@@ -143,7 +185,7 @@ export default function ProductsPage() {
     <div className="flex flex-col">
       <PageHeader 
         title="Products" 
-        total={147} 
+        total={products.length} 
         stats={stats} 
       />
       
@@ -153,11 +195,15 @@ export default function ProductsPage() {
         onDateChange={(val) => console.log("Date:", val)}
       />
 
-      <AdminDataTable 
-        columns={columns} 
-        data={mockProducts} 
-        onDetailsClick={handleDetailsClick}
-      />
+      {loading ? (
+        <div className="p-20 text-center text-gray-500 font-bold text-2xl">Loading...</div>
+      ) : (
+        <AdminDataTable 
+          columns={columns} 
+          data={products} 
+          onDetailsClick={handleDetailsClick}
+        />
+      )}
 
       <AdminDetailModal 
         isOpen={isModalOpen}

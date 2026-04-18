@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AdminDataTable, TwoLineCell, StatusBadge, type StatusType, type Column } from "@/components/admin/admin-data-table";
 import { AdminFilterBar, PageHeader } from "@/components/admin/admin-filter-bar";
 import { AdminDetailModal } from "@/components/admin/admin-detail-modal";
+import { createClient } from "@/utils/supabase/client";
+import { approveOrder, rejectOrder } from "@/lib/admin-actions";
 
 interface OrderData {
   id: string;
@@ -15,59 +17,6 @@ interface OrderData {
   paymentMethod: string;
   status: StatusType;
 }
-
-const mockOrders: OrderData[] = [
-  {
-    id: "ORD-001",
-    productName: "Silk Evening Gown",
-    category: "Dressmaking",
-    customerName: "Maria Santos",
-    orderDate: "Oct 12, 2024",
-    price: "₱4,500",
-    paymentMethod: "GCash",
-    status: "Pending",
-  },
-  {
-    id: "ORD-002",
-    productName: "Barong Tagalog Modern",
-    category: "Tailoring",
-    customerName: "Juan Dela Cruz",
-    orderDate: "Oct 10, 2024",
-    price: "₱3,200",
-    paymentMethod: "Bank Transfer",
-    status: "Accepted",
-  },
-  {
-    id: "ORD-003",
-    productName: "School Uniform Set",
-    category: "Alteration",
-    customerName: "Elena Reyes",
-    orderDate: "Oct 08, 2024",
-    price: "₱1,200",
-    paymentMethod: "Cash on Delivery",
-    status: "Declined",
-  },
-  {
-    id: "ORD-004",
-    productName: "Wedding Gown Alteration",
-    category: "Alteration",
-    customerName: "Ana Villanueva",
-    orderDate: "Oct 05, 2024",
-    price: "₱8,500",
-    paymentMethod: "GCash",
-    status: "Completed",
-  },
-  {
-    id: "ORD-005",
-    productName: "Custom Suit",
-    category: "Tailoring",
-    customerName: "Roberto Lim",
-    orderDate: "Oct 01, 2024",
-    price: "₱12,000",
-    paymentMethod: "Bank Transfer",
-    status: "Cancelled",
-  },
-];
 
 const columns: Column<OrderData>[] = [
   {
@@ -109,13 +58,66 @@ const columns: Column<OrderData>[] = [
 ];
 
 export default function OrdersPage() {
+  const [orders, setOrders] = useState<OrderData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const supabase = createClient();
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          total,
+          status,
+          created_at,
+          users (
+            first_name,
+            last_name
+          ),
+          order_items (
+            seller_products (
+              name,
+              type
+            )
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        const mapped: OrderData[] = data.map((o: any) => {
+          const firstProduct = o.order_items?.[0]?.seller_products;
+          return {
+            id: o.id,
+            productName: firstProduct?.name || "Multiple Items",
+            category: firstProduct?.type || "General",
+            customerName: `${o.users?.first_name} ${o.users?.last_name}`,
+            orderDate: new Date(o.created_at).toLocaleDateString(),
+            price: `₱${o.total.toLocaleString()}`,
+            paymentMethod: "Online Payment", // Needs a real column in DB
+            status: o.status.charAt(0).toUpperCase() + o.status.slice(1) as StatusType
+          };
+        });
+        setOrders(mapped);
+      }
+    } catch (err) {
+      console.error("Error fetching admin orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const stats = [
-    { label: "New", count: 12, color: "text-amber-500" },
-    { label: "Completed", count: 45, color: "text-emerald-500" },
-    { label: "Cancelled", count: 3, color: "text-rose-500" },
+    { label: "New", count: orders.filter(o => o.status === 'Pending').length, color: "text-amber-500" },
+    { label: "Completed", count: orders.filter(o => o.status === 'Completed').length, color: "text-emerald-500" },
+    { label: "Cancelled", count: orders.filter(o => o.status === 'Cancelled').length, color: "text-rose-500" },
   ];
 
   const handleDetailsClick = (order: OrderData) => {
@@ -123,21 +125,21 @@ export default function OrdersPage() {
     setIsModalOpen(true);
   };
 
-  const handleApprove = (id: string) => {
-    console.log("Approved order:", id);
-    // Add logic to update status in backend/state
+  const handleApprove = async (id: string) => {
+    await fetchOrders();
+    setIsModalOpen(false);
   };
 
-  const handleDecline = (id: string) => {
-    console.log("Declined order:", id);
-    // Add logic to update status in backend/state
+  const handleDecline = async (id: string) => {
+    await fetchOrders();
+    setIsModalOpen(false);
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader 
         title="Orders" 
-        total={60} 
+        total={orders.length} 
         stats={stats} 
       />
       
@@ -147,11 +149,15 @@ export default function OrdersPage() {
         onDateChange={(val) => console.log("Date:", val)}
       />
 
-      <AdminDataTable 
-        columns={columns} 
-        data={mockOrders} 
-        onDetailsClick={handleDetailsClick}
-      />
+      {loading ? (
+        <div className="p-20 text-center text-gray-500 font-bold text-2xl">Loading...</div>
+      ) : (
+        <AdminDataTable 
+          columns={columns} 
+          data={orders} 
+          onDetailsClick={handleDetailsClick}
+        />
+      )}
 
       <AdminDetailModal 
         isOpen={isModalOpen}

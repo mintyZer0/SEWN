@@ -36,8 +36,10 @@ export const ProductListItem = ({
       {type && (
         <span className={cn(
           "text-lg border-l border-gray-200 pl-6 h-8 min-w-24 flex items-center font-bold uppercase tracking-tighter",
-          type === "pending" ? "text-orange-500" : 
-          type === "accepted" ? "text-green-500" : "text-gray-400"
+          (type === "pending" || type === "draft") ? "text-orange-500" : 
+          (type === "accepted" || type === "approved") ? "text-green-500" : 
+          (type === "rejected") ? "text-red-500" :
+          "text-gray-400"
         )}>
           {type}
         </span>
