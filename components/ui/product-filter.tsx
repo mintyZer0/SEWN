@@ -26,9 +26,10 @@ type Product = {
 
 interface ProductFilterProps {
   onSortChange: (sortBy: string) => void;
+  type: "products" | "sewers";
 }
 
-export default function ProductFilter({ onSortChange }: ProductFilterProps) {
+export default function ProductFilter({ onSortChange, type }: ProductFilterProps) {
   const [sortBy, setSortBy] = useState('most-sold');
 
   const handleSortChange = (value: string) => {
@@ -43,10 +44,20 @@ export default function ProductFilter({ onSortChange }: ProductFilterProps) {
           <SelectValue placeholder="Filter by" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="most-sold">Filter by most sold</SelectItem>
-          <SelectItem value="highest-rated">Highest rated</SelectItem>
-          <SelectItem value="price-low-high">Price: Low to High</SelectItem>
-          <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+            {type === "products" && (
+              <>
+              <SelectItem value="most-sold">Filter by most sold</SelectItem>
+              <SelectItem value="highest-rated">Highest rated</SelectItem>
+              <SelectItem value="price-low-high">Price: Low to High</SelectItem>
+              <SelectItem value="price-high-low">Price: High to Low</SelectItem>
+              </>
+          )}
+            {type === "sewers" && (
+            <>
+              <SelectItem value="highest-rated">Highest rated</SelectItem>
+              <SelectItem value="most-active">Most active</SelectItem>
+            </>
+          )}
         </SelectContent>
       </Select>
     </div>

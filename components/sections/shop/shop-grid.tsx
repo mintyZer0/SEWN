@@ -21,39 +21,47 @@ interface Product {
   description?: string;
   seller_name?: string;
 
-  // Schema-correct relations (single objects or arrays)
   product_categories?: { category: string } | { category: string }[];
-  product_colors?: { color: string }[];
-  product_materials?: { material: string }[];
-  product_sizes?: { size: string }[];
-  product_variants?: { stock_quantity: number }[];
+  product_variants?: {
+    stock_quantity: number;
+    variant_attribute_values?: {
+      attribute_type: string;
+      attribute_value: string;
+    }[];
+  }[];
 }
 
 interface Props {
   filters: Record<string, string[]>;
+  type: "products" | "sewers";
 }
 
-export default function ShopGrid({ filters }: Props) {
+
+export default function ShopGrid({ filters, type }: Props) {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorState, setErrorState] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("most-sold");
 
-  // SCHEMA-CORRECT FETCH with explicit FK relations
+  
   useEffect(() => {
     async function fetchProducts() {
       try {
         setIsLoading(true);
+
         const { data, error } = await supabase
           .from("seller_products")
           .select(`
             *,
             product_categories (category),
-            product_colors (color),
-            product_materials (material),
-            product_sizes (size),
-            product_variants (stock_quantity)
+            product_variants (
+              stock_quantity,
+              variant_attribute_values (
+                attribute_type,
+                attribute_value
+              )
+            )
           `)
           .eq("is_active", true)
           .eq("verification_status", "approved")
@@ -73,11 +81,26 @@ export default function ShopGrid({ filters }: Props) {
     fetchProducts();
   }, []); 
 
+  function getAttributesByType(
+    product: Product,
+    type: "color" | "size" | "material"
+  ): string[] {
+    if (!product.product_variants) return [];
+
+  const values = product.product_variants.flatMap((variant) =>
+    (variant.variant_attribute_values?? [])
+      .filter((attr: any) => attr.attribute_type === type)
+      .map((attr: any) => attr.attribute_value) || []
+  );
+
+  return Array.from(new Set(values));
+}
+
   useEffect(() => {
     let result = [...products];
 
-    if (filters["Sewer Location"]?.length) {
-      result = result.filter(p => filters["Sewer Location"].includes(p.location));
+    if (filters["Location"]?.length) {
+      result = result.filter(p => filters["Location"].includes(p.location));
     }
  
     if (filters["Type"]?.length) {
@@ -86,34 +109,30 @@ export default function ShopGrid({ filters }: Props) {
 
     if (filters["Categories"]?.length) {
       result = result.filter((p) => {
-        let categories: string[] = [];
-        if (p.product_categories) {
-          if (Array.isArray(p.product_categories)) {
-            categories = p.product_categories.map(c => c.category).filter(Boolean);
-          } else {
-            categories = [p.product_categories.category].filter(Boolean);
-          }
-        }
-        return categories.some(cat => filters["Categories"].includes(cat));
+        const category = (p.product_categories as any)?.category;
+        return category && filters["Categories"].includes(category);
+      });
+    }
+
+    if (filters["Material"]?.length) {
+      result = result.filter((p) => {
+        const materials = getAttributesByType(p, "material");
+        return materials.some(m => filters["Material"].includes(m));
       });
     }
 
     if (filters["Color"]?.length) {
-      result = result.filter(p =>
-        p.product_colors?.some(c => filters["Color"].includes(c.color))
-      );
-    }
-
-    if (filters["Material"]?.length) {
-      result = result.filter(p =>
-        p.product_materials?.some(m => filters["Material"].includes(m.material))
-      );
+      result = result.filter((p) => {
+        const colors = getAttributesByType(p, "color");
+        return colors.some(c => filters["Color"].includes(c));
+      });
     }
 
     if (filters["Size"]?.length) {
-      result = result.filter(p =>
-        p.product_sizes?.some(s => filters["Size"].includes(s.size))
-      );
+      result = result.filter((p) => {
+        const sizes = getAttributesByType(p, "size");
+        return sizes.some(s => filters["Size"].includes(s));
+      });
     }
 
     if (filters["minPrice"]?.[0]) {
@@ -167,7 +186,10 @@ export default function ShopGrid({ filters }: Props) {
         <span className="text-2xl mx-5 font-bold text-gray-700">
           {filteredProducts.length} Products
         </span>
-        <ProductFilter onSortChange={setSortBy} />
+        <ProductFilter 
+          onSortChange={setSortBy} 
+          type="products" 
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">

@@ -1,4 +1,3 @@
-// components/sections/sewers/sewer-grid.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,12 +14,11 @@ import {
 type Filters = Record<string, string[]>;
 
 interface SewersGridProps {
-  filters: Filters;
+  filters: Record<string, string[]>;
+  type: "sewers";
 }
 
-export default function SewersGrid({
-  filters,
-}: SewersGridProps) {
+export default function SewersGrid({filters, type}: SewersGridProps) {
   const [allSewers, setAllSewers] = useState<Sewer[]>([]);
   const [filteredSewers, setFilteredSewers] = useState<Sewer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,31 +132,44 @@ export default function SewersGrid({
   useEffect(() => {
     let result = [...allSewers];
 
-    if (filters["Sewer Location"]?.length) {
-      result = result.filter((s) =>
-        filters["Sewer Location"].some((loc) => s.location.includes(loc))
-      );
-    }
-
     if (filters["search"]?.[0]) {
       const query = filters["search"][0].toLowerCase();
       result = result.filter((s) => s.name.toLowerCase().includes(query));
     }
 
+    if (filters["Services"]?.length) {
+    const selected = filters["Services"].map(s => s.toLowerCase());
+      result = result.filter((s) =>
+      s.services?.some(service =>
+        filters["Services"].includes(service)
+      )
+    );
+  }
+
+  // EXPERIENCE (future-ready)
+    if (filters["Experience"]?.length) {
+      result = result.filter((s) => {
+      // placeholder logic until you define ranges
+      return true;
+    });
+  }
+
     switch (sortBy) {
-      case "most-sold":
-        result.sort((a, b) => (b.completed_orders || 0) - (a.completed_orders || 0));
-        break;
-      case "highest-rated":
-        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        break;
-      case "most-experienced":
-        result.sort((a, b) => (b.years_of_experience || 0) - (a.years_of_experience || 0));
-        break;
-    }
+    case "most-sold":
+      result.sort((a, b) => (b.completed_orders || 0) - (a.completed_orders || 0));
+      break;
+
+    case "highest-rated":
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+
+    case "most-experienced":
+      result.sort((a, b) => (b.years_of_experience || 0) - (a.years_of_experience || 0));
+      break;
+  }
 
     setFilteredSewers(result);
-  }, [filters, allSewers, sortBy]);
+}, [filters, allSewers, sortBy]);
 
   if (isLoading) {
     return (

@@ -23,7 +23,7 @@ export default function Sewers() {
       </h1>
 
       <div className="flex flex-row my-20">
-        <FilterTab setFilters={setFilters} />
+        <FilterTab setFilters={setFilters} type="sewers" />
 
         <div className="flex flex-1 flex-col m-4 gap-4">
           <SearchBar

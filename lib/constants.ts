@@ -19,3 +19,16 @@ export const MARKETPLACE_FILTERS = {
   "Sewer Location": ["NCR", "Luzon", "Visayas", "Mindanao"],
   Type: ["Kids", "Men", "Women"],
 };
+
+export const SEWER_FILTERS = {
+  Experience: [
+      "Beginner", 
+      "Intermediate", 
+      "Expert"
+    ],
+  Services: [
+      "Commission", 
+      "Alteration", 
+      "Repair"
+    ],
+};
