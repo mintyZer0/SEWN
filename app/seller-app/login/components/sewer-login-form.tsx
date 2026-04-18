@@ -43,11 +43,12 @@ export function SewerLoginForm({
                 <div className="bg-red-500/10 border border-red-500 text-red-500 p-4 rounded-2xl text-center text-lg animate-in fade-in zoom-in duration-200">
                   {error === "invalid_credentials" && "Invalid email or password. Please try again or register an account."}
                   {error === "must_register_as_sewer" && "You are registered as a customer. Please sign up as a Sewer to access this dashboard."}
+                  {error === "must_be_verified" && "Your sewer account is pending verification. Please wait for admin approval before accessing the dashboard."}
                   {error === "email_not_confirmed" && "Please confirm your email address before logging in."}
                   {error === "oauth_exchange_failed" && "Failed to connect with your social account. Please try again."}
                   {error === "no_session" && "Session expired or not found. Please login again."}
                   {error === "unknown_error" && "An unexpected error occurred. Please try again."}
-                  {!["invalid_credentials", "must_register_as_sewer", "email_not_confirmed", "oauth_exchange_failed", "no_session", "unknown_error"].includes(error) && "An unexpected error occurred. Please try again."}
+                  {!["invalid_credentials", "must_register_as_sewer", "must_be_verified", "email_not_confirmed", "oauth_exchange_failed", "no_session", "unknown_error"].includes(error) && "An unexpected error occurred. Please try again."}
                 </div>
               )}
               <div className="grid gap-2">

@@ -60,8 +60,19 @@ export async function loginSewer(formData: FormData) {
     redirect("/onboarding");
   }
 
+  const { data: verification } = await supabase
+    .from("sewer_verifications")
+    .select("verification_status")
+    .eq("user_id", authData.user.id)
+    .single();
+
+  if (verification?.verification_status !== "verified") {
+    await supabase.auth.signOut();
+    redirect("/login?error=must_be_verified");
+  }
+
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/seller-app");
 }
 
 export async function loginAdmin(formData: FormData) {
@@ -100,10 +111,7 @@ export async function loginAdmin(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  
-  // Hardcode redirect to the root which middleware rewrites to /admin
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  redirect(`${protocol}://admin.sewn.local:3000/`);
+  redirect("/admin");
 }
 
 export async function signup(

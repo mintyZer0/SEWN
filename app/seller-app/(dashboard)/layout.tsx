@@ -29,6 +29,16 @@ export default async function SellerLayout({
     redirect("/signup");
   }
 
+  const { data: verification } = await supabase
+    .from("sewer_verifications")
+    .select("verification_status")
+    .eq("user_id", user.id)
+    .single();
+
+  if (verification?.verification_status !== "verified") {
+    redirect("/login?error=must_be_verified");
+  }
+
   return (
     <>
       <SellerHeader />
