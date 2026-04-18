@@ -34,12 +34,18 @@ export async function updateSession(request: NextRequest) {
 
   // Domain Rewrite Logic
   if (isSellerApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
-    const rewriteUrl = new URL(`/seller-app${path === "/" ? "" : path}`, request.url);
+    const targetPath = path.startsWith("/seller-app")
+      ? path
+      : `/seller-app${path === "/" ? "" : path}`;
+    const rewriteUrl = new URL(targetPath, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
   } else if (isAdminApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
-    const rewriteUrl = new URL(`/admin${path === "/" ? "" : path}`, request.url);
+    const targetPath = path.startsWith("/admin")
+      ? path
+      : `/admin${path === "/" ? "" : path}`;
+    const rewriteUrl = new URL(targetPath, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });

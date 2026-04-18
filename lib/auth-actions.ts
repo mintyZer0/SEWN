@@ -100,10 +100,7 @@ export async function loginAdmin(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  
-  // Hardcode redirect to the root which middleware rewrites to /admin
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  redirect(`${protocol}://admin.sewn.local:3000/`);
+  redirect("/admin");
 }
 
 export async function signup(
