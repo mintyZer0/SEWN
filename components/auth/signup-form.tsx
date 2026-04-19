@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import SocialSignInButton from "@/app/(auth)/auth/login/components/social-sign-in-button";
-import { signInWithGoogleSewer, signInWithFacebookSewer, signInWithTwitterSewer, signup } from "@/lib/auth-actions";
+import { signInWithGoogleSewist, signInWithFacebookSewist, signInWithTwitterSewist, signup } from "@/lib/auth-actions";
 
 const variants = {
   customer: {
@@ -26,9 +26,9 @@ const variants = {
     subtitle: "Please fill in your basic info",
     submitButtonClass: "bg-primary text-white hover:text-primary/90",
   },
-  sewer: {
+  sewist: {
     style: "text-third",
-    subtitle: "as a SEWN sewer",
+    subtitle: "as a SEWN sewist",
     submitButtonClass: "bg-secondary-gradient-b text-white",
   },
 } as const;
@@ -70,13 +70,13 @@ export function SignupForm({
           .eq("id", session.user.id)
           .single();
 
-        const isSellerDomain = window.location.hostname.startsWith("seller.");
+        const isSewistDomain = window.location.hostname.startsWith("sewist.");
 
-        if (isSellerDomain && profile?.user_type !== "seller") {
+        if (isSewistDomain && profile?.user_type !== "sewist") {
           router.push("/onboarding");
-        } else if (profile?.user_type === "seller") {
-          if (!isSellerDomain) {
-            window.location.href = `${window.location.protocol}//seller.${window.location.host}/`;
+        } else if (profile?.user_type === "sewist") {
+          if (!isSewistDomain) {
+            window.location.href = `${window.location.protocol}//sewist.${window.location.host}/`;
           } else {
             router.push("/");
           }
@@ -113,7 +113,7 @@ export function SignupForm({
 
     setFormError("");
     
-    if (variant === "sewer") {
+    if (variant === "sewist") {
       setSubmitting(true);
       const result = await signup(formData);
       setSubmitting(false);
@@ -231,22 +231,22 @@ export function SignupForm({
               {submitting ? "Registering..." : "Register"}
             </Button>
 
-            {variant === "sewer" && (
+            {variant === "sewist" && (
               <div className="flex flex-row justify-around mt-4">
                 <SocialSignInButton
                   imageSrc="/assets/login-page/gmail.png"
                   altText="Google Icon"
-                  onSignIn={() => signInWithGoogleSewer("signup")}
+                  onSignIn={() => signInWithGoogleSewist("signup")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="Facebook Icon"
-                  onSignIn={() => signInWithFacebookSewer("signup")}
+                  onSignIn={() => signInWithFacebookSewist("signup")}
                 />
                 <SocialSignInButton
                   imageSrc="/assets/login-page/facebook.png"
                   altText="X Icon"
-                  onSignIn={() => signInWithTwitterSewer("signup")}
+                  onSignIn={() => signInWithTwitterSewist("signup")}
                 />
               </div>
             )}
@@ -254,17 +254,17 @@ export function SignupForm({
 
           <div className="flex mt-4 text-center text-sm justify-between ">
             <Link
-              href={variant === "sewer" ? "/login" : "/auth/login"}
+              href={variant === "sewist" ? "/login" : "/auth/login"}
               className="hover:underline underline-offset-4"
             >
               or Login
             </Link>
             {variant === "customer" ? (
               <Link
-                href={process.env.NODE_ENV === "production" ? "https://seller.sewn.com/signup" : "http://seller.sewn.local:3000/signup"}
+                href={process.env.NODE_ENV === "production" ? "https://sewist.sewn.com/signup" : "http://sewist.sewn.local:3000/signup"}
                 className="hover:underline underline-offset-4"
               >
-                Sign up as a seller
+                Sign up as a sewist
               </Link>
             ) : (
               <Link

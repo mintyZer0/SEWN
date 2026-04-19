@@ -9,7 +9,7 @@ import { createClient } from "@/utils/supabase/client";
 interface CustomerData {
   id: string;
   name: string;
-  userType: "buyer" | "seller";
+  userType: "buyer" | "sewist";
   roleLabel: string;
   email: string;
   createdAt: string;
@@ -23,9 +23,9 @@ interface CustomerData {
   profileDocumentUrl: string | null;
   avatarUrl: string | null;
   hasCustomerRegistrationInfo: boolean;
-  hasSewerRegistrationInfo: boolean;
+  hasSewistRegistrationInfo: boolean;
   hasQuestionnaires: boolean;
-  sewerOnboardingSurvey: Record<string, string>;
+  sewistOnboardingSurvey: Record<string, string>;
   location: string;
   status: StatusType;
 }
@@ -103,12 +103,12 @@ export default function CustomersPage() {
           user_type,
           email,
           created_at,
-          sewer_verifications (
+          sewist_verifications (
             verification_status,
             id_card_url,
             profile_document_url
           ),
-          sewer_onboarding_surveys (
+          sewist_onboarding_surveys (
             educational_attainment,
             monthly_income,
             reason_for_sewing,
@@ -135,7 +135,7 @@ export default function CustomersPage() {
             province
           )
         `)
-        .in("user_type", ["buyer", "seller"]);
+        .in("user_type", ["buyer", "sewist"]);
 
       if (usersError) {
         throw usersError;
@@ -160,19 +160,19 @@ export default function CustomersPage() {
       }
 
       const mapped: CustomerData[] = (users ?? []).map((u: any) => {
-        const verification = Array.isArray(u.sewer_verifications)
-          ? u.sewer_verifications[0]
-          : u.sewer_verifications;
-        const survey = Array.isArray(u.sewer_onboarding_surveys)
-          ? u.sewer_onboarding_surveys[0]
-          : u.sewer_onboarding_surveys;
+        const verification = Array.isArray(u.sewist_verifications)
+          ? u.sewist_verifications[0]
+          : u.sewist_verifications;
+        const survey = Array.isArray(u.sewist_onboarding_surveys)
+          ? u.sewist_onboarding_surveys[0]
+          : u.sewist_onboarding_surveys;
         const avatar = Array.isArray(u.user_avatars) ? u.user_avatars[0] : u.user_avatars;
         const purchaseSummary = purchasesByUser.get(u.id) ?? { count: 0, total: 0 };
         const fullName = `${u.first_name ?? ""} ${u.last_name ?? ""}`.trim() || "Unnamed user";
-        const userType: "buyer" | "seller" = u.user_type === "seller" ? "seller" : "buyer";
+        const userType: "buyer" | "sewist" = u.user_type === "sewist" ? "sewist" : "buyer";
         const verificationStatus = verification?.verification_status ?? null;
         const status: StatusType =
-          userType === "seller"
+          userType === "sewist"
             ? verificationStatus === "verified"
               ? "Accepted"
               : verificationStatus === "rejected"
@@ -193,7 +193,7 @@ export default function CustomersPage() {
           survey?.expresses_self,
           survey?.community_goals,
         ];
-        const sewerRegistrationFields = [
+        const sewistRegistrationFields = [
           survey?.learn_method,
           survey?.teacher_relationship,
           survey?.motivations,
@@ -205,7 +205,7 @@ export default function CustomersPage() {
           survey?.specific_products,
           survey?.designs_garments,
         ];
-        const hasSurveyField = [...customerRegistrationFields, ...sewerRegistrationFields].some(
+        const hasSurveyField = [...customerRegistrationFields, ...sewistRegistrationFields].some(
           (value) => typeof value === "string" && value.trim().length > 0
         );
 
@@ -213,7 +213,7 @@ export default function CustomersPage() {
           id: u.id,
           name: fullName,
           userType,
-          roleLabel: userType === "seller" ? "Sewer" : "Customer",
+          roleLabel: userType === "sewist" ? "Sewist" : "Customer",
           email: u.email,
           createdAt: u.created_at,
           createdDate: `Account created ${new Date(u.created_at).toLocaleDateString()}`,
@@ -228,11 +228,11 @@ export default function CustomersPage() {
           hasCustomerRegistrationInfo: customerRegistrationFields.some(
             (value) => typeof value === "string" && value.trim().length > 0
           ),
-          hasSewerRegistrationInfo: sewerRegistrationFields.some(
+          hasSewistRegistrationInfo: sewistRegistrationFields.some(
             (value) => typeof value === "string" && value.trim().length > 0
           ),
           hasQuestionnaires: hasSurveyField,
-          sewerOnboardingSurvey: {
+          sewistOnboardingSurvey: {
             educational_attainment: survey?.educational_attainment ?? "",
             monthly_income: survey?.monthly_income ?? "",
             reason_for_sewing: survey?.reason_for_sewing ?? "",
@@ -288,13 +288,13 @@ export default function CustomersPage() {
 
   const stats = [
     { label: "Customers", count: customers.length },
-    { label: "Sewers", count: customers.filter((c) => c.userType === "seller").length },
+    { label: "Sewists", count: customers.filter((c) => c.userType === "sewist").length },
     { label: "Approved", count: customers.filter((c) => c.status === "Accepted").length },
     { label: "Not approved", count: customers.filter((c) => c.status !== "Accepted").length },
   ];
 
   const handleDetailsClick = (customer: CustomerData) => {
-    if (customer.userType !== "seller") return;
+    if (customer.userType !== "sewist") return;
     setSelectedCustomer(customer);
     setIsModalOpen(true);
   };
@@ -313,7 +313,7 @@ export default function CustomersPage() {
     ...selectedCustomer,
     productName: selectedCustomer.name,
     customerName: selectedCustomer.name,
-    description: `Sewer from ${selectedCustomer.location}. Joined on ${selectedCustomer.createdDate.replace("Account created ", "")}.`,
+    description: `Sewist from ${selectedCustomer.location}. Joined on ${selectedCustomer.createdDate.replace("Account created ", "")}.`,
     orderDate: selectedCustomer.createdDate.replace("Account created ", ""),
     submittedAt: selectedCustomer.createdAt,
     price: `Php ${selectedCustomer.purchaseTotal.toLocaleString()}`,
@@ -322,9 +322,9 @@ export default function CustomersPage() {
     idCardImageUrl: selectedCustomer.idCardUrl,
     avatarUrl: selectedCustomer.avatarUrl,
     hasCustomerRegistrationInfo: selectedCustomer.hasCustomerRegistrationInfo,
-    hasSewerRegistrationInfo: selectedCustomer.hasSewerRegistrationInfo,
+    hasSewistRegistrationInfo: selectedCustomer.hasSewistRegistrationInfo,
     hasQuestionnaires: selectedCustomer.hasQuestionnaires,
-    sewerOnboardingSurvey: selectedCustomer.sewerOnboardingSurvey,
+    sewistOnboardingSurvey: selectedCustomer.sewistOnboardingSurvey,
   } : null;
 
   return (
@@ -355,7 +355,7 @@ export default function CustomersPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         data={modalData}
-        type="sewer"
+        type="sewist"
         onApprove={handleApprove}
         onDecline={handleDecline}
       />

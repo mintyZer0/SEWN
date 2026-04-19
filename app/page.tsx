@@ -2,8 +2,8 @@ import HomeHero from "@/components/sections/home/home-hero";
 import NewProducts from "@/components/sections/home/new-products";
 import Categories from "@/components/sections/home/categories";
 import Browse from "@/components/sections/home/browse";
-import MeetOurSewers from "@/components/sections/home/meet-our-sewers";
-import TodaysFeaturedSewer from "@/components/sections/home/todays-featured-sewer";
+import MeetOurSewists from "@/components/sections/home/meet-our-sewists";
+import TodaysFeaturedSewist from "@/components/sections/home/todays-featured-sewist";
 import Mission from "@/components/ui/vision-mission";
 import OurPartners from "@/components/sections/home/our-partners";
 import FollowUs from "@/components/sections/home/follow-us";
@@ -18,8 +18,8 @@ export default function Home() {
       <NewProducts />
       <Categories />
       <Browse />
-      <MeetOurSewers />
-      <TodaysFeaturedSewer />
+      <MeetOurSewists />
+      <TodaysFeaturedSewist />
       <Mission />
       <ParterTestimonials />
       <FollowUs />

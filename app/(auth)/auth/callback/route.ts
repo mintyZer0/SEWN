@@ -36,18 +36,15 @@ export async function GET(request: Request) {
         .from("users")
         .select("user_type")
         .eq("id", authData.user.id)
-        .single();
+        .maybeSingle();
 
-      if (role === "sewer") {
-        console.log("Sewer-intent OAuth login detected.");
+      const isSewistDomain = host.startsWith("sewist.");
+      const isAdminDomain = host.startsWith("admin.");
+
+      if (isSewistDomain) {
+        console.log("Login from Sewist subdomain.");
         
-        if (profile?.user_type === "buyer") {
-          // Whether login or signup, send them to onboarding to upgrade
-          console.log("Buyer account found on seller domain. Redirecting to onboarding.");
-          return NextResponse.redirect(`${origin}/onboarding`);
-        }
-
-        // 2. If new user, create as buyer and go to onboarding
+        // Ensure profile exists
         if (!profile) {
           await supabase.from("users").upsert({ 
             id: authData.user.id,
@@ -56,44 +53,56 @@ export async function GET(request: Request) {
             last_name: lastName,
             user_type: "buyer" 
           }, { onConflict: 'id' });
+        }
+
+        const currentType = profile?.user_type || "buyer";
+
+        if (currentType === "sewist") {
+          // Check verification
+          const { data: verification } = await supabase
+            .from("sewist_verifications")
+            .select("verification_status")
+            .eq("user_id", authData.user.id)
+            .maybeSingle();
+
+          if (verification?.verification_status === "verified") {
+            return NextResponse.redirect(`${origin}/`);
+          } else {
+            await supabase.auth.signOut();
+            const mainLogin = new URL("/login", origin.replace("sewist.", ""));
+            mainLogin.searchParams.set("error", "must_be_verified");
+            return NextResponse.redirect(mainLogin.toString());
+          }
+        } else {
+          // Buyer on sewist domain -> onboarding
           return NextResponse.redirect(`${origin}/onboarding`);
         }
-
-        const { data: verification } = await supabase
-          .from("sewer_verifications")
-          .select("verification_status")
-          .eq("user_id", authData.user.id)
-          .single();
-
-        if (verification?.verification_status !== "verified") {
+      } else if (isAdminDomain) {
+        console.log("Login from Admin subdomain.");
+        
+        if (profile?.user_type !== "admin") {
           await supabase.auth.signOut();
-          return NextResponse.redirect(`${origin}/login?error=must_be_verified`);
+          const adminLogin = new URL("/login", origin);
+          adminLogin.searchParams.set("error", "access_denied");
+          return NextResponse.redirect(adminLogin.toString());
         }
-
         return NextResponse.redirect(`${origin}/`);
       } else {
-        // Normal Buyer flow
-        console.log("Buyer-intent OAuth login detected.");
+        // Main domain login
+        console.log("Login from main domain.");
         
-        if (profile?.user_type === "seller") {
-          // If a seller logs in through the buyer side, they just stay a seller
-          const buyerUrl = new URL(next, origin);
-          buyerUrl.host = buyerUrl.host.replace("seller.", "");
-          return NextResponse.redirect(buyerUrl);
+        if (!profile) {
+          await supabase.from("users").upsert({ 
+            id: authData.user.id,
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            user_type: "buyer" 
+          }, { onConflict: 'id' });
         }
-
-        await supabase.from("users").upsert({ 
-          id: authData.user.id,
-          email: email,
-          first_name: firstName,
-          last_name: lastName,
-          user_type: "buyer" 
-        }, { onConflict: 'id' });
         
-        const buyerUrl = new URL(next, origin);
-        buyerUrl.host = buyerUrl.host.replace("seller.", "");
-        console.log("Redirecting buyer to:", buyerUrl.toString());
-        return NextResponse.redirect(buyerUrl);
+        const targetUrl = new URL(next, origin);
+        return NextResponse.redirect(targetUrl.toString());
       }
     }
   }

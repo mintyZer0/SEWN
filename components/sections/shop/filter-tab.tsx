@@ -2,9 +2,9 @@
 
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
-import { MARKETPLACE_FILTERS, SEWER_FILTERS } from "@/lib/constants";
+import { MARKETPLACE_FILTERS, SEWIST_FILTERS } from "@/lib/constants";
 
-const collapsibleLables = [
+const productFilters = [
   {
     label: "Categories",
     options: MARKETPLACE_FILTERS.Categories,
@@ -27,7 +27,7 @@ const collapsibleLables = [
 
   {
     label: "Location",
-    options: MARKETPLACE_FILTERS["Sewer Location"],
+    options: MARKETPLACE_FILTERS["Sewist Location"],
   },
 
   { label: "Type", 
@@ -35,26 +35,26 @@ const collapsibleLables = [
   },
 ];
 
-const tailorFilters = [
+const sewistFilters = [
   {
     label: "Experience",
-    options: SEWER_FILTERS.Experience
+    options: SEWIST_FILTERS.Experience
   },
 
   {
     label: "Services",
-    options: SEWER_FILTERS.Services
+    options: SEWIST_FILTERS.Services
   },
 ];
 
 interface FilterTabProps {
   setFilters: React.Dispatch<React.SetStateAction<Record<string, string[]>>>;
-  type: "products" | "sewers";
+  type: "products" | "sewists";
 }
 
 export default function FilterTab({ setFilters, type }: FilterTabProps) {
 
-  const filtersToUse = type === "products" ? collapsibleLables : tailorFilters;
+  const filtersToUse = type === "products" ? productFilters : sewistFilters;
 
   const handleFilterChange = (section: string, values: string[]) => {
   setFilters((prev) => ({

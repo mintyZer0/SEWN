@@ -5,7 +5,7 @@ import Image from "next/image";
 
 interface OrderUpdateProps {
   productName: string;
-  sewerName: string;
+  sewistName: string;
   statusMessage: string;
   date: string;
   imageSrc: string;
@@ -13,7 +13,7 @@ interface OrderUpdateProps {
 
 export default function OrderUpdateCard({
   productName,
-  sewerName,
+  sewistName,
   statusMessage,
   date,
   imageSrc,
@@ -26,7 +26,7 @@ export default function OrderUpdateCard({
 
       <div className="flex-1 flex flex-col justify-center pr-4">
         <h3 className="text-xl md:text-2xl font-bold text-third mb-1">
-          {productName}, {sewerName}
+          {productName}, {sewistName}
         </h3>
         <p className="text-gray-700 text-base md:text-lg leading-snug">
           {statusMessage}

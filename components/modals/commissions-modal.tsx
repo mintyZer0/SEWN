@@ -30,7 +30,7 @@ export const CommissionsModal = ({ isOpen, onClose }: CommissionsModalProps) => 
       if (!user) return;
 
       const { data } = await supabase
-        .from("sewer_settings")
+        .from("sewist_settings")
         .select("accepting_commissions, accepting_alterations, accepting_repairs, accepting_appointments")
         .eq("user_id", user.id)
         .maybeSingle();
@@ -60,7 +60,7 @@ export const CommissionsModal = ({ isOpen, onClose }: CommissionsModalProps) => 
     if (user) {
       const dbKey = `accepting_${key}`;
       await supabase
-        .from("sewer_settings")
+        .from("sewist_settings")
         .upsert({ user_id: user.id, [dbKey]: newValue }, { onConflict: "user_id" });
     }
     

@@ -66,7 +66,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
         content: msg.content,
         createdAt: msg.created_at,
         user: {
-          name: msg.from_user_id === myUserId ? username : "Seller",
+          name: msg.from_user_id === myUserId ? username : "Sewist",
           id: msg.from_user_id,
         },
       }));
@@ -115,10 +115,10 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
     });
     // --- OPTIMISTIC UI END ---
 
-    // Load conversation to get buyer_id / seller_id
+    // Load conversation to get buyer_id / sewist_id
     const { data: conversation, error: convErr } = await supabase
       .from("chat_conversations")
-      .select("id, buyer_id, seller_id")
+      .select("id, buyer_id, sewist_id")
       .eq("id", conversationId)
       .single();
 
@@ -129,9 +129,9 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
 
     const myId = user.id;
     const otherId =
-      conversation.seller_id === myId
+      conversation.sewist_id === myId
         ? conversation.buyer_id
-        : conversation.seller_id;
+        : conversation.sewist_id;
 
     const { data: messageData, error } = await supabase
       .from("chat_messages")
@@ -214,7 +214,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
               content: record.content,
               createdAt: record.created_at,
               user: {
-                name: "Seller",
+                name: "Sewist",
                 id: record.from_user_id,
               },
             };

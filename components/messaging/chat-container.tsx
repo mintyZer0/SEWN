@@ -39,15 +39,15 @@ export function ChatContainer({
 
       const { data: conversation } = await supabase
         .from("chat_conversations")
-        .select("seller_id, buyer_id")
+        .select("sewist_id, buyer_id")
         .eq("id", selectedId)
         .single();
 
       if (conversation) {
         const otherId =
-          conversation.seller_id === currentUserId
+          conversation.sewist_id === currentUserId
             ? conversation.buyer_id
-            : conversation.seller_id;
+            : conversation.sewist_id;
 
         const { data: otherUser } = await supabase
           .from("users")

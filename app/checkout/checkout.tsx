@@ -14,7 +14,7 @@ interface Product {
   name: string;
   price: number;
   img_src: string;
-  seller_name: string; 
+  sewist_name: string; 
   location: string;
   type: string;
   description?: string;
@@ -51,7 +51,7 @@ export default function CheckoutClient({
 
   if (orderPlaced) return <SuccessPage />;
 
-const sellerName = initialProduct.seller_name || 'Unknown Seller';
+const sewistName = initialProduct.sewist_name || 'Unknown Sewist';
   return (
     <div className="min-h-dvw">
       <CheckoutStepper currentStep={currentStep} />
@@ -62,7 +62,7 @@ const sellerName = initialProduct.seller_name || 'Unknown Seller';
             productImage={initialProduct.img_src || '/placeholder.jpg'}
             productDescription={initialProduct.description || ""}
             price={initialProduct.price || 0}
-            seller={sellerName}
+            sewist={sewistName}
             details={[]}
             onNext={() => setCurrentStep(2)}
           />

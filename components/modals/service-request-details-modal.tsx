@@ -91,7 +91,7 @@ export const ServiceRequestDetailsModal = ({
         .insert({
           id: stableConversationId,
           buyer_id: request.client_id,
-          seller_id: user.id,
+          sewist_id: user.id,
         })
         .select("id")
         .single();
@@ -110,7 +110,7 @@ export const ServiceRequestDetailsModal = ({
     const conversationId = await ensureChatExists();
     if (conversationId) {
       // Redirect to chat with this conversation selected
-      window.location.href = `/seller-app/chat?conversationId=${conversationId}`;
+      window.location.href = `/sewist-app/chat?conversationId=${conversationId}`;
     }
   };
 

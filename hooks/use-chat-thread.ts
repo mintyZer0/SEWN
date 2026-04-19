@@ -25,14 +25,14 @@ export function useChatThreads() {
       .select(`
         id, 
         buyer_id, 
-        seller_id, 
+        sewist_id, 
         last_message_at,
         chat_messages (
           content,
           created_at
         )
       `)
-      .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+      .or(`buyer_id.eq.${user.id},sewist_id.eq.${user.id}`)
       .order("last_message_at", { ascending: false });
 
     if (error) {
@@ -41,7 +41,7 @@ export function useChatThreads() {
       return;
     }
 
-    const recipientIds = [...new Set(conversations.map((c: any) => c.buyer_id === user.id ? c.seller_id : c.buyer_id))];
+    const recipientIds = [...new Set(conversations.map((c: any) => c.buyer_id === user.id ? c.sewist_id : c.buyer_id))];
     
     const { data: usersData } = await supabase
       .from("users")
@@ -51,7 +51,7 @@ export function useChatThreads() {
     const usersMap = new Map(usersData?.map(u => [u.id, `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.id.substring(0,8)}`]) || []);
 
     const mapped = conversations.map((c: any) => {
-      const recipientId = c.buyer_id === user.id ? c.seller_id : c.buyer_id;
+      const recipientId = c.buyer_id === user.id ? c.sewist_id : c.buyer_id;
       const userName = usersMap.get(recipientId) || `User ${recipientId.substring(0, 8)}`;
       
       const sortedMessages = (c.chat_messages || []).sort(

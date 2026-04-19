@@ -28,7 +28,7 @@ export async function login(formData: FormData) {
   redirect("/");
 }
 
-export async function loginSewer(formData: FormData) {
+export async function loginSewist(formData: FormData) {
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -49,7 +49,7 @@ export async function loginSewer(formData: FormData) {
     redirect("/login?error=unknown_error");
   }
 
-  // Check if the user is actually a seller
+  // Check if the user is actually a sewist
   const { data: profile } = await supabase
     .from("users")
     .select("user_type")
@@ -61,7 +61,7 @@ export async function loginSewer(formData: FormData) {
   }
 
   const { data: verification } = await supabase
-    .from("sewer_verifications")
+    .from("sewist_verifications")
     .select("verification_status")
     .eq("user_id", authData.user.id)
     .single();
@@ -72,7 +72,7 @@ export async function loginSewer(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  redirect("/seller-app");
+  redirect("/sewist-app");
 }
 
 export async function loginAdmin(formData: FormData) {
@@ -191,7 +191,7 @@ export async function signout() {
   redirect("/logout");
 }
 
-export async function signUpAsSewer(
+export async function signUpAsSewist(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
@@ -207,7 +207,7 @@ export async function signUpAsSewer(
     .single();
 
   if (existingUser) {
-    if (existingUser.user_type === "seller") {
+    if (existingUser.user_type === "sewist") {
       return {
         success: false,
         error: "An account with this email already exists.",
@@ -223,7 +223,7 @@ export async function signUpAsSewer(
     if (signInError) {
       return {
         success: false,
-        error: "This email is already registered as a customer, but the password provided is incorrect. Please provide your correct password to upgrade your account to a Sewer.",
+        error: "This email is already registered as a customer, but the password provided is incorrect. Please provide your correct password to upgrade your account to a Sewist.",
       };
     }
   } else {
@@ -233,8 +233,8 @@ export async function signUpAsSewer(
       password: password,
       options: {
         data: {
-          role: "seller",
-          user_type: "seller",
+          role: "sewist",
+          user_type: "sewist",
           username: formData.get("username") as string,
         },
       },
@@ -245,11 +245,11 @@ export async function signUpAsSewer(
     }
   }
 
-  // 4. Now that they are authenticated (new or existing), use upgradeToSewer logic to save the profile data
-  return await upgradeToSewer(formData);
+  // 4. Now that they are authenticated (new or existing), use upgradeToSewist logic to save the profile data
+  return await upgradeToSewist(formData);
 }
 
-export async function upgradeToSewer(formData: FormData): Promise<{ success: boolean; error?: string }> {
+export async function upgradeToSewist(formData: FormData): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -302,7 +302,7 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   const { error: userError } = await supabase
     .from("users")
     .update({ 
-      user_type: "seller",
+      user_type: "sewist",
       first_name: firstName,
       last_name: lastName,
       birthday: birthday || null,
@@ -368,14 +368,14 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   // 4. Update Auth Metadata
   await supabase.auth.updateUser({
     data: { 
-      role: "seller",
+      role: "sewist",
       shop_name: shopName,
       tax_id: taxId
     }
   });
 
-  // 5. Upsert into sewer_verifications
-  const { error: verificationError } = await supabase.from("sewer_verifications").upsert({
+  // 5. Upsert into sewist_verifications
+  const { error: verificationError } = await supabase.from("sewist_verifications").upsert({
     user_id: user.id,
     tax_id: taxId,
     dti_sec_number: dtiSecNumber,
@@ -385,8 +385,8 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     return { success: false, error: verificationError.message };
   }
 
-  // 6. Upsert into sewer_onboarding_surveys
-  const { error: surveyError } = await supabase.from("sewer_onboarding_surveys").upsert({
+  // 6. Upsert into sewist_onboarding_surveys
+  const { error: surveyError } = await supabase.from("sewist_onboarding_surveys").upsert({
     user_id: user.id,
     educational_attainment: educationalAttainment,
     monthly_income: monthlyIncome,
@@ -411,10 +411,10 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
     return { success: false, error: surveyError.message };
   }
 
-  // 7. Ensure sewer_settings and sewer_statistics exist
+  // 7. Ensure sewist_settings and sewist_statistics exist
   await Promise.all([
-    supabase.from("sewer_settings").upsert({ user_id: user.id }, { onConflict: "user_id" }),
-    supabase.from("sewer_statistics").upsert({ user_id: user.id }, { onConflict: "user_id" })
+    supabase.from("sewist_settings").upsert({ user_id: user.id }, { onConflict: "user_id" }),
+    supabase.from("sewist_statistics").upsert({ user_id: user.id }, { onConflict: "user_id" })
   ]);
 
   // 8. Insert social link if provided
@@ -430,7 +430,7 @@ export async function upgradeToSewer(formData: FormData): Promise<{ success: boo
   return { success: true };
 }
 
-async function getRedirectTo(role?: "customer" | "sewer", intent?: "login" | "signup") {
+async function getRedirectTo(role?: "customer" | "sewist", intent?: "login" | "signup") {
   const headerList = await headers();
   let base = headerList.get("origin");
   
@@ -449,7 +449,7 @@ async function getRedirectTo(role?: "customer" | "sewer", intent?: "login" | "si
   return queryString ? `${url}?${queryString}` : url;
 }
 
-export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewer", intent?: "login" | "signup") {
+export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewist", intent?: "login" | "signup") {
   const supabase = await createClient();
   const redirectTo = await getRedirectTo(role, intent);
 
@@ -487,14 +487,14 @@ export async function signInWithTwitter() {
   return signInWithOAuth("twitter");
 }
 
-export async function signInWithGoogleSewer(intent: "login" | "signup" = "login") {
-  return signInWithOAuth("google", "sewer", intent);
+export async function signInWithGoogleSewist(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("google", "sewist", intent);
 }
 
-export async function signInWithFacebookSewer(intent: "login" | "signup" = "login") {
-  return signInWithOAuth("facebook", "sewer", intent);
+export async function signInWithFacebookSewist(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("facebook", "sewist", intent);
 }
 
-export async function signInWithTwitterSewer(intent: "login" | "signup" = "login") {
-  return signInWithOAuth("twitter", "sewer", intent);
+export async function signInWithTwitterSewist(intent: "login" | "signup" = "login") {
+  return signInWithOAuth("twitter", "sewist", intent);
 }

@@ -3,14 +3,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface FooterProps {
-  variant?: "primary" | "orchid" | "seller";
+  variant?: "primary" | "orchid" | "sewist";
 }
 
 export default function Footer({ variant = "primary" }: FooterProps) {
   const bgStyles = {
     primary: "bg-primary",
     orchid: "bg-orchid-light",
-    seller: "third-gradient",
+    sewist: "third-gradient",
   };
   const footerSections = [
     {

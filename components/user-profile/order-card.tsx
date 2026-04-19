@@ -4,12 +4,12 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { ChatWithSewerButton, ViewSewerButton, ConfirmDeliveryButton } from "./profile-buttons";
+import { ChatWithSewistButton, ViewSewistButton, ConfirmDeliveryButton } from "./profile-buttons";
 
 export interface OrderItem {
   id: string;
-  sewerId: string;
-  sewerName: string;
+  sewistId: string;
+  sewistName: string;
   productName: string;
   variant: string;
   status: string;
@@ -31,12 +31,12 @@ export default function OrderCard({ order }: OrderCardProps) {
           <div className="text-third">
             <ShoppingBag className="w-8 h-8" />
           </div>
-          <h3 className="text-2xl font-bold text-third">{order.sewerName}</h3>
+          <h3 className="text-2xl font-bold text-third">{order.sewistName}</h3>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
-          <ChatWithSewerButton className="flex-1 md:flex-none" />
-          <ViewSewerButton
-            sewerId={order.sewerId}
+          <ChatWithSewistButton className="flex-1 md:flex-none" />
+          <ViewSewistButton
+            sewistId={order.sewistId}
             className="flex-1 md:flex-none"
           />
         </div>

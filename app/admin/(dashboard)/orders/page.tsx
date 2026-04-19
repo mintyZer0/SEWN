@@ -79,7 +79,7 @@ export default function OrdersPage() {
             last_name
           ),
           order_items (
-            seller_products (
+            sewist_products (
               name,
               type
             )
@@ -89,7 +89,7 @@ export default function OrdersPage() {
 
       if (data) {
         const mapped: OrderData[] = data.map((o: any) => {
-          const firstProduct = o.order_items?.[0]?.seller_products;
+          const firstProduct = o.order_items?.[0]?.sewist_products;
           return {
             id: o.id,
             productName: firstProduct?.name || "Multiple Items",
