@@ -19,7 +19,7 @@ interface Product {
   sold: number;
   verification_status: string;
   description?: string;
-  seller_name?: string;
+  sewist_name?: string;
 
   product_categories?: { category: string } | { category: string }[];
   product_variants?: {
@@ -33,7 +33,7 @@ interface Product {
 
 interface Props {
   filters: Record<string, string[]>;
-  type: "products" | "sewers";
+  type: "products" | "sewists";
 }
 
 
@@ -51,7 +51,7 @@ export default function ShopGrid({ filters, type }: Props) {
         setIsLoading(true);
 
         const { data, error } = await supabase
-          .from("seller_products")
+          .from("sewist_products")
           .select(`
             *,
             product_categories (category),
@@ -154,7 +154,7 @@ export default function ShopGrid({ filters, type }: Props) {
         result.sort((a, b) => (b.sold || 0) - (a.sold || 0));
         break;
       case "highest-rated":
-        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
         break;
       case "price-low-high":
         result.sort((a, b) => (a.price || 0) - (b.price || 0));

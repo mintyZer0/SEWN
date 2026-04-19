@@ -26,7 +26,7 @@ type Product = {
 
 interface ProductFilterProps {
   onSortChange: (sortBy: string) => void;
-  type: "products" | "sewers";
+  type: "products" | "sewists";
 }
 
 export default function ProductFilter({ onSortChange, type }: ProductFilterProps) {
@@ -52,7 +52,7 @@ export default function ProductFilter({ onSortChange, type }: ProductFilterProps
               <SelectItem value="price-high-low">Price: High to Low</SelectItem>
               </>
           )}
-            {type === "sewers" && (
+            {type === "sewists" && (
             <>
               <SelectItem value="highest-rated">Highest rated</SelectItem>
               <SelectItem value="most-active">Most active</SelectItem>

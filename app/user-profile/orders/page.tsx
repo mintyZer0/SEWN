@@ -18,8 +18,8 @@ const TABS = [
 const MOCK_ORDERS: OrderItem[] = [
   {
     id: "260211A7XBKLY1",
-    sewerId: "550e8400-e29b-41d4-a716-446655440000",
-    sewerName: "Ysabel Santiago",
+    sewistId: "550e8400-e29b-41d4-a716-446655440000",
+    sewistName: "Ysabel Santiago",
     productName: "Mint Muse",
     variant: "Premade Small 1x",
     status: "To receive",
@@ -29,8 +29,8 @@ const MOCK_ORDERS: OrderItem[] = [
   },
   {
     id: "260212G9VCMFY0",
-    sewerId: "678e8400-e29b-41d4-a716-446655440000",
-    sewerName: "Chini De Bertha",
+    sewistId: "678e8400-e29b-41d4-a716-446655440000",
+    sewistName: "Chini De Bertha",
     productName: "Charcoal Night",
     variant: "Measurement Profile #1",
     status: "Completed",

@@ -32,12 +32,12 @@ export async function GET(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-      const isSellerDomain = host.startsWith("seller.");
+      const isSewistDomain = host.startsWith("sewist.");
 
       if (type === "signup") {
-        const fallbackUrl = isSellerDomain && profile?.user_type !== "seller" 
+        const fallbackUrl = isSewistDomain && profile?.user_type !== "sewist" 
           ? new URL("/onboarding", origin).toString() 
-          : (profile?.user_type === "seller" ? (isSellerDomain ? new URL("/", origin).toString() : new URL("/", `seller.${origin.replace(/^https?:\/\//, "")}`).toString()) : redirectTo.toString());
+          : (profile?.user_type === "sewist" ? (isSewistDomain ? new URL("/", origin).toString() : new URL("/", `sewist.${origin.replace(/^https?:\/\//, "")}`).toString()) : redirectTo.toString());
 
         const verifiedUrl = new URL("/auth/verified", origin);
         verifiedUrl.searchParams.set("fallback", fallbackUrl);
@@ -45,18 +45,18 @@ export async function GET(request: NextRequest) {
       }
 
       // Fallback for non-signup OTPs
-      if (isSellerDomain && profile?.user_type !== "seller") {
+      if (isSewistDomain && profile?.user_type !== "sewist") {
         const onboardingUrl = new URL("/onboarding", origin);
         return NextResponse.redirect(onboardingUrl);
       }
 
-      if (profile?.user_type === "seller") {
-        // If it's a seller, make sure they end up on the seller subdomain dashboard
-        const sellerUrl = new URL("/", origin);
-        if (!isSellerDomain) {
-          sellerUrl.host = `seller.${host}`;
+      if (profile?.user_type === "sewist") {
+        // If it's a sewist, make sure they end up on the sewist subdomain dashboard
+        const sewistUrl = new URL("/", origin);
+        if (!isSewistDomain) {
+          sewistUrl.host = `sewist.${host}`;
         }
-        return NextResponse.redirect(sellerUrl);
+        return NextResponse.redirect(sewistUrl);
       }
 
       return NextResponse.redirect(redirectTo);

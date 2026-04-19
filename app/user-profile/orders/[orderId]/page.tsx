@@ -5,8 +5,8 @@ import Image from "next/image";
 import { ShoppingBag } from "lucide-react";
 import { useParams } from "next/navigation";
 import {
-  ChatWithSewerButton,
-  ViewSewerButton,
+  ChatWithSewistButton,
+  ViewSewistButton,
   ConfirmDeliveryButton,
 } from "@/components/user-profile/profile-buttons";
 
@@ -26,8 +26,8 @@ export default function OrderDetailsPage() {
 
   const orderData = {
     id: orderId || "260212G9VCMFY0",
-    sewerId: "678e8400-e29b-41d4-a716-446655440000",
-    sewerName: "Chini De Bertha",
+    sewistId: "678e8400-e29b-41d4-a716-446655440000",
+    sewistName: "Chini De Bertha",
     productName: "Charcoal Night",
     variant: "Measurement Profile #1",
     status: "Completed",
@@ -87,19 +87,19 @@ export default function OrderDetailsPage() {
       </div>
 
       <div className="bg-white rounded-[35px] p-8 shadow-sm border border-gray-100 overflow-hidden">
-        {/* Sewer Header */}
+        {/* Sewist Header */}
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-200/50">
           <div className="flex items-center gap-3">
             <div className="text-third">
               <ShoppingBag className="w-8 h-8" />
             </div>
             <h3 className="text-2xl font-bold text-third">
-              {orderData.sewerName}
+              {orderData.sewistName}
             </h3>
           </div>
           <div className="flex gap-4">
-            <ChatWithSewerButton />
-            <ViewSewerButton sewerId={orderData.sewerId} />
+            <ChatWithSewistButton />
+            <ViewSewistButton sewistId={orderData.sewistId} />
           </div>
         </div>
 

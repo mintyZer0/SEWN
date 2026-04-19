@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 
 interface CommissionFormProps {
-  sewerName: string;
-  sewerImage: string;
-  sewerId: string;
+  sewistName: string;
+  sewistImage: string;
+  sewistId: string;
   serviceType: "commission" | "repair" | "alteration";
   disableSubject?: boolean;
   disableEmail?: boolean;
@@ -31,9 +31,9 @@ interface CommissionFormProps {
 }
 
 export default function CommissionForm({
-  sewerName,
-  sewerImage,
-  sewerId,
+  sewistName,
+  sewistImage,
+  sewistId,
   serviceType,
   disableSubject = false,
   disableEmail = false,
@@ -128,7 +128,7 @@ export default function CommissionForm({
 
       const { error: submitError } = await supabase.from("service_requests").insert({
         client_id: user.id,
-        sewer_id: sewerId,
+        sewist_id: sewistId,
         service_type: serviceType,
         subject: formData.subject || `New ${serviceType} request`,
         contact_email: formData.email || user.email || "",
@@ -168,7 +168,7 @@ export default function CommissionForm({
   return (
     <div className="max-w-dvw mx-30 rounded-lg p-10 my-10">
       <h2 className="text-6xl font-regular text-heading mb-4">
-        <span className="text-black">Commision</span> {sewerName}
+        <span className="text-black">Commission</span> {sewistName}
       </h2>
 
       {success ? (
@@ -179,8 +179,8 @@ export default function CommissionForm({
             </svg>
           </div>
           <h3 className="text-3xl font-medium text-heading">Request Submitted!</h3>
-          <p className="text-xl text-gray-600">The sewer will review your request and get back to you shortly.</p>
-          <Link href={`/sewers/${sewerId}`}>
+          <p className="text-xl text-gray-600">The sewist will review your request and get back to you shortly.</p>
+          <Link href={`/sewists/${sewistId}`}>
             <PrimaryButton className="mt-8">Return to Profile</PrimaryButton>
           </Link>
         </div>

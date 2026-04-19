@@ -5,8 +5,8 @@ import { Plus, ArrowLeft, Trash2, Loader2, X } from "lucide-react";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomField } from "@/components/ui/custom-field";
 import { PhotoSlot } from "@/components/ui/photo-slot";
-import { VariationRow } from "@/components/sewer-center/variation-row";
-import { SectionItem } from "@/components/sewer-center/collapsible-product-section";
+import { VariationRow } from "@/components/sewist-center/variation-row";
+import { SectionItem } from "@/components/sewist-center/collapsible-product-section";
 import { MARKETPLACE_FILTERS } from "@/lib/constants";
 import { createClient } from "@/utils/supabase/client";
 
@@ -179,7 +179,7 @@ export const ProductModal = ({
     async function fetchFullProduct() {
       if (product && isOpen) {
         const { data, error } = await supabase
-          .from('seller_products')
+          .from('sewist_products')
           .select(`
             *,
             product_categories (category),

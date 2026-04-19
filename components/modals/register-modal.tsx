@@ -15,7 +15,7 @@ const variants = {
     buttonStyle: "bg-orchid hover:bg-background",
     borderStyle: "border-heading",
   },
-  sewer: {
+  sewist: {
     textColor: "text-third",
     buttonStyle: "bg-third hover:bg-third/80",
     borderStyle: "border-third",
@@ -77,7 +77,7 @@ export function RegisterModal({
         <div className="mb-6">
           <h2 className="text-6xl font-normal">Register</h2>
           <p className="text-sm">
-            For smooth transactions, we need additional {variant === "customer" ? "user" : "seller"} data
+            For smooth transactions, we need additional {variant === "customer" ? "user" : "sewist"} data
           </p>
         </div>
 

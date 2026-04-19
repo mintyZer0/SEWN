@@ -28,7 +28,7 @@ export async function rejectOrder(id: string, reason: string) {
 export async function approveProduct(id: string) {
   const supabase = await createClient();
   const { error } = await supabase
-    .from("seller_products")
+    .from("sewist_products")
     .update({ 
       verification_status: "approved",
       latest_rejection_log_id: null 
@@ -61,7 +61,7 @@ export async function rejectProduct(id: string, reasonCode: string, comment: str
 
   // 2. Update Product
   const { error: productError } = await supabase
-    .from("seller_products")
+    .from("sewist_products")
     .update({ 
       verification_status: "rejected",
       latest_rejection_log_id: log.id 
@@ -72,10 +72,10 @@ export async function rejectProduct(id: string, reasonCode: string, comment: str
   return { success: true };
 }
 
-export async function approveSewer(id: string) {
+export async function approveSewist(id: string) {
   const supabase = await createClient();
   const { error } = await supabase
-    .from("sewer_verifications")
+    .from("sewist_verifications")
     .upsert(
       {
         user_id: id,
@@ -88,10 +88,10 @@ export async function approveSewer(id: string) {
   return { success: true };
 }
 
-export async function rejectSewer(id: string, reason: string) {
+export async function rejectSewist(id: string, reason: string) {
   const supabase = await createClient();
   const { error } = await supabase
-    .from("sewer_verifications")
+    .from("sewist_verifications")
     .upsert(
       {
         user_id: id,

@@ -19,7 +19,7 @@ export default function AboutHero() {
         <p className="text-lg md:text-2xl text-white leading-relaxed">
           <strong className="font-medium">SEWN</strong>{" "}
           <span className="text-secondary">
-            is an app-app that helps users find and hire local sewers. We stand
+            is an app-app that helps users find and hire local sewists. We stand
             from Higatay and are part of community contribution. This app
             matches the end-users with a qualified mannually skillful, their
             sewing needs—whether it's for custom clothing, alterations, or

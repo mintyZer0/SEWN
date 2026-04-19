@@ -35,7 +35,7 @@ export default function OrderUpdatesPage() {
             <OrderUpdateCard
               key={update.id}
               productName={update.product_name}
-              sewerName={update.sewer_name}
+              sewistName={update.sewist_name}
               statusMessage={update.status_message}
               date={update.created_at}
               imageSrc={update.image_url}

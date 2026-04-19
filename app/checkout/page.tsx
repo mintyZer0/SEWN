@@ -10,7 +10,7 @@ export default async function CheckoutPage({
   const { id: productId } = await searchParams;
   
   const { data: product } = await supabase
-    .from('seller_products')
+    .from('sewist_products')
     .select('*')
     .eq('id', productId)
     .eq('is_active', true)
