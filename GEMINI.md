@@ -10,6 +10,13 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 - **User Roles:** Triple-user ecosystem distinguishing between **Customers** (User Profile), **Sewists** (Sewist Center), and **Admins** (Internal Management).
 - **Database Schema:** Follows a normalized structure where sewist-specific data is distributed across specialized tables (`sewist_verifications`, `sewist_onboarding_surveys`, `sewist_achievements`, `sewist_statistics`) rather than a single profile table.
 
+## Routing & Subdomains
+- **Middleware Rewrites:** The project uses Next.js middleware (`utils/supabase/middleware.ts`) to handle multi-tenant subdomains.
+  - `sewist.*` requests are transparently rewritten to the `/sewist-app` folder.
+  - `admin.*` requests are rewritten to the `/admin` folder.
+- **Path Resolution:** When redirecting users within a subdomain (like sewists or admins), ALWAYS redirect to the root path (e.g., `/login`), NOT the physical folder path (e.g., `/sewist-app/login`). The middleware will automatically map `/login` on the `sewist` subdomain to the correct files in `/sewist-app/login`. Explicitly including `/sewist-app` or `/admin` in the redirect path will break the routing or cause 404 errors.
+- **Cross-Domain Navigation:** When navigating between domains (e.g., from customer domain to sewist domain), use absolute URLs constructed with the current origin to ensure session cookies and routing work correctly.
+
 ## Key Features & Components
 - **Marketplace:** Multi-step checkout stepper (`product-details` → `address` → `payment` → `confirmation`).
 - **Sewist Center:** Profile management (Achievements, Services, Location pinning via Google Maps) and Product dashboard.

@@ -69,9 +69,9 @@ export async function GET(request: Request) {
             return NextResponse.redirect(`${origin}/`);
           } else {
             await supabase.auth.signOut();
-            const mainLogin = new URL("/login", origin.replace("sewist.", ""));
-            mainLogin.searchParams.set("error", "must_be_verified");
-            return NextResponse.redirect(mainLogin.toString());
+            const sewistLogin = new URL("/login", origin);
+            sewistLogin.searchParams.set("error", "must_be_verified");
+            return NextResponse.redirect(sewistLogin.toString());
           }
         } else {
           // Buyer on sewist domain -> onboarding
