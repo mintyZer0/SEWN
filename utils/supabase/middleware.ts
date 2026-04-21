@@ -80,7 +80,30 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error("Middleware Supabase auth error:", error);
+    // Mitigate "Invalid UTF-8 sequence" / malformed base64 cookie error
+    if (error?.message?.includes("Invalid UTF-8") || error?.message?.includes("base64") || error?.name === "TypeError") {
+      const loginUrl = new URL(isAdminApp ? "/login" : isSewistApp ? "/login" : "/auth/login", request.url);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith("sb-")) {
+          redirectResponse.cookies.set({
+            name: cookie.name,
+            value: "",
+            maxAge: 0,
+            domain: domain,
+          });
+        }
+      });
+      return redirectResponse;
+    }
+  }
 
   const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
