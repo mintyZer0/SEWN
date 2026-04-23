@@ -41,7 +41,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
             last_name,
             user_type,
             user_avatars (id, avatar_url),
-            user_addresses (province, city, is_primary),
+            user_addresses (province, city, is_primary, address_type),
             sewist_statistics (rating_avg, total_orders_completed),
             sewist_settings (accepting_alterations, accepting_repairs, accepting_commissions),
             sewist_verifications (verification_status),
@@ -69,9 +69,14 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
           const verification = user.sewist_verifications?.[0];
           const achievements = user.sewist_achievements || [];
 
+          const addresses = Array.isArray(user.user_addresses)
+            ? user.user_addresses
+            : [user.user_addresses].filter(Boolean);
           const primaryAddress =
-            user.user_addresses?.find((addr: any) => addr.is_primary) ||
-            user.user_addresses?.[0];
+            addresses.find((addr: any) => addr.address_type === "shop" && addr.is_primary) ||
+            addresses.find((addr: any) => addr.address_type === "shop") ||
+            addresses.find((addr: any) => addr.is_primary) ||
+            addresses[0];
 
           const location =
             primaryAddress

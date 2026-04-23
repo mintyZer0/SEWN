@@ -3,8 +3,11 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
-export default function Map() {
-  const position = { lat: 15.4753, lng: 120.596 }; // Tarlac City, Tarlac
+interface SewistMapProps {
+  position?: { lat: number; lng: number };
+}
+
+export default function Map({ position = { lat: 15.4753, lng: 120.596 } }: SewistMapProps) {
 
   const MapComponent = useMemo(
     () =>
@@ -18,7 +21,7 @@ export default function Map() {
   );
 
   return (
-    <div className="h-200 w-max-dvw mx-10">
+    <div className="h-200 w-[70vw] max-w-full mx-auto">
       <MapComponent position={position} />
     </div>
   );
