@@ -33,7 +33,8 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
   
   const [openSections, setOpenSections] = useState({
-    products: true,
+    activeProducts: true,
+    declinedProducts: true,
     orders: true,
     commissions: true,
     appointments: true,
@@ -276,6 +277,16 @@ export default function ProductsPage() {
     }
   };
 
+  const activeProducts = products.filter((product) =>
+    ["approved", "accepted"].includes(String(product.type || "").toLowerCase())
+  );
+  const pendingProducts = products.filter((product) =>
+    ["pending", "draft"].includes(String(product.type || "").toLowerCase())
+  );
+  const declinedProducts = products.filter((product) =>
+    ["rejected", "declined"].includes(String(product.type || "").toLowerCase())
+  );
+
   if (loading && products.length === 0) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
@@ -323,9 +334,20 @@ export default function ProductsPage() {
         <CollapsibleProductSection
           title="Active Products"
           variant="product"
-          isOpen={openSections.products}
-          onToggle={() => toggleSection("products")}
-          items={products}
+          isOpen={openSections.activeProducts}
+          onToggle={() => toggleSection("activeProducts")}
+          items={activeProducts}
+          onItemDelete={(id) => handleDelete(id, 'product')}
+          onItemEdit={handleEditProduct}
+        />
+
+        {/* Declined Products Section */}
+        <CollapsibleProductSection
+          title="Declined Products"
+          variant="product"
+          isOpen={openSections.declinedProducts}
+          onToggle={() => toggleSection("declinedProducts")}
+          items={declinedProducts}
           onItemDelete={(id) => handleDelete(id, 'product')}
           onItemEdit={handleEditProduct}
         />
@@ -378,6 +400,9 @@ export default function ProductsPage() {
       <ViewPendingsModal
         isOpen={isViewPendingsModalOpen}
         onClose={() => setIsViewPendingsModalOpen(false)}
+        items={pendingProducts.map((item) => ({ id: item.id, name: item.name }))}
+        loading={loading}
+        onDelete={(id) => handleDelete(id, "product")}
       />
 
       <ServiceRequestDetailsModal
