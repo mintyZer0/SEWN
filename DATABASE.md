@@ -70,7 +70,7 @@ WHERE variant_id = 'uuid-123';
 The workflow for custom work.
 - **Service Types:** `commission`, `repair`, `alteration`.
 - **Status:** `pending`, `accepted`, `in_progress`, `completed`, `cancelled`.
-- **Fields:** Includes contact info, `subject` (Required), `request_details`, `appointment_date`, `fabric_id`, `measurement_profile_id`, and `deleted_at` (Timestamp).
+- **Fields:** `client_id`, `sewist_id`, `address_id`, `subject` (Required), `request_details`, `appointment_date`, `fabric` (text value), optional `measurement_profile_id`, and `deleted_at` (Timestamp).
 
 ### Sewist-Specific Config
 - **`sewist_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
