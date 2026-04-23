@@ -131,13 +131,11 @@ CREATE TABLE public.service_requests (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   client_id uuid NOT NULL,
   sewist_id uuid NOT NULL,
+  address_id uuid NOT NULL,
   service_type character varying NOT NULL CHECK (service_type::text = ANY (ARRAY['commission'::character varying::text, 'repair'::character varying::text, 'alteration'::character varying::text])),
-  contact_email character varying NOT NULL,
-  contact_phone character varying NOT NULL,
-  contact_name character varying NOT NULL,
   request_details text NOT NULL,
   appointment_date timestamp without time zone NOT NULL,
-  fabric_id uuid,
+  fabric text,
   measurement_profile_id uuid,
   status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying::text, 'accepted'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])),
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
@@ -147,6 +145,7 @@ CREATE TABLE public.service_requests (
   CONSTRAINT service_requests_pkey PRIMARY KEY (id),
   CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
   CONSTRAINT service_requests_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES public.users(id),
+  CONSTRAINT service_requests_address_id_fkey FOREIGN KEY (address_id) REFERENCES public.user_addresses(id),
   CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id)
 );
 CREATE TABLE public.sewist_achievements (

@@ -86,20 +86,54 @@ export default function ProductsPage() {
       // 3. Fetch Service Requests (Commissions & Appointments)
       const { data: requestsData } = await supabase
         .from('service_requests')
-        .select('*')
+        .select(`
+          id,
+          client_id,
+          address_id,
+          service_type,
+          subject,
+          request_details,
+          appointment_date,
+          status,
+          created_at,
+          measurement_profile_id,
+          users!service_requests_client_id_fkey (
+            first_name,
+            last_name,
+            email
+          ),
+          user_addresses!service_requests_address_id_fkey (
+            full_address,
+            barangay,
+            city,
+            province,
+            zip_code,
+            contact_name,
+            contact_phone
+          )
+        `)
         .eq('sewist_id', user.id)
         .is('deleted_at', null) // Only fetch non-archived requests
         .order('created_at', { ascending: false });
 
       if (requestsData) {
-        setAllServiceRequests(requestsData as ServiceRequest[]);
+        const normalizedRequests = requestsData.map((request: any) => {
+          const client = Array.isArray(request.users) ? request.users[0] : request.users;
+          const address = Array.isArray(request.user_addresses) ? request.user_addresses[0] : request.user_addresses;
+          return {
+            ...request,
+            users: client || null,
+            user_addresses: address || null,
+          };
+        });
+        setAllServiceRequests(normalizedRequests as ServiceRequest[]);
         
         // Filter into Commissions (Commissions, Repairs, Alterations)
-        const commissionsList = requestsData
+        const commissionsList = normalizedRequests
           .filter(r => ['commission', 'repair', 'alteration'].includes(r.service_type))
           .map(r => ({
             id: r.id,
-            name: `${r.contact_name} - ${r.subject || r.service_type}`,
+            name: `${`${r.users?.first_name || ""} ${r.users?.last_name || ""}`.trim() || "Customer"} - ${r.subject || r.service_type}`,
             type: r.status
           }));
         setCommissions(commissionsList);
