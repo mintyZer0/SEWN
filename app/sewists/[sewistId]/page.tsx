@@ -26,9 +26,11 @@ export default async function SewistPage({ params }: PageProps) {
       first_name,
       last_name,
       email,
+      latitude,
+      longitude,
       user_type,
       user_avatars (avatar_url),
-      user_addresses (province, city, is_primary),
+      user_addresses (province, city, is_primary, address_type, latitude, longitude),
       user_phones (phone),
       sewist_achievements (title),
       sewist_statistics (rating_avg, profile_views_total, total_orders_completed),
@@ -53,14 +55,23 @@ export default async function SewistPage({ params }: PageProps) {
     console.error("View Tracking Error:", err);
   }
 
-  const primaryAddress =
-    user.user_addresses?.find((addr: any) => addr.is_primary) ||
-    user.user_addresses?.[0];
+  const addresses = Array.isArray(user.user_addresses)
+    ? user.user_addresses
+    : [user.user_addresses].filter(Boolean);
+  const shopAddress =
+    addresses.find((addr: any) => addr.address_type === "shop" && addr.is_primary) ||
+    addresses.find((addr: any) => addr.address_type === "shop") ||
+    addresses.find((addr: any) => addr.is_primary) ||
+    addresses[0];
 
   const location =
-    primaryAddress
-      ? `${primaryAddress.city}${primaryAddress.province ? `, ${primaryAddress.province}` : ""}`
+    shopAddress
+      ? `${shopAddress.city}${shopAddress.province ? `, ${shopAddress.province}` : ""}`
       : "Location not set";
+  const mapPosition = {
+    lat: shopAddress?.latitude ?? user.latitude ?? 15.4753,
+    lng: shopAddress?.longitude ?? user.longitude ?? 120.596,
+  };
 
   const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewist-photos/1.jpg";
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist";
@@ -107,9 +118,8 @@ export default async function SewistPage({ params }: PageProps) {
       <AchievementsServices
         achievements={achievements}
         tesdaCertified={tesdaCertified}
-        servicesOffered={servicesOffered as any}
       />
-      <Map />
+      <Map position={mapPosition} />
       <ContactSewist
         sewistName={name}
         mobileNumber={mobileNumber}
