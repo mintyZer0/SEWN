@@ -12,7 +12,6 @@ export interface ImageFile {
 }
 
 interface UploadOptions {
-  bucket?: string;
   folder?: string;
 }
 
@@ -21,7 +20,7 @@ export const useImageUpload = (options: UploadOptions = {}) => {
   const [uploading, setUploading] = useState(false);
   const supabase = createClient();
   
-  const { bucket = 'product-images', folder = 'public/images' } = options;
+  const { folder = 'public/images' } = options;
 
   const addImages = useCallback(async (files: FileList) => {
   const newImages: ImageFile[] = [];

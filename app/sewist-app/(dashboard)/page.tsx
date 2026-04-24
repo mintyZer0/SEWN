@@ -41,7 +41,6 @@ export default function SewistCenterPage() {
     
   // Use a dedicated folder for avatars in the existing bucket
   const { images, uploading, addImages, uploadImages, clearAll } = useImageUpload({
-    bucket: 'product-images',
     folder: 'avatars'
   });
     
