@@ -26,8 +26,6 @@ export default async function SewistPage({ params }: PageProps) {
       first_name,
       last_name,
       email,
-      latitude,
-      longitude,
       user_type,
       user_avatars (avatar_url),
       user_addresses (province, city, is_primary, address_type, latitude, longitude),
@@ -69,8 +67,8 @@ export default async function SewistPage({ params }: PageProps) {
       ? `${shopAddress.city}${shopAddress.province ? `, ${shopAddress.province}` : ""}`
       : "Location not set";
   const mapPosition = {
-    lat: shopAddress?.latitude ?? user.latitude ?? 15.4753,
-    lng: shopAddress?.longitude ?? user.longitude ?? 120.596,
+    lat: shopAddress?.latitude ?? 15.4753,
+    lng: shopAddress?.longitude ?? 120.596,
   };
 
   const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewist-photos/1.jpg";
