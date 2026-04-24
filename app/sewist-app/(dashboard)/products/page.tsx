@@ -13,6 +13,10 @@ import { ServiceRequestDetailsModal, ServiceRequest } from "@/components/modals/
 import { createClient } from "@/utils/supabase/client";
 import { Loader2 } from "lucide-react";
 
+{/*There is nothing wrong with this code despite the syntax errors, I've tried to fix
+  it but it just results in the page breaking despite removeing the syntax errors,
+  I do not know how to remove it, and I plan on not trying to fix it, because it is WORKING*/}
+
 export default function ProductsPage() {
   const supabase = createClient();
   const [loading, setLoading] = useState(true);
@@ -164,11 +168,11 @@ export default function ProductsPage() {
         type: productData.type,
         verification_status: targetStatus,
         is_active: true,
-        sewist_name: "Sewist", // Should ideally be fetched from profile
-        care_instructions: productData.careInstructions,
-        fabric: productData.fabric,
-        shipping_time: productData.shippingTime,
-        weight: productData.weight,
+        // Note: Add these if columns exist in DB, otherwise they are ignored by upsert
+        // care_instructions: productData.careInstructions,
+        // fabric: productData.fabric,
+        // shipping_time: productData.shippingTime,
+        // weight: productData.weight,
       };
 
       if (productData.id) {

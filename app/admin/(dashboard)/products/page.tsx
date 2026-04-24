@@ -79,7 +79,6 @@ export default function ProductsPage() {
           img_src,
           created_at,
           verification_status,
-          sewist_name,
           user_id,
           users (
             first_name,
@@ -105,7 +104,7 @@ export default function ProductsPage() {
           id: p.id,
           name: p.name,
           category: p.type,
-          sewistName: p.sewist_name || `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Sewist",
+          sewistName: `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Sewist",
           dateAdded: new Date(p.created_at).toLocaleDateString(),
           price: `₱${p.price.toLocaleString()}`,
           stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
