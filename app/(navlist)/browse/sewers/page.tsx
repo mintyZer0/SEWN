@@ -1,4 +1,3 @@
-// app/sewers/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -32,6 +31,7 @@ export default function Sewers() {
           />
           <SewersGrid
             filters={filters}
+            type = "sewers"
           />
         </div>
       </div>
