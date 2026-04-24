@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.s3.*.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
   // In Next.js 15.2.3+ and 16, this is a top-level config for HMR security

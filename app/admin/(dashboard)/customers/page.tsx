@@ -5,6 +5,7 @@ import { AdminDataTable, TwoLineCell, StatusBadge, type StatusType, type Column 
 import { AdminFilterBar, PageHeader } from "@/components/admin/admin-filter-bar";
 import { AdminDetailModal } from "@/components/admin/admin-detail-modal";
 import { createClient } from "@/utils/supabase/client";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface CustomerData {
   id: string;
@@ -182,8 +183,8 @@ export default function CustomersPage() {
 
         const avatarPath = avatar?.avatar_url as string | undefined;
         const avatarUrl = avatarPath
-          ? supabase.storage.from("product-images").getPublicUrl(avatarPath).data.publicUrl
-          : "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+          ? getS3PublicUrl(avatarPath)
+          : getS3PublicUrl("avatars/default.jpg");
         const customerRegistrationFields = [
           survey?.educational_attainment,
           survey?.monthly_income,
