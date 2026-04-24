@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 import { CustomCheckbox } from "@/components/ui/custom-checkbox";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import { createClient } from "@/utils/supabase/client";
 import { Loader2 } from "lucide-react";
 import { LocationPicker } from "@/components/ui/location-picker";
@@ -175,14 +176,10 @@ export default function SewistCenterPage() {
           let publicAvatarUrl = "";
           
           if (avatarObj?.avatar_url) {
-            const { data: publicData } = supabase.storage
-              .from("product-images")
-              .getPublicUrl(avatarObj.avatar_url);
-
-            publicAvatarUrl = publicData.publicUrl;
+            publicAvatarUrl = getS3PublicUrl(avatarObj.avatar_url);
             } 
           else {
-            publicAvatarUrl = "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+            publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
             }
           console.log("FETCHED DATA:", profileData.user_avatars);
           setAvatarUrl(publicAvatarUrl);
@@ -242,12 +239,14 @@ export default function SewistCenterPage() {
           // Delete old avatar 
           if (
             existingAvatar?.avatar_url &&
-            existingAvatar.avatar_url !== "avatars/Default.jpg" &&
+            existingAvatar.avatar_url !== "avatars/default.jpg" &&
             existingAvatar.avatar_url !== filePath
           ) {
-            await supabase.storage
-              .from("product-images")
-              .remove([existingAvatar.avatar_url]);
+            await fetch('/api/s3-upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: existingAvatar.avatar_url, action: 'delete' })
+            });
           }
 
           // Save new avatar
@@ -256,6 +255,7 @@ export default function SewistCenterPage() {
             .upsert({
               user_id: user.id,
               avatar_url: filePath,
+              uploaded_at: new Date().toISOString(),
             }, { onConflict: "user_id" })
             .select()
             .single();
@@ -263,11 +263,7 @@ export default function SewistCenterPage() {
           if (avatarError) throw avatarError;
 
           if (newAvatar) {
-            const { data: publicData } = supabase.storage
-              .from("product-images")
-              .getPublicUrl(newAvatar.avatar_url);
-
-            setAvatarUrl(publicData.publicUrl);
+            setAvatarUrl(getS3PublicUrl(newAvatar.avatar_url));
           }
         }
 

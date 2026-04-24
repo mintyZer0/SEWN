@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { getS3PublicUrl } from "@/lib/s3-client";
+
 type Filters = Record<string, string[]>;
 
 interface SewistsGridProps {
@@ -89,11 +91,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
             let avatarUrl = "/assets/sewist-photos/1.jpg";
 
             if (avatarObj?.avatar_url) {
-              const { data: publicData } = supabase.storage
-                .from("product-images")
-                .getPublicUrl(avatarObj.avatar_url);
-
-              avatarUrl = publicData.publicUrl;
+              avatarUrl = getS3PublicUrl(avatarObj.avatar_url);
             }
 
           const services: string[] = [];

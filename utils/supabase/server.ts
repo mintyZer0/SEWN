@@ -76,25 +76,32 @@ export async function createClient() {
   return supabase;
 }
 
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { s3 } from "@/lib/s3";
+
 export async function uploadProductImage(
-  supabase: ReturnType<typeof createServerClient>,
   file: File,
   productId: string,
 ) {
   const fileExt = file.name.split(".").pop();
   const fileName = `${productId}.${fileExt}`;
-  const filePath = `${productId}/${fileName}`; // Product-specific folder
+  const filePath = `products/${productId}/${fileName}`;
 
-  const { data, error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, file, { upsert: true });
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const bucket = process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_BUCKET;
 
-  if (error) throw error;
+  if (!bucket) {
+    throw new Error("S3 bucket not configured");
+  }
 
-  // Get public URL
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("product-images").getPublicUrl(filePath);
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: filePath,
+    Body: buffer,
+    ContentType: file.type,
+  });
 
-  return publicUrl;
+  await s3.send(command);
+
+  return `https://${bucket}.s3.${process.env.AWS_REGION || 'ap-southeast-2'}.amazonaws.com/${filePath}`;
 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { User, Loader2 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import { cn } from "@/lib/utils";
 import ProfileSection from "@/components/user-profile/profile-section";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
@@ -92,13 +93,9 @@ export default function UserProfilePage() {
             let publicAvatarUrl = "";
 
             if (avatar?.avatar_url) {
-              const { data: publicData } = supabase.storage
-                .from("product-images")
-                .getPublicUrl(avatar.avatar_url);
-
-              publicAvatarUrl = publicData.publicUrl;
+              publicAvatarUrl = getS3PublicUrl(avatar.avatar_url);
             } else {
-              publicAvatarUrl = "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg";
+              publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
             }
             console.log("FETCHED DATA:", data.user_avatars);
             setAvatarUrl(publicAvatarUrl);
@@ -181,19 +178,22 @@ export default function UserProfilePage() {
         .eq("user_id", user.id)
         .single();
 
-        if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/Default.jpg") {
-
-        await supabase.storage
-          .from("product-images")
-          .remove([existingAvatar.avatar_url]);
+        if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/default.jpg") {
+          await fetch('/api/s3-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: existingAvatar.avatar_url, action: 'delete' })
+          });
         }
 
       if (completedUpload?.filePath && !completedUpload.filePath.endsWith("/")) {
         // Delete old image from storage if it exists
         if (currentAvatarRecord?.avatar_url) {
-          await supabase.storage
-            .from("product-images")
-            .remove([currentAvatarRecord.avatar_url]);
+          await fetch('/api/s3-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: currentAvatarRecord.avatar_url, action: 'delete' })
+          });
         }
 
         // Update database with new URL
@@ -202,6 +202,7 @@ export default function UserProfilePage() {
           .upsert({
             user_id: user.id,
             avatar_url: completedUpload.filePath,
+            uploaded_at: new Date().toISOString(),
           }, { onConflict: 'user_id' })
           .select()
           .single();
@@ -213,16 +214,13 @@ export default function UserProfilePage() {
           setCurrentAvatarRecord(newAvatar);
 
           // Convert file path to public URL
-          const { data: publicData } = supabase.storage
-            .from("product-images")
-            .getPublicUrl(newAvatar.avatar_url);
+          const newPublicUrl = getS3PublicUrl(newAvatar.avatar_url);
 
-          setAvatarUrl(publicData.publicUrl);
+          setAvatarUrl(newPublicUrl);
           setFormData(prev => ({
             ...prev,
-            avatar_url: publicData.publicUrl
+            avatar_url: newPublicUrl
           }));
-          setAvatarUrl(publicData.publicUrl);
         }
 
       }

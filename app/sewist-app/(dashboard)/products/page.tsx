@@ -10,7 +10,8 @@ import { ProductModal } from "@/components/modals/product-modal";
 import { CommissionsModal } from "@/components/modals/commissions-modal";
 import { ViewPendingsModal } from "@/components/modals/view-pendings-modal";
 import { ServiceRequestDetailsModal, ServiceRequest } from "@/components/modals/service-request-details-modal";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from '@/utils/supabase/client';
+import { getS3PublicUrl } from '@/lib/s3-client';
 import { Loader2 } from "lucide-react";
 
 export default function ProductsPage() {
@@ -205,7 +206,7 @@ export default function ProductsPage() {
           // weight: productData.weight,
           // fabric: productData.fabric,
           // care_instructions: productData.careInstructions,
-          img_src: "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg", // Placeholder
+          img_src: getS3PublicUrl("avatars/default.jpg"), // Placeholder
           is_active: true,
           sewist_name: "Sewist", // Should ideally be fetched from profile
         })

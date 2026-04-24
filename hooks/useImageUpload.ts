@@ -67,24 +67,40 @@ export const useImageUpload = (options: UploadOptions = {}) => {
         ));
 
         const fileExt = image.file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 11)}.${fileExt}`;
         const filePath = `${folder}/${fileName}`.replace(/\/+/g, '/');
+
         if (!fileName) {
-            console.error("Invalid file name!");
-          }
-        const { data, error } = await supabase.storage
-          .from(bucket)
-          .upload(filePath, image.file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: image.file.type
-          });
+          console.error("Invalid file name!");
+        }
 
-        if (error) throw error;
+        // 1. Get presigned URL from our API
+        const res = await fetch('/api/s3-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            filename: filePath, 
+            contentType: image.file.type 
+          }),
+        });
 
-        const { data: { publicUrl } } = supabase.storage
-          .from(bucket)
-          .getPublicUrl(filePath);
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to get upload URL');
+        }
+
+        const { url, publicUrl } = await res.json();
+
+        // 2. Upload file directly to S3
+        const uploadRes = await fetch(url, {
+          method: 'PUT',
+          body: image.file,
+          headers: {
+            'Content-Type': image.file.type,
+          },
+        });
+
+        if (!uploadRes.ok) throw new Error('Failed to upload file to S3');
 
         lastUploaded = { publicUrl, filePath };
 
@@ -104,7 +120,7 @@ export const useImageUpload = (options: UploadOptions = {}) => {
 
     setUploading(false);
     return lastUploaded;
-  }, [images, bucket, folder, supabase]);
+  }, [images, folder]);
 
   return {
     images,

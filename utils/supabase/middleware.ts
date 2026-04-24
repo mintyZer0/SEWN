@@ -41,7 +41,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Domain Rewrite Logic
-  if (isSewistApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+  if (isSewistApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/api") && !path.startsWith("/_next") && path !== "/favicon.ico") {
     const targetPath = path.startsWith("/sewist-app")
       ? path
       : `/sewist-app${path === "/" ? "" : path}`;
@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
-  } else if (isAdminApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+  } else if (isAdminApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/api") && !path.startsWith("/_next") && path !== "/favicon.ico") {
     const targetPath = path.startsWith("/admin")
       ? path
       : `/admin${path === "/" ? "" : path}`;
@@ -117,7 +117,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data"];
+  const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data", "/api"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
 
   // Redirect unauthenticated users
