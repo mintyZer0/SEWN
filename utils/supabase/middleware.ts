@@ -1,14 +1,22 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+
+function isLocalHost(host: string) {
+  return (
+    host.includes("localhost") ||
+    host.startsWith("127.") ||
+    host.endsWith(".local") ||
+    host.includes(".local:")
+  );
+}
 
 export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0];
+  const shouldSecure = !isLocalHost(host);
   const isSewistApp = hostname.startsWith("sewist.");
   const isAdminApp = hostname.startsWith("admin.");
   const path = request.nextUrl.pathname;
-
-  console.log("Middleware Request:", { hostname, path, isSewistApp, isAdminApp });
 
   // Force sewist subdomain auth pages to the sewist root equivalents
   if (isSewistApp && path === "/auth/login") {
@@ -72,6 +80,10 @@ export async function updateSession(request: NextRequest) {
               name,
               value,
               ...options,
+              path: options.path ?? "/",
+              sameSite: options.sameSite ?? "lax",
+              httpOnly: options.httpOnly ?? true,
+              secure: options.secure ?? shouldSecure,
               domain: name.startsWith("sb-") ? domain : options.domain,
             });
           });
@@ -85,7 +97,7 @@ export async function updateSession(request: NextRequest) {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch (error: any) {
-    console.error("Middleware Supabase auth error:", error);
+    console.error("Middleware Supabase auth error");
     // Mitigate "Invalid UTF-8 sequence" / malformed base64 cookie error
     if (error?.message?.includes("Invalid UTF-8") || error?.message?.includes("base64") || error?.name === "TypeError") {
       const loginUrl = new URL(isAdminApp ? "/login" : isSewistApp ? "/login" : "/auth/login", request.url);
@@ -138,7 +150,6 @@ export async function updateSession(request: NextRequest) {
       const adminLoginUrl = new URL("/login", `${protocol}://${host}`);
       adminLoginUrl.searchParams.set("error", "access_denied");
       
-      console.log("Redirecting non-admin to admin login:", adminLoginUrl.toString());
       // we must log them out to change users
       await supabase.auth.signOut();
       return NextResponse.redirect(adminLoginUrl);
@@ -169,7 +180,6 @@ export async function updateSession(request: NextRequest) {
       const sewistLoginUrl = new URL("/login", `${protocol}://${host}`);
       sewistLoginUrl.searchParams.set("error", "must_register_as_sewist");
       
-      console.log("Redirecting non-sewist to sewist login:", sewistLoginUrl.toString());
       return NextResponse.redirect(sewistLoginUrl);
     }
 

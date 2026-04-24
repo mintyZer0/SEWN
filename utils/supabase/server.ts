@@ -1,11 +1,20 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
-import { NextRequest } from "next/server";
+
+function isLocalHost(host: string) {
+  return (
+    host.includes("localhost") ||
+    host.startsWith("127.") ||
+    host.endsWith(".local") ||
+    host.includes(".local:")
+  );
+}
 
 export async function createClient() {
   const cookieStore = await cookies();
   const host = (await headers()).get("host") || "";
   const domain = host.includes("sewn.local") ? ".sewn.local" : undefined;
+  const shouldSecure = !isLocalHost(host);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,6 +31,10 @@ export async function createClient() {
                 name, 
                 value, 
                 ...options,
+                path: options.path ?? "/",
+                sameSite: options.sameSite ?? "lax",
+                httpOnly: options.httpOnly ?? true,
+                secure: options.secure ?? shouldSecure,
                 domain: name.startsWith("sb-") ? domain : options.domain 
               }),
             );

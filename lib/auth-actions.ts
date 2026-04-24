@@ -4,9 +4,42 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+import { isSameOriginRequest } from "@/lib/security/csrf";
+import { checkRateLimit } from "@/lib/security/rate-limit";
+import { getSafeOriginForCurrentRequest } from "@/lib/security/request";
 import { createClient } from "@/utils/supabase/server";
 
+const GENERIC_ACTION_ERROR = "Unable to process request. Please try again.";
+
+async function enforceServerActionSecurity(
+  action: string,
+  limit: number,
+  windowMs: number,
+): Promise<Headers | null> {
+  const headerList = await headers();
+
+  if (!isSameOriginRequest(headerList)) {
+    return null;
+  }
+
+  const rate = checkRateLimit(headerList, action, limit, windowMs);
+  if (!rate.allowed) {
+    return null;
+  }
+
+  return headerList;
+}
+
 export async function login(formData: FormData) {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-login",
+    10,
+    60_000,
+  );
+  if (!secureHeaders) {
+    redirect("/auth/login?error=invalid_request");
+  }
+
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -29,6 +62,15 @@ export async function login(formData: FormData) {
 }
 
 export async function loginSewist(formData: FormData) {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-login-sewist",
+    10,
+    60_000,
+  );
+  if (!secureHeaders) {
+    redirect("/login?error=invalid_request");
+  }
+
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -76,6 +118,15 @@ export async function loginSewist(formData: FormData) {
 }
 
 export async function loginAdmin(formData: FormData) {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-login-admin",
+    10,
+    60_000,
+  );
+  if (!secureHeaders) {
+    redirect("/login?error=invalid_request");
+  }
+
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -117,6 +168,15 @@ export async function loginAdmin(formData: FormData) {
 export async function signup(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-signup",
+    5,
+    15 * 60_000,
+  );
+  if (!secureHeaders) {
+    return { success: false, error: GENERIC_ACTION_ERROR };
+  }
+
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -137,16 +197,7 @@ export async function signup(
     };
   }
 
-  const headerList = await headers();
-  let base = headerList.get("origin");
-  const host = headerList.get("host");
-  
-  if (!base) {
-    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
-    base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
-  }
-
-  console.log("Signup URL Construction:", { origin: headerList.get("origin"), host, base });
+  const base = await getSafeOriginForCurrentRequest();
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -169,8 +220,7 @@ export async function signup(
   });
 
   if (error) {
-    console.log(error);
-    return { success: false, error: error.message };
+    return { success: false, error: GENERIC_ACTION_ERROR };
   }
 
   revalidatePath("/", "layout");
@@ -178,13 +228,18 @@ export async function signup(
 }
 
 export async function signout() {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-signout",
+    30,
+    60_000,
+  );
+  if (!secureHeaders) {
+    redirect("/error");
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signOut();
   if (error) {
-    console.log(error);
-    console.log(error.message);
-    console.log(error.status);
-    console.log(error.code);
     redirect("/error");
   }
 
@@ -194,6 +249,15 @@ export async function signout() {
 export async function signUpAsSewist(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-signup-sewist",
+    5,
+    15 * 60_000,
+  );
+  if (!secureHeaders) {
+    return { success: false, error: GENERIC_ACTION_ERROR };
+  }
+
   const supabase = await createClient();
 
   const email = (formData.get("email") as string).trim().toLowerCase();
@@ -241,7 +305,7 @@ export async function signUpAsSewist(
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: GENERIC_ACTION_ERROR };
     }
   }
 
@@ -250,6 +314,15 @@ export async function signUpAsSewist(
 }
 
 export async function upgradeToSewist(formData: FormData): Promise<{ success: boolean; error?: string }> {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-upgrade-sewist",
+    20,
+    60_000,
+  );
+  if (!secureHeaders) {
+    return { success: false, error: GENERIC_ACTION_ERROR };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -311,7 +384,7 @@ export async function upgradeToSewist(formData: FormData): Promise<{ success: bo
     .eq("id", user.id);
 
   if (userError) {
-    return { success: false, error: userError.message };
+    return { success: false, error: GENERIC_ACTION_ERROR };
   }
 
   // 3. Add/Update Registered Address
@@ -361,8 +434,7 @@ export async function upgradeToSewist(formData: FormData): Promise<{ success: bo
   const { error: addressError } = await supabase.from("user_addresses").upsert(addressData);
 
   if (addressError) {
-    console.error("Address Error:", addressError);
-    return { success: false, error: addressError.message };
+    return { success: false, error: GENERIC_ACTION_ERROR };
   }
 
   // 4. Update Auth Metadata
@@ -382,7 +454,7 @@ export async function upgradeToSewist(formData: FormData): Promise<{ success: bo
   }, { onConflict: "user_id" });
 
   if (verificationError) {
-    return { success: false, error: verificationError.message };
+    return { success: false, error: GENERIC_ACTION_ERROR };
   }
 
   // 6. Upsert into sewist_onboarding_surveys
@@ -408,7 +480,7 @@ export async function upgradeToSewist(formData: FormData): Promise<{ success: bo
   }, { onConflict: "user_id" });
 
   if (surveyError) {
-    return { success: false, error: surveyError.message };
+    return { success: false, error: GENERIC_ACTION_ERROR };
   }
 
   // 7. Ensure sewist_settings and sewist_statistics exist
@@ -431,15 +503,8 @@ export async function upgradeToSewist(formData: FormData): Promise<{ success: bo
 }
 
 async function getRedirectTo(role?: "customer" | "sewist", intent?: "login" | "signup") {
-  const headerList = await headers();
-  let base = headerList.get("origin");
-  
-  if (!base) {
-    const host = headerList.get("host");
-    const protocol = headerList.get("x-forwarded-proto") || (host?.includes("localhost") || host?.includes(".local") ? "http" : "https");
-    base = host ? `${protocol}://${host}` : `${protocol}://sewn.local:3000`;
-  }
-  
+  const base = await getSafeOriginForCurrentRequest();
+
   let url = `${base}/auth/callback`;
   const params = new URLSearchParams();
   if (role) params.set("role", role);
@@ -450,6 +515,15 @@ async function getRedirectTo(role?: "customer" | "sewist", intent?: "login" | "s
 }
 
 export async function signInWithOAuth(provider: "google" | "facebook" | "twitter", role?: "customer" | "sewist", intent?: "login" | "signup") {
+  const secureHeaders = await enforceServerActionSecurity(
+    `oauth-${provider}`,
+    12,
+    60_000,
+  );
+  if (!secureHeaders) {
+    redirect("/error");
+  }
+
   const supabase = await createClient();
   const redirectTo = await getRedirectTo(role, intent);
 
@@ -468,7 +542,6 @@ export async function signInWithOAuth(provider: "google" | "facebook" | "twitter
   });
 
   if (error) {
-    console.error(error);
     redirect("/error");
   }
 

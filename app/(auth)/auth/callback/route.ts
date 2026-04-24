@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/security/rate-limit";
+import {
+  getSafeOriginFromHeaders,
+  sanitizeRelativeRedirectPath,
+} from "@/lib/security/request";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
-  const role = searchParams.get("role");
-  const intent = searchParams.get("intent") || "login";
-  
-  const host = request.headers.get("host") || "sewn.local:3000";
-  const protocol = host.includes(".local") || host.includes("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
+  const nextPath = sanitizeRelativeRedirectPath(searchParams.get("next"), "/");
+  const origin = getSafeOriginFromHeaders(request.headers);
+  const { hostname } = new URL(origin);
 
-  console.log("OAuth Callback Triggered:", { role, intent, origin, next, hasCode: !!code });
+  const rateLimit = checkRateLimit(
+    request.headers,
+    "oauth-callback",
+    30,
+    5 * 60_000,
+  );
+  if (!rateLimit.allowed) {
+    return NextResponse.redirect(`${origin}/auth/login?error=rate_limited`);
+  }
 
   if (code) {
     const supabase = await createClient();
@@ -20,13 +29,10 @@ export async function GET(request: Request) {
     const { data: authData, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (error) {
-      console.error("OAuth Exchange Error:", error.message);
       return NextResponse.redirect(`${origin}/auth/login?error=oauth_exchange_failed`);
     }
 
     if (authData.user) {
-      console.log("OAuth User Authenticated:", authData.user.id);
-      
       const { email, user_metadata } = authData.user;
       const firstName = user_metadata?.full_name?.split(" ")[0] || user_metadata?.name?.split(" ")[0] || "";
       const lastName = user_metadata?.full_name?.split(" ").slice(1).join(" ") || user_metadata?.name?.split(" ").slice(1).join(" ") || "";
@@ -38,12 +44,10 @@ export async function GET(request: Request) {
         .eq("id", authData.user.id)
         .maybeSingle();
 
-      const isSewistDomain = host.startsWith("sewist.");
-      const isAdminDomain = host.startsWith("admin.");
+      const isSewistDomain = hostname.startsWith("sewist.");
+      const isAdminDomain = hostname.startsWith("admin.");
 
       if (isSewistDomain) {
-        console.log("Login from Sewist subdomain.");
-        
         // Ensure profile exists
         if (!profile) {
           await supabase.from("users").upsert({ 
@@ -78,8 +82,6 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/onboarding`);
         }
       } else if (isAdminDomain) {
-        console.log("Login from Admin subdomain.");
-        
         if (profile?.user_type !== "admin") {
           await supabase.auth.signOut();
           const adminLogin = new URL("/login", origin);
@@ -88,9 +90,6 @@ export async function GET(request: Request) {
         }
         return NextResponse.redirect(`${origin}/`);
       } else {
-        // Main domain login
-        console.log("Login from main domain.");
-        
         if (!profile) {
           await supabase.from("users").upsert({ 
             id: authData.user.id,
@@ -101,12 +100,11 @@ export async function GET(request: Request) {
           }, { onConflict: 'id' });
         }
         
-        const targetUrl = new URL(next, origin);
+        const targetUrl = new URL(nextPath, origin);
         return NextResponse.redirect(targetUrl.toString());
       }
     }
   }
 
-  console.warn("OAuth Callback reached end without session. Redirecting to login.");
   return NextResponse.redirect(`${origin}/auth/login?error=no_session`);
 }

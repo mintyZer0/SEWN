@@ -1,20 +1,31 @@
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
 
+import { checkRateLimit } from "@/lib/security/rate-limit";
+import {
+  getSafeOriginFromHeaders,
+  sanitizeRelativeRedirectPath,
+} from "@/lib/security/request";
 import { createClient } from "@/utils/supabase/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const nextPath = sanitizeRelativeRedirectPath(searchParams.get("next"), "/");
+  const origin = getSafeOriginFromHeaders(request.headers);
+  const { host, hostname } = new URL(origin);
+  const redirectTo = new URL(nextPath, origin);
 
-  // Use headers to get the correct origin
-  const host = request.headers.get("host") || "sewn.local:3000";
-  const protocol = host.includes(".local") || host.includes("localhost") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
-
-  const redirectTo = new URL(next, origin);
+  const rateLimit = checkRateLimit(
+    request.headers,
+    "auth-confirm-otp",
+    30,
+    5 * 60_000,
+  );
+  if (!rateLimit.allowed) {
+    return NextResponse.redirect(`${origin}/auth/login?error=rate_limited`);
+  }
 
   if (token_hash && type) {
     const supabase = await createClient();
@@ -32,12 +43,12 @@ export async function GET(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-      const isSewistDomain = host.startsWith("sewist.");
+      const isSewistDomain = hostname.startsWith("sewist.");
 
       if (type === "signup") {
         const fallbackUrl = isSewistDomain && profile?.user_type !== "sewist" 
           ? new URL("/onboarding", origin).toString() 
-          : (profile?.user_type === "sewist" ? (isSewistDomain ? new URL("/", origin).toString() : new URL("/", `sewist.${origin.replace(/^https?:\/\//, "")}`).toString()) : redirectTo.toString());
+          : (profile?.user_type === "sewist" ? (isSewistDomain ? new URL("/", origin).toString() : new URL("/", `sewist.${host}`).toString()) : redirectTo.toString());
 
         const verifiedUrl = new URL("/auth/verified", origin);
         verifiedUrl.searchParams.set("fallback", fallbackUrl);
