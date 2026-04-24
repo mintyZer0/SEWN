@@ -155,32 +155,84 @@ export default function ProductsPage() {
       if (!user) return;
 
       // 1. Insert/Update Product
+      const productPayload: any = {
+        user_id: user.id,
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        location: productData.location,
+        type: productData.type,
+        verification_status: targetStatus,
+        is_active: true,
+        sewist_name: "Sewist", // Should ideally be fetched from profile
+        care_instructions: productData.careInstructions,
+        fabric: productData.fabric,
+        shipping_time: productData.shippingTime,
+        weight: productData.weight,
+      };
+
+      if (productData.id) {
+        productPayload.id = productData.id;
+      }
+
       const { data: product, error: productError } = await supabase
         .from('sewist_products')
-        .upsert({
-          id: productData.id,
-          user_id: user.id,
-          name: productData.name,
-          description: productData.description,
-          price: productData.price,
-          location: productData.location,
-          type: productData.type,
-          verification_status: targetStatus,
-          // Note: Add these if columns exist in DB, otherwise they are ignored by upsert
-          // shipping_time: productData.shippingTime,
-          // weight: productData.weight,
-          // fabric: productData.fabric,
-          // care_instructions: productData.careInstructions,
-          img_src: "https://qgniaasqnjzvfjximawh.supabase.co/storage/v1/object/public/product-images/avatars/Default.jpg", // Placeholder
-          is_active: true,
-          sewist_name: "Sewist", // Should ideally be fetched from profile
-        })
+        .upsert(productPayload)
         .select()
         .single();
 
       if (productError) throw productError;
 
-      // 2. Save selected product category.
+      // 2. Handle Image Uploads
+      if (productData.images && productData.images.length > 0) {
+        const uploadedImageUrls: string[] = [];
+        
+        for (let i = 0; i < productData.images.length; i++) {
+          const file = productData.images[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${i}.${fileExt}`;
+          const filePath = `products/${product.id}/${fileName}`;
+
+          // Get presigned URL
+          const res = await fetch('/api/s3-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filename: filePath, contentType: file.type }),
+          });
+
+          if (!res.ok) throw new Error('Failed to get upload URL');
+          const { url, publicUrl } = await res.json();
+
+          // Upload to S3
+          const uploadRes = await fetch(url, {
+            method: 'PUT',
+            body: file,
+            headers: { 'Content-Type': file.type },
+          });
+
+          if (!uploadRes.ok) throw new Error('Failed to upload image to S3');
+          
+          uploadedImageUrls.push(publicUrl);
+
+          // Save to product_images table
+          await supabase.from('product_images').insert({
+            product_id: product.id,
+            image_url: publicUrl,
+            is_main: i === 0,
+            display_order: i,
+          });
+        }
+
+        // Update product's main image
+        if (uploadedImageUrls.length > 0) {
+          await supabase
+            .from('sewist_products')
+            .update({ img_src: uploadedImageUrls[0] })
+            .eq('id', product.id);
+        }
+      }
+
+      // 3. Save selected product category.
       const { error: categoryError } = await supabase
         .from("product_categories")
         .upsert({
@@ -234,9 +286,9 @@ export default function ProductsPage() {
       }
       await fetchData();
       setIsProductModalOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to save product:", error);
-      alert("Failed to save product. Check console for details.");
+      alert("Failed to save product: " + (error.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
