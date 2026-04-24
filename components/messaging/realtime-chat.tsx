@@ -1,7 +1,7 @@
 'use client'
 
 import { SendHorizontal, Smile, Image as ImageIcon, Play, FileText, Mail, Copy } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
 import { ChatMessageItem } from './chat-message'
@@ -42,6 +42,7 @@ export const RealtimeChat = ({
     roomName,
     username,
   })
+  const textareaRef = useRef<HTMLTextAreaElement>(null);  
   const [newMessage, setNewMessage] = useState('')
 
   const allMessages = useMemo(() => {
@@ -69,6 +70,10 @@ export const RealtimeChat = ({
 
       sendMessage(newMessage)
       setNewMessage('')
+
+      if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
     },
     [newMessage, isConnected, sendMessage]
   )
@@ -117,14 +122,34 @@ export const RealtimeChat = ({
           onSubmit={handleSendMessage} 
           className="relative group"
         >
-          <input
+          <textarea
+            ref={textareaRef}
+            rows = {2}
             className={cn(
-              "w-full bg-secondary/20 border-2 border-primary/5 rounded-full transition-all placeholder:text-primary/20 text-primary",
-              isCompact ? "py-2 px-4 text-sm pr-10" : "py-4 px-8 text-lg pr-16"
+              "w-full bg-secondary/20 border-2 border-primary/5 transition-all placeholder:text-primary/20 text-primary resize-none overflow-hidden",
+              isCompact ? "py-2 px-4 text-sm pr-10 rounded-2xl" : "py-4 px-8 text-lg pr-16 rounded-3xl"
             )}
-            type="text"
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={(e) => {  
+              setNewMessage(e.target.value);
+              const elem = e.target;
+
+              // reset size
+              elem.style.height = "auto";
+
+              //comp height
+              const lnheight = parseInt(window.getComputedStyle(elem).lineHeight)
+              const maxHeight = lnheight * 5; // limit to 5 lines
+              
+              //set new height
+              elem.style.height = Math.min (elem.scrollHeight, maxHeight) + "px";
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage(e as any);
+              }
+            }}
             placeholder="Type your message here"
             disabled={!isConnected}
           />

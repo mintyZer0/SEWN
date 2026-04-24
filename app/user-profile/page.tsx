@@ -169,12 +169,14 @@ export default function UserProfilePage() {
 
       // Handle Avatar Update
       const completedUpload = images.find(img => img.status === 'complete');
-      const filePath = completedUpload?.filePath;
+      
+      if (completedUpload?.filePath) {
+        const filePath = completedUpload?.filePath;
 
-      if (!filePath?.startsWith("avatars/")) {
-        throw new Error("Invalid file path: " + filePath);
+        if (!filePath?.startsWith("avatars/")) {
+          throw new Error("Invalid file path: " + filePath);
+        }
       }
-
       const { data: existingAvatar } = await supabase
         .from("user_avatars")
         .select("avatar_url")

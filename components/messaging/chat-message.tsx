@@ -31,7 +31,7 @@ export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", is
 
         <div
           className={cn(
-            'shadow-sm text-white font-medium transition-transform active:scale-[0.98] w-full',
+            'shadow-sm text-white font-medium transition-transform active:scale-[0.98] w-full whitespace-pre-wrap break-words',
             isCompact ? 'px-4 py-2 rounded-2xl text-sm bg-primary' : 'px-8 py-4 rounded-3xl text-lg third-gradient',
             isOwnMessage ? (isCompact ? 'rounded-tr-none' : 'rounded-tr-none') : (isCompact ? 'rounded-tl-none' : 'rounded-tl-none')
           )}

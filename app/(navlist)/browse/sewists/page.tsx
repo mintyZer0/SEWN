@@ -1,7 +1,4 @@
-<<<<<<< HEAD:app/(navlist)/browse/sewers/page.tsx
-=======
 // app/sewists/page.tsx
->>>>>>> main:app/(navlist)/browse/sewists/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -35,11 +32,7 @@ export default function Sewists() {
           />
           <SewistsGrid
             filters={filters}
-<<<<<<< HEAD:app/(navlist)/browse/sewers/page.tsx
-            type = "sewers"
-=======
             type="sewists"
->>>>>>> main:app/(navlist)/browse/sewists/page.tsx
           />
         </div>
       </div>
