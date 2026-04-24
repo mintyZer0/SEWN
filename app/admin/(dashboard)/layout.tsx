@@ -25,9 +25,12 @@ export default async function AdminLayout({
     .eq("id", user.id)
     .single();
 
-  if (error || userData?.user_type !== "admin") {
-    // If they are not an admin, redirect them back to the main site
-    redirect("http://sewn.local:3000/");
+  if (error) {
+    redirect("/login?error=unknown_error");
+  }
+
+  if (userData?.user_type !== "admin") {
+    redirect("/login?error=access_denied");
   }
 
   return (

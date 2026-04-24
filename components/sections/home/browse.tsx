@@ -5,14 +5,14 @@ export default function Browse() {
     {
       imgSrc: "/assets/services-bento-bg/bento-shop.jpg",
       service: "Shop",
-      href: "",
+      href: "/browse/shop",
       colSpan: 2,
       id: 1,
     },
     {
       imgSrc: "/assets/services-bento-bg/bento-commision.jpg",
-      service: "Commision a Sewer",
-      href: "",
+      service: "Commission a Sewist",
+      href: "/browse/sewists",
       colSpan: 2,
       id: 2,
     },

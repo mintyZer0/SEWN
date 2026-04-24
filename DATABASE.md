@@ -20,14 +20,14 @@ The central identity table.
 
 ---
 
-## 2. Marketplace & Products (Sewer-Owned)
+## 2. Marketplace & Products (Sewist-Owned)
 
-### `seller_products`
+### `sewist_products`
 The main product catalog.
 - **Constraints:**
   - `location`: NCR, Luzon, Visayas, Mindanao.
   - `type`: Kids, Men, Women.
-- **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `seller_name`, `deleted_at` (Timestamp).
+- **Fields:** `id`, `user_id`, `name`, `price`, `img_src`, `is_active`, `rating`, `sold`, `description`, `sewist_name`, `deleted_at` (Timestamp).
 
 ### Product Attributes & Variants
 - **`product_categories`**, **`product_colors`**, **`product_materials`**, **`product_sizes`**: Global tags for a product (One-to-Many).
@@ -70,26 +70,26 @@ WHERE variant_id = 'uuid-123';
 The workflow for custom work.
 - **Service Types:** `commission`, `repair`, `alteration`.
 - **Status:** `pending`, `accepted`, `in_progress`, `completed`, `cancelled`.
-- **Fields:** Includes contact info, `subject` (Required), `request_details`, `appointment_date`, `fabric_id`, `measurement_profile_id`, and `deleted_at` (Timestamp).
+- **Fields:** `client_id`, `sewist_id`, `address_id`, `subject` (Required), `request_details`, `appointment_date`, `fabric` (text value), optional `measurement_profile_id`, and `deleted_at` (Timestamp).
 
-### Sewer-Specific Config
-- **`sewer_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
-- **`sewer_statistics`**: Performance and engagement metrics (`user_id`, `rating_avg`, `rating_count`, `total_orders_completed`, `profile_views_total`, `response_time_minutes`, `last_active_at`).
-- **`sewer_verifications`**: Stores `tax_id`, `dti_sec_number`, and `verification_status` ('pending', 'verified', 'rejected').
-- **`sewer_onboarding_surveys`**: Qualitative data like `educational_attainment`, `monthly_income`, and personal sewing background.
-- **`sewer_achievements`**: A list of professional milestones for a sewer (`user_id`, `title`).
-- **`sewer_fabrics`**: A catalog of fabrics a sewer offers for commissions. Includes `name`, `description`, `image_url`, and `is_available`.
+### Sewist-Specific Config
+- **`sewist_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.
+- **`sewist_statistics`**: Performance and engagement metrics (`user_id`, `rating_avg`, `rating_count`, `total_orders_completed`, `profile_views_total`, `response_time_minutes`, `last_active_at`).
+- **`sewist_verifications`**: Stores `tax_id`, `dti_sec_number`, and `verification_status` ('pending', 'verified', 'rejected').
+- **`sewist_onboarding_surveys`**: Qualitative data like `educational_attainment`, `monthly_income`, and personal sewing background.
+- **`sewist_achievements`**: A list of professional milestones for a sewist (`user_id`, `title`).
+- **`sewist_fabrics`**: A catalog of fabrics a sewist offers for commissions. Includes `name`, `description`, `image_url`, and `is_available`.
 
 ### RPC Functions (Stored Procedures)
 Custom PostgreSQL functions called via `supabase.rpc()`.
-- **`increment_profile_views(target_user_id)`**: Atomically increments the `profile_views_total` in `sewer_statistics`. Configured as `SECURITY DEFINER` to allow public tracking without exposing write access to the table.
+- **`increment_profile_views(target_user_id)`**: Atomically increments the `profile_views_total` in `sewist_statistics`. Configured as `SECURITY DEFINER` to allow public tracking without exposing write access to the table.
 
 ---
 
 ## 5. Messaging & Communication
 
 ### `chat_conversations`
-- **Fields:** `id` (text), `buyer_id`, `seller_id`, `last_message_at`.
+- **Fields:** `id` (text), `buyer_id`, `sewist_id`, `last_message_at`.
 
 ### `chat_messages`
 - **Fields:** `id`, `conversation_id` (text), `from_user_id`, `to_user_id`, `content`, `created_at`.
@@ -100,16 +100,16 @@ Custom PostgreSQL functions called via `supabase.rpc()`.
 
 ### Security & Row Level Security (RLS)
 The database enforces strict privacy using Supabase RLS policies.
-- **Public Tables (SELECT for all):** `sewer_statistics`, `sewer_achievements`. These are visible to marketplace visitors.
-- **Private Tables (Owner only):** `sewer_onboarding_surveys`, `sewer_verifications`. These contain sensitive data (Income, Tax IDs) visible only to the account owner and admins.
-- **Write Access:** Restricted to the account owner (`auth.uid() = user_id`) across all specialized seller tables.
+- **Public Tables (SELECT for all):** `sewist_statistics`, `sewist_achievements`. These are visible to marketplace visitors.
+- **Private Tables (Owner only):** `sewist_onboarding_surveys`, `sewist_verifications`. These contain sensitive data (Income, Tax IDs) visible only to the account owner and admins.
+- **Write Access:** Restricted to the account owner (`auth.uid() = user_id`) across all specialized sewist tables.
 
 ### User Roles & Permissions
-- **Triple-User System:** `users` can have types `buyer`, `seller`, or `admin`.
-- **Admin Verification:** Admins have bypass policies to review documents in `sewer_verifications` and `sewer_onboarding_surveys` for verification purposes.
+- **Triple-User System:** `users` can have types `buyer`, `sewist`, or `admin`.
+- **Admin Verification:** Admins have bypass policies to review documents in `sewist_verifications` and `sewist_onboarding_surveys` for verification purposes.
 
 ### For Frontend Developers
 - **Tracking Views:** Use `await supabase.rpc('increment_profile_views', { target_user_id: id })` on profile load.
 - **Measurements:** Use the `user_measurements` table to populate the "Measurements" section of the user profile.
-- **Marketplace:** Filter `seller_products` using `location` and `type` fields.
-- **Sewer Profile:** Data from `sewer_onboarding_surveys` (Public fields only) and `sewer_achievements` should be used to build the "About" section.
+- **Marketplace:** Filter `sewist_products` using `location` and `type` fields.
+- **Sewist Profile:** Data from `sewist_onboarding_surveys` (Public fields only) and `sewist_achievements` should be used to build the "About" section.

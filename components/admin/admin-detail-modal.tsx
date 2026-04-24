@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils";
 import { 
   approveOrder, rejectOrder, 
   approveProduct, rejectProduct, 
-  approveSewer, rejectSewer 
+  approveSewist, rejectSewist 
 } from "@/lib/admin-actions";
 import { useRouter } from "next/navigation";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
 
-export type AdminItemType = 'order' | 'product' | 'sewer';
+export type AdminItemType = 'order' | 'product' | 'sewist';
 
 interface AdminDetailModalProps {
   isOpen: boolean;
@@ -67,7 +67,7 @@ export const AdminDetailModal = ({
     designs_garments: "Designs Garments",
   };
   const onboardingSurveyEntries = Object.entries(
-    (data.sewerOnboardingSurvey ?? {}) as Record<string, string | null | undefined>
+    (data.sewistOnboardingSurvey ?? {}) as Record<string, string | null | undefined>
   ).filter(([, value]) => typeof value === "string" && value.trim().length > 0);
 
   const handleApproveClick = async () => {
@@ -81,8 +81,8 @@ export const AdminDetailModal = ({
         case 'product':
           result = await approveProduct(data.id);
           break;
-        case 'sewer':
-          result = await approveSewer(data.id);
+        case 'sewist':
+          result = await approveSewist(data.id);
           break;
       }
 
@@ -102,10 +102,10 @@ export const AdminDetailModal = ({
   };
 
   const handleDeclineClick = async () => {
-    if (type === "sewer") {
+    if (type === "sewist") {
       setIsSubmitting(true);
       try {
-        const result = await rejectSewer(data.id, "Declined by admin");
+        const result = await rejectSewist(data.id, "Declined by admin");
         if (result?.success) {
           onDecline?.(data.id);
           router.refresh();
@@ -264,9 +264,9 @@ export const AdminDetailModal = ({
                 </div>
               </div>
 
-              {/* Quadrant 3: Sewer Information */}
+              {/* Quadrant 3: Sewist Information */}
               <div className="p-10 rounded-[40px] bg-primary/5 border border-primary/10 space-y-8 shadow-sm">
-                 <h3 className="text-sm font-bold text-primary/60 uppercase tracking-widest">Sewer Information</h3>
+                 <h3 className="text-sm font-bold text-primary/60 uppercase tracking-widest">Sewist Information</h3>
                  
                  <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="w-24 h-24 rounded-full bg-orchid flex items-center justify-center text-white shadow-xl ring-4 ring-white">
@@ -275,8 +275,8 @@ export const AdminDetailModal = ({
                     
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-8">
                        <div className="flex flex-col">
-                          <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Seller Name</span>
-                          <span className="text-2xl font-extrabold text-primary">{data.sellerName}</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Sewist Name</span>
+                          <span className="text-2xl font-extrabold text-primary">{data.sewistName}</span>
                        </div>
                        <div className="flex flex-col">
                           <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Location</span>
@@ -289,13 +289,13 @@ export const AdminDetailModal = ({
                           <span className="text-[10px] text-gray-400 font-bold uppercase mb-1">Member Since</span>
                           <span className="text-lg font-bold text-primary flex items-center gap-1.5">
                             <Calendar size={16} className="text-primary/40" />
-                            {data.sellerJoined || "Jan 2024"}
+                            {data.sewistJoined || "Jan 2024"}
                           </span>
                        </div>
                     </div>
 
                     <div className="px-6 py-3 rounded-2xl bg-emerald-100 text-emerald-700 font-black text-sm uppercase tracking-wider">
-                       Verified Seller
+                       Verified Sewist
                     </div>
                  </div>
               </div>
@@ -312,7 +312,7 @@ export const AdminDetailModal = ({
                  </div>
               </div>
             </div>
-          ) : type === "sewer" ? (
+          ) : type === "sewist" ? (
             <div className="space-y-5">
               <div className="rounded-3xl border-2 border-sky-500 bg-primary/60 p-5 min-h-[520px] relative">
                 <div className="flex items-start gap-4">
@@ -325,7 +325,7 @@ export const AdminDetailModal = ({
                   </div>
 
                   <div className="min-h-44 flex-1 rounded-2xl bg-white/20 p-4 text-white">
-                    <p className="text-xs font-bold uppercase tracking-wide text-white/70">Sewer Profile</p>
+                    <p className="text-xs font-bold uppercase tracking-wide text-white/70">Sewist Profile</p>
                     <p className="mt-2 text-2xl font-black">{data.customerName || "Unnamed user"}</p>
                     <div className="mt-3 space-y-1 text-sm font-semibold">
                       <p>{data.email || "No email"}</p>
@@ -337,7 +337,7 @@ export const AdminDetailModal = ({
 
                 <div className="mt-5 rounded-2xl bg-white/95 p-4 text-primary">
                   <p className="text-sm font-black uppercase tracking-wide">
-                    Sewer Onboarding Survey
+                    Sewist Onboarding Survey
                   </p>
                   {onboardingSurveyEntries.length > 0 ? (
                     <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -382,7 +382,7 @@ export const AdminDetailModal = ({
           )}
 
           {/* Rejection Reason Input */}
-          {isDeclineMode && type !== "sewer" && (
+          {isDeclineMode && type !== "sewist" && (
             <div className="mt-12 p-8 rounded-[32px] bg-rose-50 border-2 border-rose-100 animate-in slide-in-from-top-4 duration-300">
               <div className="flex items-center gap-3 mb-4 text-rose-600">
                 <AlertCircle size={24} />
@@ -446,7 +446,7 @@ export const AdminDetailModal = ({
                 size="xl"
                 className="flex-2 uppercase tracking-wider shadow-xl shadow-emerald-200 h-16"
               >
-                {isSubmitting ? "Processing..." : type === "sewer" ? "Approve" : "Approve Request"}
+                {isSubmitting ? "Processing..." : type === "sewist" ? "Approve" : "Approve Request"}
               </ProfileButton>
             )}
           </div>

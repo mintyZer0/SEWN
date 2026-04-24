@@ -7,7 +7,7 @@ export async function createClient() {
   const host = (await headers()).get("host") || "";
   const domain = host.includes("sewn.local") ? ".sewn.local" : undefined;
 
-  return createServerClient(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -34,6 +34,33 @@ export async function createClient() {
       },
     },
   );
+
+  // Wrap auth methods to mitigate "Invalid UTF-8 sequence" malformed cookie errors
+  const originalGetUser = supabase.auth.getUser.bind(supabase.auth);
+  supabase.auth.getUser = async (...args) => {
+    try {
+      return await originalGetUser(...args);
+    } catch (error: any) {
+      if (error?.message?.includes("Invalid UTF-8") || error?.message?.includes("base64") || error?.name === "TypeError") {
+        return { data: { user: null }, error: new Error("Session corrupted") as any };
+      }
+      throw error;
+    }
+  };
+
+  const originalGetSession = supabase.auth.getSession.bind(supabase.auth);
+  supabase.auth.getSession = async () => {
+    try {
+      return await originalGetSession();
+    } catch (error: any) {
+      if (error?.message?.includes("Invalid UTF-8") || error?.message?.includes("base64") || error?.name === "TypeError") {
+        return { data: { session: null }, error: new Error("Session corrupted") as any };
+      }
+      throw error;
+    }
+  };
+
+  return supabase;
 }
 
 export async function uploadProductImage(

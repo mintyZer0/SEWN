@@ -15,7 +15,7 @@ export default function NewProducts() {
       setLoading(true);
 
       const { data, error } = await supabase
-        .from("seller_products")
+        .from("sewist_products")
         .select("*")
         .eq("is_active", true)
         .order("created_at", { ascending: false })
@@ -58,7 +58,7 @@ export default function NewProducts() {
               id={product.id}
               name={product.name}                 
               img_src={product.img_src}           
-              seller={product.seller_name}        
+              sewist={product.sewist_name}        
               price={Number(product.price)}       
               className={"h-100 lg:h-150"}
             />

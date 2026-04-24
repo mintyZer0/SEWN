@@ -6,7 +6,7 @@ type NewProductProps = {
   name: string;
   price: number;
   img_src: string;
-  seller?: string;
+  sewist?: string;
   className?: string;
 };
 
@@ -14,7 +14,7 @@ export default function NewProductCard({
   id,
   name,
   img_src,
-  seller,
+  sewist,
   price,
   className,
 }: NewProductProps) {
@@ -38,9 +38,9 @@ export default function NewProductCard({
           {name}
         </h2>
 
-        {seller && (
+        {sewist && (
           <p className="text-center text-muted text-lg sm:text-2xl">
-            {seller}
+            {sewist}
           </p>
         )}
 

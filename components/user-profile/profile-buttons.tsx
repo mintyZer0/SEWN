@@ -73,34 +73,34 @@ export const OrderActionButton = ({ className, children, asChild = false, ...pro
   );
 };
 
-export const ChatWithSewerButton = ({ className, ...props }: Omit<ProfileButtonProps, "children">) => {
+export const ChatWithSewistButton = ({ className, ...props }: Omit<ProfileButtonProps, "children">) => {
   return (
     <OrderActionButton
       className={className}
       onClick={() => {
         // Future: Open chat logic
-        console.log("Opening chat with sewer...");
+        console.log("Opening chat with sewist...");
       }}
       {...props}
     >
-      Chat with Sewer
+      Chat with Sewist
     </OrderActionButton>
   );
 };
 
-export const ViewSewerButton = ({ 
-  sewerId, 
+export const ViewSewistButton = ({ 
+  sewistId, 
   className, 
   ...props 
-}: Omit<ProfileButtonProps, "children"> & { sewerId: string }) => {
+}: Omit<ProfileButtonProps, "children"> & { sewistId: string }) => {
   return (
     <OrderActionButton
       asChild
       className={className}
       {...props}
     >
-      <Link href={`/sewers/${sewerId}`}>
-        View Sewer
+      <Link href={`/sewists/${sewistId}`}>
+        View Sewist
       </Link>
     </OrderActionButton>
   );

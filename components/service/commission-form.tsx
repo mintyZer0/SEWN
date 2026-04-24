@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import PrimaryButton from "../ui/primary-button";
 import { createClient } from "@/utils/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -15,9 +14,9 @@ import {
 } from "@/components/ui/select";
 
 interface CommissionFormProps {
-  sewerName: string;
-  sewerImage: string;
-  sewerId: string;
+  sewistName: string;
+  sewistImage: string;
+  sewistId: string;
   serviceType: "commission" | "repair" | "alteration";
   disableSubject?: boolean;
   disableEmail?: boolean;
@@ -30,10 +29,45 @@ interface CommissionFormProps {
   orderDetailsLabel?: string;
 }
 
+interface UserAddressOption {
+  id: string;
+  full_address: string;
+  barangay: string;
+  city: string;
+  province: string;
+  zip_code: number;
+  is_primary: boolean;
+  address_type?: string | null;
+}
+
+interface MeasurementOption {
+  id: string;
+  profile_name: string | null;
+  unit: string | null;
+  chest: number | null;
+  shoulder_width: number | null;
+  neck: number | null;
+  sleeve_length_short: number | null;
+  sleeve_length_long: number | null;
+  upper_arm_bicep: number | null;
+  wrist: number | null;
+  shirt_length: number | null;
+  waist_shirt: number | null;
+  waist_pants: number | null;
+  hips: number | null;
+  inseam: number | null;
+  outseam: number | null;
+  thigh: number | null;
+  knee: number | null;
+  leg_opening: number | null;
+  front_rise: number | null;
+  back_rise: number | null;
+}
+
 export default function CommissionForm({
-  sewerName,
-  sewerImage,
-  sewerId,
+  sewistName,
+  sewistImage,
+  sewistId,
   serviceType,
   disableSubject = false,
   disableEmail = false,
@@ -48,39 +82,74 @@ export default function CommissionForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [addresses, setAddresses] = useState<UserAddressOption[]>([]);
+  const [measurementProfiles, setMeasurementProfiles] = useState<MeasurementOption[]>([]);
   const supabase = createClient();
 
   const [formData, setFormData] = useState({
     subject: "",
-    email: "",
-    fullName: "",
+    selectedAddressId: "",
+    selectedMeasurementId: "",
     fabricToUse: "",
     orderDetails: "",
-    measurements: "",
-    scheduleAppointment: "",
     appointmentDate: "",
     images: [] as File[],
   });
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  useEffect(() => {
+    const loadUserFormOptions = async () => {
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-  const handleScheduleClick = () => {
-    const dateInput = document.getElementById(
-      "appointmentDate"
-    ) as HTMLInputElement;
-    if (dateInput) {
-      dateInput.showPicker();
-    }
-  };
+      if (userError || !user) {
+        setErrorMsg("You must be logged in to submit a request.");
+        return;
+      }
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      appointmentDate: selectedDate,
-      scheduleAppointment: selectedDate,
-    }));
-  };
+      setUserEmail(user.email || "");
+
+      const [{ data: addressData, error: addressError }, { data: measurementData, error: measurementError }] =
+        await Promise.all([
+          supabase
+            .from("user_addresses")
+            .select("id, full_address, barangay, city, province, zip_code, is_primary, address_type")
+            .eq("user_id", user.id)
+            .order("is_primary", { ascending: false }),
+          supabase
+            .from("user_measurements")
+            .select("id, profile_name, unit, chest, shoulder_width, neck, sleeve_length_short, sleeve_length_long, upper_arm_bicep, wrist, shirt_length, waist_shirt, waist_pants, hips, inseam, outseam, thigh, knee, leg_opening, front_rise, back_rise")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: true }),
+        ]);
+
+      if (addressError) {
+        setErrorMsg(addressError.message);
+        return;
+      }
+      if (measurementError) {
+        setErrorMsg(measurementError.message);
+        return;
+      }
+
+      const validAddresses = (addressData || []).filter(
+        (address) => !!address.id && String(address.address_type || "").toLowerCase() !== "shop"
+      );
+      const validMeasurements = (measurementData || []).filter((measurement) => !!measurement.id);
+
+      setAddresses(validAddresses as UserAddressOption[]);
+      setMeasurementProfiles(validMeasurements as MeasurementOption[]);
+      setFormData((prev) => ({
+        ...prev,
+        selectedAddressId: validAddresses[0]?.id || "",
+        selectedMeasurementId: validMeasurements[0]?.id || "",
+      }));
+    };
+
+    loadUserFormOptions();
+  }, [supabase]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -89,20 +158,11 @@ export default function CommissionForm({
   ) => {
     const { name, value, type } = e.target;
 
-    if (name === "scheduleAppointment") {
-      setFormData((prev) => ({
-        ...prev,
-        scheduleAppointment: value,
-        appointmentDate: value === "yes" ? prev.appointmentDate : "",
-      }));
-      setShowDatePicker(value === "yes");
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]:
-          type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,25 +177,34 @@ export default function CommissionForm({
         throw new Error("You must be logged in to submit a request.");
       }
 
+      const selectedAddress = addresses.find((address) => address.id === formData.selectedAddressId);
+      const selectedMeasurement = measurementProfiles.find(
+        (measurement) => measurement.id === formData.selectedMeasurementId
+      );
+
+      if (!selectedAddress) {
+        throw new Error("Please add and select an address from your profile first.");
+      }
+      if (!disableMeasurements && !selectedMeasurement) {
+        throw new Error("Please add and select a measurement profile first.");
+      }
+
       // Format details
       let finalDetails = formData.orderDetails;
-      if (formData.fabricToUse) {
-        finalDetails += `\nFabric: ${formData.fabricToUse}`;
-      }
-      if (formData.measurements) {
-        finalDetails += `\nMeasurements: ${formData.measurements}`;
+      if (selectedMeasurement?.profile_name) {
+        finalDetails += `\nMeasurement Preset: ${selectedMeasurement.profile_name}`;
       }
 
       const { error: submitError } = await supabase.from("service_requests").insert({
         client_id: user.id,
-        sewer_id: sewerId,
+        sewist_id: sewistId,
         service_type: serviceType,
         subject: formData.subject || `New ${serviceType} request`,
-        contact_email: formData.email || user.email || "",
-        contact_phone: "Not provided", // Add to form later if needed
-        contact_name: formData.fullName || user.user_metadata?.full_name || "User",
+        address_id: selectedAddress.id,
+        fabric: disableFabric ? null : formData.fabricToUse || null,
         request_details: finalDetails,
-        appointment_date: formData.scheduleAppointment === "yes" && formData.appointmentDate 
+        measurement_profile_id: disableMeasurements ? null : selectedMeasurement?.id || null,
+        appointment_date: formData.appointmentDate
           ? new Date(formData.appointmentDate).toISOString()
           : new Date().toISOString(), // Fallback if no date
         status: "pending"
@@ -164,11 +233,37 @@ export default function CommissionForm({
     "Velvet",
     "Other",
   ];
+  const selectedMeasurementProfile = measurementProfiles.find(
+    (measurement) => measurement.id === formData.selectedMeasurementId
+  );
+  const measurementUnit = selectedMeasurementProfile?.unit || "in";
+  const measurementPreviewFields = selectedMeasurementProfile
+    ? [
+        { label: "Chest", value: selectedMeasurementProfile.chest },
+        { label: "Shoulder Width", value: selectedMeasurementProfile.shoulder_width },
+        { label: "Neck", value: selectedMeasurementProfile.neck },
+        { label: "Sleeve (Short)", value: selectedMeasurementProfile.sleeve_length_short },
+        { label: "Sleeve (Long)", value: selectedMeasurementProfile.sleeve_length_long },
+        { label: "Upper Arm/Bicep", value: selectedMeasurementProfile.upper_arm_bicep },
+        { label: "Wrist", value: selectedMeasurementProfile.wrist },
+        { label: "Shirt Length", value: selectedMeasurementProfile.shirt_length },
+        { label: "Waist (Shirt)", value: selectedMeasurementProfile.waist_shirt },
+        { label: "Waist (Pants)", value: selectedMeasurementProfile.waist_pants },
+        { label: "Hips", value: selectedMeasurementProfile.hips },
+        { label: "Inseam", value: selectedMeasurementProfile.inseam },
+        { label: "Outseam", value: selectedMeasurementProfile.outseam },
+        { label: "Thigh", value: selectedMeasurementProfile.thigh },
+        { label: "Knee", value: selectedMeasurementProfile.knee },
+        { label: "Leg Opening", value: selectedMeasurementProfile.leg_opening },
+        { label: "Front Rise", value: selectedMeasurementProfile.front_rise },
+        { label: "Back Rise", value: selectedMeasurementProfile.back_rise },
+      ].filter((field) => field.value !== null)
+    : [];
 
   return (
     <div className="max-w-dvw mx-30 rounded-lg p-10 my-10">
       <h2 className="text-6xl font-regular text-heading mb-4">
-        <span className="text-black">Commision</span> {sewerName}
+        <span className="text-black">Commission</span> {sewistName}
       </h2>
 
       {success ? (
@@ -179,15 +274,15 @@ export default function CommissionForm({
             </svg>
           </div>
           <h3 className="text-3xl font-medium text-heading">Request Submitted!</h3>
-          <p className="text-xl text-gray-600">The sewer will review your request and get back to you shortly.</p>
-          <Link href={`/sewers/${sewerId}`}>
+          <p className="text-xl text-gray-600">The sewist will review your request and get back to you shortly.</p>
+          <Link href={`/sewists/${sewistId}`}>
             <PrimaryButton className="mt-8">Return to Profile</PrimaryButton>
           </Link>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           {errorMsg && (
-            <div className="p-4 bg-red-50 text-red-500 rounded-md">
+            <div className="p-4 bg-red-50 text-red-500 rounded-2xl">
               {errorMsg}
             </div>
           )}
@@ -207,48 +302,55 @@ export default function CommissionForm({
               placeholder={`E.g. ${serviceType === 'repair' ? 'Fixing a hole' : 'Custom dress inquiry'}`}
               value={formData.subject}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
+              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
             />
           </div>
         )}
 
         {!disableEmail && (
           <div>
-            <label
-              htmlFor="email"
-              className="block text-base font-light text-black mb-1"
-            >
-              Email <span className="text-red-500">*</span>
+            <label className="block text-base font-light text-black mb-1">
+              Email
             </label>
             <input
               type="email"
-              id="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
+              value={userEmail}
+              readOnly
+              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 text-gray-600 focus:outline-none"
             />
           </div>
         )}
 
         {!disableFullName && (
-          <div>
-            <label
-              htmlFor="fullName"
-              className="block text-base font-light text-black mb-1"
-            >
-              Full Name <span className="text-red-500">*</span>
+          <div className="relative">
+            <label className="block text-base font-light text-black mb-1">
+              Address <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              required
-              value={formData.fullName}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent"
-            />
+            <Select
+              variant="purple"
+              value={formData.selectedAddressId}
+              onValueChange={(val) => setFormData((prev) => ({ ...prev, selectedAddressId: val }))}
+            >
+              <SelectTrigger className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent">
+                <SelectValue placeholder={addresses.length ? "Select your address" : "No saved address found"} />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {addresses.map((address) => (
+                  <SelectItem key={address.id} value={address.id}>
+                    {`${address.full_address}, ${address.city}, ${address.province}`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {addresses.length === 0 && (
+              <p className="text-xs text-red-500 mt-1">
+                Add an address in your profile first.
+                {" "}
+                <Link href="/user-profile/addresses" className="underline">
+                  Go to My Addresses
+                </Link>
+              </p>
+            )}
           </div>
         )}
 
@@ -266,10 +368,10 @@ export default function CommissionForm({
               onValueChange={(val) => setFormData(prev => ({ ...prev, fabricToUse: val }))}
               required
             >
-              <SelectTrigger className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent">
+              <SelectTrigger className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent">
                 <SelectValue placeholder="Select fabric type" />
               </SelectTrigger>
-              <SelectContent className="rounded-md">
+              <SelectContent className="rounded-2xl">
                 {fabricOptions.map((fabric) => (
                   <SelectItem key={fabric} value={fabric}>
                     {fabric}
@@ -295,35 +397,66 @@ export default function CommissionForm({
               rows={4}
               value={formData.orderDetails}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent resize-none"
+              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent resize-none"
             />
           </div>
         )}
 
         {!disableMeasurements && (
-          <div>
-            <label
-              htmlFor="measurements"
-              className="block text-base font-light text-black mb-1"
-            >
-              Measurements <span className="text-red-500">*</span>
+          <div className="relative">
+            <label className="block text-base font-light text-black mb-1">
+              Measurement Preset <span className="text-red-500">*</span>
             </label>
-            <textarea
-              id="measurements"
-              name="measurements"
-              required
-              rows={4}
-              value={formData.measurements}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent resize-none"
-            />
+            <Select
+              variant="purple"
+              value={formData.selectedMeasurementId}
+              onValueChange={(val) => setFormData((prev) => ({ ...prev, selectedMeasurementId: val }))}
+            >
+              <SelectTrigger className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent">
+                <SelectValue placeholder={measurementProfiles.length ? "Select measurement profile" : "No measurement profile found"} />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {measurementProfiles.map((measurement) => (
+                  <SelectItem key={measurement.id} value={measurement.id}>
+                    {measurement.profile_name || "Unnamed profile"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {measurementProfiles.length === 0 && (
+              <p className="text-xs text-red-500 mt-1">
+                Add a measurement profile first.
+                {" "}
+                <Link href="/user-profile/measurements" className="underline">
+                  Go to Measurements
+                </Link>
+              </p>
+            )}
+            {selectedMeasurementProfile && (
+              <div className="mt-3 rounded-2xl border border-gray-200 bg-gray-100 p-3">
+                <p className="text-sm font-medium text-heading mb-2">
+                  {selectedMeasurementProfile.profile_name || "Selected profile"} measurements
+                </p>
+                {measurementPreviewFields.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1">
+                    {measurementPreviewFields.map((field) => (
+                      <p key={field.label} className="text-sm text-gray-700">
+                        {field.label}: {field.value} {measurementUnit}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">No measurements set in this profile yet.</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 
         {!disableScheduleAppointment && (
           <div>
             <label
-              htmlFor="scheduleAppointment"
+              htmlFor="appointmentDate"
               className="block text-base font-light text-black mb-1"
             >
               Schedule an appointment? <span className="text-red-500">*</span>
@@ -334,9 +467,9 @@ export default function CommissionForm({
               name="appointmentDate"
               required
               value={formData.appointmentDate}
-              onChange={handleDateChange}
+              onChange={handleChange}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent cursor-pointer"
+              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent cursor-pointer"
             />
           </div>
         )}
@@ -356,7 +489,7 @@ export default function CommissionForm({
               multiple
               accept="image/*"
               disabled
-              className="w-full px-4 py-2 rounded-md border border-gray-300 bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-third file:text-white hover:file:bg-third/90 cursor-not-allowed"
+              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-third file:text-white hover:file:bg-third/90 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500 mt-1">Image uploads are currently being set up. This will be available soon.</p>
           </div>

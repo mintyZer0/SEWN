@@ -9,18 +9,27 @@ import { ProfileButton } from "@/components/user-profile/profile-buttons";
 export interface ServiceRequest {
   id: string;
   client_id: string;
+  address_id: string;
   service_type: string;
   subject: string;
   request_details: string;
   appointment_date: string;
   status: "pending" | "accepted" | "in_progress" | "completed" | "cancelled";
   created_at: string;
-  contact_email: string;
-  contact_phone: string;
-  contact_name: string;
+  measurement_profile_id?: string | null;
   users?: {
     first_name: string;
     last_name: string;
+    email?: string;
+  } | null;
+  user_addresses?: {
+    full_address: string;
+    barangay: string;
+    city: string;
+    province: string;
+    zip_code: number;
+    contact_name?: string | null;
+    contact_phone?: string | null;
   };
 }
 
@@ -91,7 +100,7 @@ export const ServiceRequestDetailsModal = ({
         .insert({
           id: stableConversationId,
           buyer_id: request.client_id,
-          seller_id: user.id,
+          sewist_id: user.id,
         })
         .select("id")
         .single();
@@ -110,7 +119,7 @@ export const ServiceRequestDetailsModal = ({
     const conversationId = await ensureChatExists();
     if (conversationId) {
       // Redirect to chat with this conversation selected
-      window.location.href = `/seller-app/chat?conversationId=${conversationId}`;
+      window.location.href = `/sewist-app/chat?conversationId=${conversationId}`;
     }
   };
 
@@ -123,6 +132,15 @@ export const ServiceRequestDetailsModal = ({
       minute: "2-digit",
     });
   };
+
+  const clientName = request.users
+    ? `${request.users.first_name || ""} ${request.users.last_name || ""}`.trim()
+    : request.user_addresses?.contact_name || "Customer";
+  const clientEmail = request.users?.email || "No email found";
+  const clientPhone = request.user_addresses?.contact_phone || "Not provided";
+  const clientAddress = request.user_addresses
+    ? `${request.user_addresses.full_address}, ${request.user_addresses.barangay}, ${request.user_addresses.city}, ${request.user_addresses.province} ${request.user_addresses.zip_code}`
+    : "No address found";
 
   return (
     <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
@@ -150,14 +168,14 @@ export const ServiceRequestDetailsModal = ({
                 <User className="w-5 h-5 text-third" />
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase">Client</p>
-                  <p className="font-semibold text-lg">{request.contact_name}</p>
+                  <p className="font-semibold text-lg">{clientName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-gray-600">
                 <Mail className="w-5 h-5 text-third" />
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase">Email</p>
-                  <p className="font-semibold">{request.contact_email}</p>
+                  <p className="font-semibold">{clientEmail}</p>
                 </div>
               </div>
             </div>
@@ -173,9 +191,16 @@ export const ServiceRequestDetailsModal = ({
                 <Phone className="w-5 h-5 text-third" />
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase">Phone</p>
-                  <p className="font-semibold">{request.contact_phone || "Not provided"}</p>
+                  <p className="font-semibold">{clientPhone}</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 pt-6">
+            <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Address</h3>
+            <div className="bg-gray-50 rounded-2xl p-4 text-gray-700 leading-relaxed">
+              {clientAddress}
             </div>
           </div>
 

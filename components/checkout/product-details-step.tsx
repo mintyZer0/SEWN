@@ -6,7 +6,7 @@ interface ProductDetailsStepProps {
   productImage: string;
   productDescription: string;
   price: number;
-  seller?: string;     
+  sewist?: string;     
   details: string[];
   onNext: () => void;
 }
@@ -16,7 +16,7 @@ export default function ProductDetailsStep({
   productImage,
   productDescription,
   price,
-  seller,
+  sewist,
   details,
   onNext,
 }: ProductDetailsStepProps) {
@@ -51,7 +51,7 @@ export default function ProductDetailsStep({
               {productName}
             </h3>
             <p className="text-3xl font-semibold mb-6">
-              by {seller || 'Unknown Seller'}
+              by {sewist || 'Unknown Sewist'}
             </p>
 
             <p className="text-2xl leading-relaxed mb-6 text-gray-700">
@@ -92,7 +92,7 @@ export default function ProductDetailsStep({
 
       <div className="mt-8 text-center">
         <p className="text-2xl italic text-heading underline cursor-pointer hover:opacity-80">
-          More about {seller || 'Seller'}
+          More about {sewist || 'Sewist'}
         </p>
       </div>
     </div>

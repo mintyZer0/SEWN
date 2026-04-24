@@ -11,7 +11,7 @@ interface ProductData {
   id: string;
   name: string;
   category: string;
-  sellerName: string;
+  sewistName: string;
   dateAdded: string;
   price: string;
   stock: string;
@@ -31,11 +31,11 @@ const columns: Column<ProductData>[] = [
     ),
   },
   {
-    header: "Seller",
-    accessorKey: "sellerName",
+    header: "Sewist",
+    accessorKey: "sewistName",
     cell: (product) => (
       <TwoLineCell 
-        title={product.sellerName} 
+        title={product.sewistName} 
         subtitle={product.dateAdded} 
       />
     ),
@@ -68,7 +68,7 @@ export default function ProductsPage() {
     try {
       if (!isSilent) setLoading(true);
       const { data, error } = await supabase
-        .from('seller_products')
+        .from('sewist_products')
         .select(`
           id,
           name,
@@ -79,7 +79,7 @@ export default function ProductsPage() {
           img_src,
           created_at,
           verification_status,
-          seller_name,
+          sewist_name,
           user_id,
           users (
             first_name,
@@ -105,7 +105,7 @@ export default function ProductsPage() {
           id: p.id,
           name: p.name,
           category: p.type,
-          sellerName: p.seller_name || `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Seller",
+          sewistName: p.sewist_name || `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Sewist",
           dateAdded: new Date(p.created_at).toLocaleDateString(),
           price: `₱${p.price.toLocaleString()}`,
           stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
@@ -114,7 +114,7 @@ export default function ProductsPage() {
           description: p.description,
           location: p.location,
           imageUrl: p.img_src,
-          sellerJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
+          sewistJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
           variants: p.product_variants || [],
         }));        setProducts(mapped);
       }
@@ -133,7 +133,7 @@ export default function ProductsPage() {
       .channel('admin-products-realtime')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'seller_products' },
+        { event: '*', schema: 'public', table: 'sewist_products' },
         () => fetchProducts(true)
       )
       .on(
@@ -177,7 +177,7 @@ export default function ProductsPage() {
   const modalData = selectedProduct ? {
     ...selectedProduct,
     productName: selectedProduct.name,
-    customerName: selectedProduct.sellerName,
+    customerName: selectedProduct.sewistName,
     orderDate: selectedProduct.dateAdded,
   } : null;
 

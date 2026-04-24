@@ -16,11 +16,11 @@ export const MARKETPLACE_FILTERS = {
     "Gray",
     "Pink"
   ],
-  "Sewer Location": ["NCR", "Luzon", "Visayas", "Mindanao"],
+  "Sewist Location": ["NCR", "Luzon", "Visayas", "Mindanao"],
   Type: ["Kids", "Men", "Women"],
 };
 
-export const SEWER_FILTERS = {
+export const SEWIST_FILTERS = {
   Experience: [
       "Beginner", 
       "Intermediate", 

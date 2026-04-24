@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
-  variant?: "default" | "seller";
+  variant?: "default" | "sewist";
 }
 
 export default function Header({ variant = "default" }: HeaderProps) {
@@ -19,7 +19,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
   const bgStyles = {
     default: "bg-orchid-light",
-    seller: "third-gradient",
+    sewist: "third-gradient",
   };
 
   const { cart, getCartCount, getCartTotal, updateQuantity, removeFromCart } = useCart();
@@ -27,10 +27,10 @@ export default function Header({ variant = "default" }: HeaderProps) {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/browse/shop" },
-    { name: "Sewers", href: "/browse/sewers" },
+    { name: "Sewists", href: "/browse/sewists" },
     { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
-    { name: "Sewer Center", href: process.env.NODE_ENV === "production" ? "https://seller.sewn.com" : "http://seller.sewn.local:3000" },
+    { name: "Sewist Center", href: process.env.NODE_ENV === "production" ? "https://sewist.sewn.com" : "http://sewist.sewn.local:3000" },
   ];
   
   const router = useRouter();
@@ -228,7 +228,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium text-heading">{item.product_name || item.name}</h3>
-                          <p className="text-sm text-gray-600">{item.sewer_name}</p>
+                          <p className="text-sm text-gray-600">{item.sewist_name}</p>
                           <p className="text-heading font-semibold">₱{item.price?.toFixed(2)}</p>
                         </div>
                         <div className="flex flex-col items-end justify-between">

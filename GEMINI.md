@@ -7,12 +7,19 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 - **Backend:** **Supabase** handles authentication (Email, OAuth), PostgreSQL database management, and image storage.
 - **Styling:** **Tailwind CSS 4** with **DaisyUI** and Radix UI.
 - **Theme:** Colors like `primary`, `secondary`, and `third` (orange) are defined as CSS variables in `globals.css`. Use Tailwind classes like `text-primary`, `bg-secondary`, `border-third`.
-- **User Roles:** Triple-user ecosystem distinguishing between **Customers** (User Profile), **Sellers** (Sewer Center), and **Admins** (Internal Management).
-- **Database Schema:** Follows a normalized structure where seller-specific data is distributed across specialized tables (`sewer_verifications`, `sewer_onboarding_surveys`, `sewer_achievements`, `sewer_statistics`) rather than a single profile table.
+- **User Roles:** Triple-user ecosystem distinguishing between **Customers** (User Profile), **Sewists** (Sewist Center), and **Admins** (Internal Management).
+- **Database Schema:** Follows a normalized structure where sewist-specific data is distributed across specialized tables (`sewist_verifications`, `sewist_onboarding_surveys`, `sewist_achievements`, `sewist_statistics`) rather than a single profile table.
+
+## Routing & Subdomains
+- **Middleware Rewrites:** The project uses Next.js middleware (`utils/supabase/middleware.ts`) to handle multi-tenant subdomains.
+  - `sewist.*` requests are transparently rewritten to the `/sewist-app` folder.
+  - `admin.*` requests are rewritten to the `/admin` folder.
+- **Path Resolution:** When redirecting users within a subdomain (like sewists or admins), ALWAYS redirect to the root path (e.g., `/login`), NOT the physical folder path (e.g., `/sewist-app/login`). The middleware will automatically map `/login` on the `sewist` subdomain to the correct files in `/sewist-app/login`. Explicitly including `/sewist-app` or `/admin` in the redirect path will break the routing or cause 404 errors.
+- **Cross-Domain Navigation:** When navigating between domains (e.g., from customer domain to sewist domain), use absolute URLs constructed with the current origin to ensure session cookies and routing work correctly.
 
 ## Key Features & Components
 - **Marketplace:** Multi-step checkout stepper (`product-details` → `address` → `payment` → `confirmation`).
-- **Sewer Center:** Profile management (Achievements, Services, Location pinning via Google Maps) and Product dashboard.
+- **Sewist Center:** Profile management (Achievements, Services, Location pinning via Google Maps) and Product dashboard.
 - **Admin Dashboard:** **Not yet implemented.** While the `Admin` user type exists in the database, the management UI is currently a future task.
 - **Reusable Components:**
   - `ProfileButton`: Located in `@/components/user-profile/profile-buttons`. Use variants like `orange` (white text) and sizes like `xl` for primary actions.
@@ -32,7 +39,7 @@ This file serves as a foundational guide for Gemini CLI when working on the SEWN
 ## Project Conventions
 - **Forms:** Wrap profile/product fields in `<form>` elements with appropriate `name` and `type` attributes to prepare for future data integration.
 - **Maps:** Use Google Maps API. Requires `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in `.env.local`. Use `dynamic` imports for map components to avoid SSR issues.
-- **Navigation:** The Seller Center utilizes a `SewerSidebar` with themed navigation links.
+- **Navigation:** The Sewist Center utilizes a `SewistSidebar` with themed navigation links.
 
 ## Coding Standards
 - **Styling:** ALWAYS prioritize standard Tailwind CSS classes (e.g., `w-80`, `rounded-3xl`, `p-6`) over arbitrary values (e.g., `w-[320px]`, `rounded-[24px]`). Only use arbitrary values if a specific pixel-perfect requirement cannot be met by the standard scale.

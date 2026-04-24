@@ -4,19 +4,19 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host") || "";
   const hostname = host.split(":")[0];
-  const isSellerApp = hostname.startsWith("seller.");
+  const isSewistApp = hostname.startsWith("sewist.");
   const isAdminApp = hostname.startsWith("admin.");
   const path = request.nextUrl.pathname;
 
-  console.log("Middleware Request:", { hostname, path, isSellerApp, isAdminApp });
+  console.log("Middleware Request:", { hostname, path, isSewistApp, isAdminApp });
 
-  // Force seller subdomain auth pages to the seller root equivalents
-  if (isSellerApp && path === "/auth/login") {
+  // Force sewist subdomain auth pages to the sewist root equivalents
+  if (isSewistApp && path === "/auth/login") {
     const loginUrl = new URL("/login", request.url);
     request.nextUrl.searchParams.forEach((val, key) => loginUrl.searchParams.set(key, val));
     return NextResponse.redirect(loginUrl);
   }
-  if (isSellerApp && path === "/auth/signup") {
+  if (isSewistApp && path === "/auth/signup") {
     const signupUrl = new URL("/signup", request.url);
     request.nextUrl.searchParams.forEach((val, key) => signupUrl.searchParams.set(key, val));
     return NextResponse.redirect(signupUrl);
@@ -33,17 +33,23 @@ export async function updateSession(request: NextRequest) {
   });
 
   // Domain Rewrite Logic
-  if (isSellerApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
-    const rewriteUrl = new URL(`/seller-app${path === "/" ? "" : path}`, request.url);
+  if (isSewistApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
+    const targetPath = path.startsWith("/sewist-app")
+      ? path
+      : `/sewist-app${path === "/" ? "" : path}`;
+    const rewriteUrl = new URL(targetPath, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
   } else if (isAdminApp && !path.startsWith("/auth") && !path.startsWith("/data") && !path.startsWith("/_next") && path !== "/favicon.ico") {
-    const rewriteUrl = new URL(`/admin${path === "/" ? "" : path}`, request.url);
+    const targetPath = path.startsWith("/admin")
+      ? path
+      : `/admin${path === "/" ? "" : path}`;
+    const rewriteUrl = new URL(targetPath, request.url);
     response = NextResponse.rewrite(rewriteUrl, {
       request: { headers: request.headers },
     });
-  } else if (!isSellerApp && path.startsWith("/seller-app")) {
+  } else if (!isSewistApp && path.startsWith("/sewist-app")) {
     return NextResponse.rewrite(new URL("/404", request.url));
   } else if (!isAdminApp && path.startsWith("/admin")) {
     return NextResponse.rewrite(new URL("/404", request.url));
@@ -74,14 +80,37 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (error: any) {
+    console.error("Middleware Supabase auth error:", error);
+    // Mitigate "Invalid UTF-8 sequence" / malformed base64 cookie error
+    if (error?.message?.includes("Invalid UTF-8") || error?.message?.includes("base64") || error?.name === "TypeError") {
+      const loginUrl = new URL(isAdminApp ? "/login" : isSewistApp ? "/login" : "/auth/login", request.url);
+      const redirectResponse = NextResponse.redirect(loginUrl);
+      
+      request.cookies.getAll().forEach((cookie) => {
+        if (cookie.name.startsWith("sb-")) {
+          redirectResponse.cookies.set({
+            name: cookie.name,
+            value: "",
+            maxAge: 0,
+            domain: domain,
+          });
+        }
+      });
+      return redirectResponse;
+    }
+  }
 
   const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
 
   // Redirect unauthenticated users
   if (!isPublicRoute && !user) {
-    const loginUrl = new URL(isAdminApp ? "/login" : isSellerApp ? "/login" : "/auth/login", request.url);
+    const loginUrl = new URL(isAdminApp ? "/login" : isSewistApp ? "/login" : "/auth/login", request.url);
     // Preserving query params can be dangerous during OAuth, but we'll keep it for now
     // except if it looks like a dead OAuth code
     if (!request.nextUrl.searchParams.has("code")) {
@@ -116,32 +145,46 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Seller App Access Control
+  // Sewist App Access Control
   // IMPORTANT: Do not block /auth or public paths, as they handle the login/signup/data logic itself
-  if (user && isSellerApp && !isPublicRoute && !path.startsWith("/auth") && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
+  if (user && isSewistApp && !isPublicRoute && !path.startsWith("/auth") && path !== "/login" && path !== "/signup" && path !== "/onboarding") {
     
-    const isSellerMetadata = user.user_metadata?.role === "seller" || user.user_metadata?.user_type === "seller";
+    const isSewistMetadata = user.user_metadata?.role === "sewist" || user.user_metadata?.user_type === "sewist";
     
-    let isSeller = isSellerMetadata;
+    let isSewist = isSewistMetadata;
 
-    if (!isSeller) {
+    if (!isSewist) {
       const { data: profile } = await supabase
         .from("users")
         .select("user_type")
         .eq("id", user.id)
         .single();
-      isSeller = profile?.user_type === "seller";
+      isSewist = profile?.user_type === "sewist";
     }
 
-    if (!isSeller) {
-      // If they are a buyer trying to access seller features, send them to the seller login page
-      // so they can upgrade/sign in as a sewer
+    if (!isSewist) {
+      // If they are a buyer trying to access sewist features, send them to the sewist login page
+      // so they can upgrade/sign in as a sewist
       const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
-      const sellerLoginUrl = new URL("/login", `${protocol}://${host}`);
-      sellerLoginUrl.searchParams.set("error", "must_register_as_sewer");
+      const sewistLoginUrl = new URL("/login", `${protocol}://${host}`);
+      sewistLoginUrl.searchParams.set("error", "must_register_as_sewist");
       
-      console.log("Redirecting non-seller to seller login:", sellerLoginUrl.toString());
-      return NextResponse.redirect(sellerLoginUrl);
+      console.log("Redirecting non-sewist to sewist login:", sewistLoginUrl.toString());
+      return NextResponse.redirect(sewistLoginUrl);
+    }
+
+    const { data: verification } = await supabase
+      .from("sewist_verifications")
+      .select("verification_status")
+      .eq("user_id", user.id)
+      .single();
+
+    if (verification?.verification_status !== "verified") {
+      const protocol = hostname.includes(".local") || hostname.includes("localhost") ? "http" : "https";
+      const sewistLoginUrl = new URL("/login", `${protocol}://${host}`);
+      sewistLoginUrl.searchParams.set("error", "must_be_verified");
+      await supabase.auth.signOut();
+      return NextResponse.redirect(sewistLoginUrl);
     }
   }
 

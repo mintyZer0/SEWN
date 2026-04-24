@@ -31,11 +31,11 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
   const { threads, loading } = useChatThreads();
 
   useEffect(() => {
-    // Hide on seller subdomain or auth pages
-    const isSellerDomain = typeof window !== "undefined" && window.location.hostname.startsWith("seller.");
+    // Hide on sewist subdomain or auth pages
+    const isSewistDomain = typeof window !== "undefined" && window.location.hostname.startsWith("sewist.");
     const isAuthPage = pathname?.startsWith("/auth") || pathname === "/login" || pathname === "/signup";
     
-    if (isSellerDomain || isAuthPage) {
+    if (isSewistDomain || isAuthPage) {
       setCurrentUserId(null); // Force hidden
       setIsCheckingUser(false); // Resolve loading state
       return;
