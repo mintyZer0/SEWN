@@ -9,9 +9,10 @@ interface PhotoSlotProps {
   name?: string;
   className?: string;
   onChange?: (file: File) => void;
+  defaultImage?: string;
 }
 
-export const PhotoSlot = ({ size = "sm", name, className, onChange }: PhotoSlotProps) => {
+export const PhotoSlot = ({ size = "sm", name, className, onChange, defaultImage }: PhotoSlotProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -48,9 +49,9 @@ export const PhotoSlot = ({ size = "sm", name, className, onChange }: PhotoSlotP
         accept="image/*"
         onChange={handleFileChange}
       />
-      {preview ? (
+      {preview || defaultImage ? (
         <img
-          src={preview}
+          src={preview || defaultImage}
           alt="Preview"
           className="w-full h-full object-cover"
         />

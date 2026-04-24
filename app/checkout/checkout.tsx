@@ -14,10 +14,13 @@ interface Product {
   name: string;
   price: number;
   img_src: string;
-  sewist_name: string; 
   location: string;
   type: string;
   description?: string;
+  users?: {
+    first_name: string;
+    last_name: string;
+  };
 }
 
 
@@ -51,7 +54,9 @@ export default function CheckoutClient({
 
   if (orderPlaced) return <SuccessPage />;
 
-const sewistName = initialProduct.sewist_name || 'Unknown Sewist';
+const sewistName = initialProduct.users 
+  ? `${initialProduct.users.first_name} ${initialProduct.users.last_name}`.trim() 
+  : 'Unknown Sewist';
   return (
     <div className="min-h-dvw">
       <CheckoutStepper currentStep={currentStep} />
