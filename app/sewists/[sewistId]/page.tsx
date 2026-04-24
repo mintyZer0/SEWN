@@ -8,6 +8,7 @@ import SeparatorX from "@/components/ui/separator-x";
 import Map from "@/components/sewist-profile/map";
 import ContactSewist from "@/components/sewist-profile/contact-sewist";
 import { createClient } from "@/utils/supabase/server";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface PageProps {
   params: Promise<{
@@ -71,7 +72,9 @@ export default async function SewistPage({ params }: PageProps) {
     lng: shopAddress?.longitude ?? 120.596,
   };
 
-  const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewist-photos/1.jpg";
+  const avatarData = user.user_avatars;
+  const avatarUrl = Array.isArray(avatarData) ? avatarData[0]?.avatar_url : avatarData?.avatar_url;
+  const avatar = getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg");
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist";
 
   // New logic for dynamic fields

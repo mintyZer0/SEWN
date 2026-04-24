@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import CommissionForm from "@/components/service/commission-form";
 import Image from "next/image";
 import SeparatorX from "@/components/ui/separator-x";
@@ -57,7 +58,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
   }
   
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist";
-  const avatar = user.user_avatars?.[0]?.avatar_url || "/assets/sewist-photos/1.jpg";
+  const avatarData = user.user_avatars;
+  const avatarUrl = Array.isArray(avatarData) ? avatarData[0]?.avatar_url : avatarData?.avatar_url;
+  const avatar = getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg");
 
   const renderServiceContent = () => {
     switch (normalizedService) {
