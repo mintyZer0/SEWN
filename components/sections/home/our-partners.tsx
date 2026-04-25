@@ -14,9 +14,9 @@ export default function OurPartners() {
   ];
 
   return (
-    <div className="relative w-full h-auto min-h-[50vh] flex items-center justify-center bg-linear-to-t from-40% from-[#7B3B7B] to-[#FFE063] py-12 overflow-hidden">
+    <div className="relative w-full h-auto min-h-[50vh] flex items-center justify-center py-12 overflow-hidden">
       <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-7xl px-4 md:px-8">
-        <h2 className="text-4xl md:text-6xl font-bold text-white text-center">
+        <h2 className="text-4xl md:text-6xl font-bold text-heading text-center">
           Our Partners
         </h2>
 

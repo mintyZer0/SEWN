@@ -41,7 +41,6 @@ export default async function RootLayout({
       <body className={`${jost.className} antialiased overflow-x-hidden`}>
         <GoogleMapsProvider>
           <CartProvider>
-            <div className="fixed inset-0 -z-10 bg-[url(/assets/background.png)] bg-cover bg-center bg-no-repeat w-full h-full" />
             {children}
             {!isAdminApp && <ChatWidget />}
           </CartProvider>

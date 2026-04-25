@@ -11,7 +11,7 @@ export default function TodaysFeaturedSewist() {
   };
 
   return (
-    <div className="flex h-auto lg:h-96 flex-col lg:flex-row w-full bg-secondary-gradient-b p-6 lg:p-9 justify-between overflow-hidden">
+    <div className="flex h-auto lg:h-96 flex-col lg:flex-row w-full bg-[#FFE5FF] p-6 lg:p-9 justify-between overflow-hidden">
 
       <div className="flex w-full lg:w-150 justify-center lg:justify-start text-center lg:text-left">
         <h2 className="text-5xl md:text-7xl lg:text-8xl p-3 text-heading font-light">

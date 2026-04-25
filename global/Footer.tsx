@@ -37,34 +37,43 @@ export default function Footer({ variant = "primary" }: FooterProps) {
     },
   ];
   return (
-<footer className={cn("w-full overflow-hidden", bgStyles[variant])}>
-      <div className="flex flex-col md:grid md:grid-cols-5 h-auto md:h-150 place-items-center md:place-items-start gap-8 md:gap-2 p-8 md:py-16">
-        <div className="relative h-40 w-40 md:h-70 md:w-70 md:col-span-2 flex justify-center items-center">
+    <footer className={cn("w-full overflow-hidden", bgStyles[variant])}>
+      <div className="flex flex-col md:grid md:grid-cols-12 h-auto md:h-120 place-items-center md:items-center p-8 md:px-16 md:py-16">
+        <div className="relative h-64 w-full md:h-120 md:w-120 md:col-span-5 flex justify-center items-center md:justify-start">
           <Image
-            src="/assets/logo.png"
+            src="/assets/logo-white.png"
             fill
             alt="logo"
-            className="p-4 object-contain rounded-full bg-white"
-          ></Image>
+            className="object-contain"
+          />
         </div>
 
-        {footerSections.map((sections) => (
-          <div
-            key={sections.title}
-            className="flex flex-col items-center md:items-start h-auto gap-4 md:gap-8 text-center md:text-left"
-          >
-            <h3 className="text-white font-bold text-2xl md:text-3xl">{sections.title}</h3>
-            {sections.links.map((link) => (
-              <Link
-                className="text-base md:text-lg text-white hover:opacity-80 transition-opacity"
-                key={link.name}
-                href={link.href}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-        ))}
+        <div className="md:col-span-7 flex flex-col md:flex-row items-center md:items-start justify-start gap-8 md:gap-30 w-full md:-mt-12">
+          {footerSections.map((sections) => (
+            <div
+              key={sections.title}
+              className="flex flex-col items-center md:items-start h-auto gap-2 md:gap-3 text-center md:text-left"
+            >
+              <h3 className="text-white font-bold text-2xl md:text-3xl mb-1 md:mb-2">{sections.title}</h3>
+              {sections.links.map((link) => (
+                <Link
+                  className="text-base md:text-lg text-white hover:opacity-80 transition-opacity"
+                  key={link.name}
+                  href={link.href}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="w-full px-8 md:px-16 pb-8 text-center">
+        <div className="w-full h-px bg-white/30 mb-8"></div>
+        <p className="text-white text-base md:text-lg opacity-80 uppercase tracking-widest">
+          © 2025, SEWNTUKAN
+        </p>
       </div>
     </footer>
   );

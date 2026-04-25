@@ -21,9 +21,9 @@ export default function Home() {
       <MeetOurSewists />
       <TodaysFeaturedSewist />
       <Mission />
+      <OurPartners />
       <ParterTestimonials />
       <FollowUs />
-      <OurPartners />
       <Footer />
     </>
   );
