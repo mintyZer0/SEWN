@@ -52,45 +52,40 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
   const monthName = new Date(currentMonth.year, currentMonth.month - 1).toLocaleString('default', { month: 'long' });
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-primary-light/50 shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-light/50 shadow-sm overflow-hidden flex flex-col">
       {/* Calendar Section */}
-      <div className="flex-1 p-6 md:p-8 bg-gray-50/50">
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary-light text-primary flex items-center justify-center">
-              <CalendarIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-xl font-medium text-gray-900">{monthName}</h3>
-              <p className="text-sm text-gray-500">{currentMonth.year}</p>
-            </div>
+      <div className="p-5 bg-gray-50/50">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <h3 className="text-lg font-medium text-gray-900">{monthName}</h3>
+            <p className="text-xs text-gray-500">{currentMonth.year}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <button 
               type="button"
               onClick={() => setCurrentMonth(prev => prev.month === 1 ? { year: prev.year - 1, month: 12 } : { ...prev, month: prev.month - 1 })}
-              className="p-2 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
+              className="p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-4 h-4" />
             </button>
             <button 
               type="button"
               onClick={() => setCurrentMonth(prev => prev.month === 12 ? { year: prev.year + 1, month: 1 } : { ...prev, month: prev.month + 1 })}
-              className="p-2 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
+              className="p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>
 
         {loading ? (
-          <div className="h-[280px] flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="h-[240px] flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-y-4 gap-x-2">
+          <div className="grid grid-cols-7 gap-y-2 gap-x-1">
             {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-              <div key={d} className="text-center text-xs font-semibold text-gray-400 tracking-wider uppercase mb-2">
+              <div key={d} className="text-center text-[10px] font-semibold text-gray-400 tracking-wider uppercase mb-1">
                 {d}
               </div>
             ))}
@@ -113,12 +108,12 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                   disabled={!isAvailable}
                   onClick={() => handleDateClick(dateStr)}
                   className={`
-                    relative aspect-square flex items-center justify-center rounded-2xl text-sm font-medium transition-all duration-300
+                    relative aspect-square flex items-center justify-center rounded-xl text-xs font-medium transition-all duration-200
                     ${isSelected 
-                      ? 'bg-primary text-white shadow-md scale-105' 
+                      ? 'bg-primary text-white shadow-sm' 
                       : isAvailable 
-                        ? 'bg-white border border-gray-100 text-gray-700 hover:border-primary-light hover:text-primary hover:shadow-sm active:scale-95' 
-                        : 'text-gray-300 opacity-50 cursor-not-allowed'
+                        ? 'bg-white border border-gray-100 text-gray-700 hover:border-primary-light hover:text-primary active:scale-95' 
+                        : 'text-gray-300 opacity-40 cursor-not-allowed'
                     }
                   `}
                 >
@@ -134,81 +129,72 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
       </div>
 
       {/* Time Slots Section */}
-      <div className="md:w-72 border-t md:border-t-0 md:border-l border-gray-100 bg-white p-6 md:p-8 flex flex-col h-full">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-secondary text-primary flex items-center justify-center">
-            <Clock className="w-5 h-5" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900">Time</h3>
-        </div>
-
-        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-          <AnimatePresence mode="popLayout">
-            {!selectedDate ? (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                exit={{ opacity: 0 }}
-                className="h-full flex flex-col items-center justify-center text-center space-y-3 text-gray-400 py-12"
-              >
-                <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-2">
-                  <CalendarIcon className="w-8 h-8 opacity-50" />
+      <div className="border-t border-gray-100 bg-white p-5">
+        <AnimatePresence mode="wait">
+          {!selectedDate ? (
+            <motion.div 
+              key="no-date"
+              initial={{ opacity: 0 }} 
+              animate={{ opacity: 1 }} 
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-3 text-gray-400 py-2"
+            >
+              <CalendarIcon className="w-4 h-4 opacity-50" />
+              <p className="text-xs font-light tracking-wide">Select a date to see times</p>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="has-date"
+              initial={{ opacity: 0, y: 10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-gray-900">
+                    {new Date(selectedDate).toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
                 </div>
-                <p className="text-sm">Select a date to see<br/>available times</p>
-              </motion.div>
-            ) : slotsForSelectedDate.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                className="text-center py-8 text-gray-500 text-sm"
-              >
-                No slots available on this date.
-              </motion.div>
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="space-y-3"
-              >
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                  {new Date(selectedDate).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric' })}
+                {slotsForSelectedDate.length > 0 && (
+                  <span className="text-[10px] text-gray-400 uppercase tracking-tighter">
+                    {slotsForSelectedDate.length} slots
+                  </span>
+                )}
+              </div>
+              
+              {slotsForSelectedDate.length === 0 ? (
+                <div className="text-center py-4 text-gray-500 text-xs font-light italic">
+                  No slots available
                 </div>
-                
-                {slotsForSelectedDate.map((slot, index) => {
-                  const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                  const isSelected = selectedSlot === slot.startTime;
-                  
-                  return (
-                    <motion.button
-                      key={slot.startTime}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      type="button"
-                      onClick={() => handleSlotClick(slot)}
-                      className={`
-                        w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all duration-200 active:scale-[0.98]
-                        ${isSelected 
-                          ? 'border-third bg-secondary/50 text-third font-medium shadow-sm' 
-                          : 'border-gray-100 hover:border-primary-light hover:bg-primary-light/30 text-gray-700'
-                        }
-                      `}
-                    >
-                      <span>{timeStr}</span>
-                      {isSelected && (
-                        <motion.div 
-                          initial={{ scale: 0 }} 
-                          animate={{ scale: 1 }} 
-                          className="w-2 h-2 rounded-full bg-third" 
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+                  {slotsForSelectedDate.map((slot, index) => {
+                    const timeStr = new Date(slot.startTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+                    const isSelected = selectedSlot === slot.startTime;
+                    
+                    return (
+                      <button
+                        key={slot.startTime}
+                        type="button"
+                        onClick={() => handleSlotClick(slot)}
+                        className={`
+                          py-2 px-1 rounded-xl border text-[11px] text-center transition-all duration-200 active:scale-[0.96]
+                          ${isSelected 
+                            ? 'border-third bg-secondary/50 text-third font-semibold' 
+                            : 'border-gray-100 hover:border-primary-light text-gray-600'
+                          }
+                        `}
+                      >
+                        {timeStr}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
