@@ -20,7 +20,7 @@ export default function Home() {
       <Browse />
       <MeetOurSewists />
       <TodaysFeaturedSewist />
-      <Mission />
+      <Mission className="bg-light-pink" />
       <OurPartners />
       <ParterTestimonials />
       <FollowUs />

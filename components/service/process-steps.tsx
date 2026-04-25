@@ -20,9 +20,9 @@ export default function ProcessSteps({ steps }: ProcessStepsProps) {
         const bgColorClass =
           step.bgColor === "purple"
             ? "bg-orchid-vertical-b"
-            : "bg-secondary-gradient-b";
+            : "bg-light-pink";
         const textColorClass =
-          step.bgColor === "purple" ? "text-secondary" : "text-[#7B3B7B]";
+          step.bgColor === "purple" ? "text-secondary" : "text-heading";
 
         return (
           <div
