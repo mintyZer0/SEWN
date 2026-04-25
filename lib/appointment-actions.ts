@@ -13,26 +13,13 @@ export interface DayAvailability {
   slots: TimeSlot[];
 }
 
-export async function getAvailableSlots(sewistId: string, year: number, month: number): Promise<DayAvailability[]> {
-  const supabase = await createClient();
-
-  const startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
-  const endDate = new Date(Date.UTC(year, month, 0)).toISOString(); // Last day of month
-
-  const [workingHoursRes, overridesRes, appointmentsRes] = await Promise.all([
-    supabase.from("sewist_working_hours").select("*").eq("user_id", sewistId),
-    supabase.from("sewist_schedule_overrides").select("*").eq("user_id", sewistId).gte("override_date", startDate.split('T')[0]).lte("override_date", endDate.split('T')[0]),
-    supabase.from("appointments").select("start_time").eq("sewist_id", sewistId).gte("start_time", startDate).lte("start_time", endDate).neq("status", "cancelled")
-  ]);
-
-  if (workingHoursRes.error || overridesRes.error || appointmentsRes.error) {
-    throw new Error("Failed to fetch schedule data");
-  }
-
-  const workingHours = workingHoursRes.data || [];
-  const overrides = overridesRes.data || [];
-  const appointments = appointmentsRes.data || [];
-
+export async function computeAvailableDays(
+  year: number,
+  month: number,
+  workingHours: any[],
+  overrides: any[],
+  appointments: any[]
+): Promise<DayAvailability[]> {
   const appointmentCounts: Record<string, number> = {};
   appointments.forEach(app => {
     const timeKey = new Date(app.start_time).toISOString();
@@ -44,8 +31,8 @@ export async function getAvailableSlots(sewistId: string, year: number, month: n
 
   for (let i = 1; i <= daysInMonth; i++) {
     const currentDate = new Date(Date.UTC(year, month - 1, i));
-    // Skip past dates
-    if (currentDate < new Date(new Date().setUTCHours(0,0,0,0))) continue;
+    // Skip past dates (only in production context, for tests we allow it if we mock today)
+    // if (currentDate < new Date(new Date().setUTCHours(0,0,0,0))) continue;
 
     const dateStr = currentDate.toISOString().split('T')[0];
     const dayOfWeek = currentDate.getUTCDay();
@@ -97,5 +84,30 @@ export async function getAvailableSlots(sewistId: string, year: number, month: n
     }
   }
 
-  return availableDays;
+  // Filter out past dates logic moved here so it works reliably
+  const todayZeroed = new Date(new Date().setUTCHours(0,0,0,0));
+  return availableDays.filter(day => new Date(day.date) >= todayZeroed);
+}
+
+export async function getAvailableSlots(sewistId: string, year: number, month: number): Promise<DayAvailability[]> {
+  const supabase = await createClient();
+
+  const startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+  const endDate = new Date(Date.UTC(year, month, 0)).toISOString(); // Last day of month
+
+  const [workingHoursRes, overridesRes, appointmentsRes] = await Promise.all([
+    supabase.from("sewist_working_hours").select("*").eq("user_id", sewistId),
+    supabase.from("sewist_schedule_overrides").select("*").eq("user_id", sewistId).gte("override_date", startDate.split('T')[0]).lte("override_date", endDate.split('T')[0]),
+    supabase.from("appointments").select("start_time").eq("sewist_id", sewistId).gte("start_time", startDate).lte("start_time", endDate).neq("status", "cancelled")
+  ]);
+
+  if (workingHoursRes.error || overridesRes.error || appointmentsRes.error) {
+    throw new Error("Failed to fetch schedule data");
+  }
+
+  const workingHours = workingHoursRes.data || [];
+  const overrides = overridesRes.data || [];
+  const appointments = appointmentsRes.data || [];
+
+  return computeAvailableDays(year, month, workingHours, overrides, appointments);
 }
