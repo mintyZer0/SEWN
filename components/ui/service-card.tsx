@@ -29,6 +29,7 @@ export default function ServiceCard({
         src={imgSrc}
         alt={service}
         fill
+        sizes="(max-width: 768px) 100vw, 800px"
         className="object-cover rounded-4xl"
       />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2">

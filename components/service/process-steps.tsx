@@ -40,6 +40,7 @@ export default function ProcessSteps({ steps }: ProcessStepsProps) {
                 src={step.image}
                 alt={step.title}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover"
               />
             </div>

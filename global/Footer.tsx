@@ -51,6 +51,7 @@ export default function Footer({ variant = "primary" }: FooterProps) {
           <Image
             src={logoSrc}
             fill
+            sizes="(max-width: 768px) 100vw, 480px"
             alt="logo"
             className="object-contain"
           />

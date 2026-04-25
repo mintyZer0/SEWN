@@ -103,6 +103,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -161,6 +162,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/repair-steps/repair-hero.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -227,6 +229,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />

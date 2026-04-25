@@ -55,6 +55,7 @@ const handleAddToCart = (e: React.MouseEvent) => {
             src={getImageUrl(product.img_src)}
             alt={product.name}
             fill
+            sizes="320px"
             className="object-cover"
           />
           <button

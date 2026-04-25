@@ -24,6 +24,7 @@ export default function SDGSection() {
                 src={sdg.icon}
                 alt={`SDG ${sdg.number}`}
                 fill
+                sizes="(max-width: 768px) 80px, 200px"
                 className="rounded-2xl md:rounded-4xl object-cover"
               />
             </div>

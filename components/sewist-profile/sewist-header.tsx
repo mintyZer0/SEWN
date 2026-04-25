@@ -27,6 +27,7 @@ export default function SewistHeader({
           src={image}
           alt={name}
           fill
+          sizes="(max-width: 768px) 100vw, 700px"
           className="object-cover rounded-3xl"
         />
         {isTesdaCertified && (

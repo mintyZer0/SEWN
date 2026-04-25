@@ -32,6 +32,7 @@ export default function MeetOurSewists() {
         <Image
           src="/assets/meet-our-sewists.png"
           fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           alt="meet our sewists"
           className="object-cover object-center md:object-right"
         ></Image>

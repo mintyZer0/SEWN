@@ -32,6 +32,7 @@ export default function OurPartners() {
                   src={partner.logo}
                   alt={partner.name}
                   fill
+                  sizes="(max-width: 768px) 80px, 168px"
                   className="object-contain"
                 />
               ) : (

@@ -49,6 +49,7 @@ export default function OrderCard({ order }: OrderCardProps) {
               src={order.imageSrc}
               alt={order.productName}
               fill
+              sizes="(max-width: 768px) 128px, 160px"
               className="object-cover"
             />
           </div>

@@ -22,6 +22,7 @@ export default function CulturalSignificance() {
             src="/assets/about-page/cultural-significance-about.png"
             alt="Cultural Significance"
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover object-top md:rounded-lg"
           />
         </div>

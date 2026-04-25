@@ -97,6 +97,7 @@ export default function SewistCard({
             src={getImageUrl(sewist.img_src)}
             alt={sewist.name || "Sewist"}
             fill
+            sizes="(max-width: 768px) 100vw, 600px"
             className="object-cover rounded-b-3xl"
           />
           <button

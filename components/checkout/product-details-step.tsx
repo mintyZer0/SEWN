@@ -38,6 +38,7 @@ export default function ProductDetailsStep({
                   src={productImage}
                   alt={productName}
                   fill
+                  sizes="(max-width: 768px) 100vw, 400px"
                   className="object-cover w-full rounded-4xl"
                 />
               </div>
@@ -83,6 +84,7 @@ export default function ProductDetailsStep({
           src={productImage}
           alt={`${productName} detail`}
           fill
+          sizes="100vw"
           className="object-cover rounded-2xl brightness-75"
         />
         <div className="absolute inset-0 flex items-center justify-center">
