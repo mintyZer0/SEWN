@@ -1,14 +1,27 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.appointments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  service_request_id uuid,
+  sewist_id uuid NOT NULL,
+  client_id uuid NOT NULL,
+  start_time timestamp with time zone NOT NULL,
+  end_time timestamp with time zone NOT NULL,
+  status text NOT NULL DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'confirmed'::text, 'cancelled'::text])),
+  CONSTRAINT appointments_pkey PRIMARY KEY (id),
+  CONSTRAINT appointments_service_request_id_fkey FOREIGN KEY (service_request_id) REFERENCES public.service_requests(id),
+  CONSTRAINT appointments_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES public.users(id),
+  CONSTRAINT appointments_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id)
+);
 CREATE TABLE public.chat_conversations (
   id text NOT NULL DEFAULT gen_random_uuid(),
   buyer_id uuid NOT NULL,
   sewist_id uuid NOT NULL,
   last_message_at timestamp with time zone DEFAULT now(),
   CONSTRAINT chat_conversations_pkey PRIMARY KEY (id),
-  CONSTRAINT chat_conversations_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES auth.users(id),
-  CONSTRAINT chat_conversations_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES auth.users(id)
+  CONSTRAINT chat_conversations_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES auth.users(id),
+  CONSTRAINT chat_conversations_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.chat_messages (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -57,7 +70,7 @@ CREATE TABLE public.orders (
 );
 CREATE TABLE public.product_categories (
   product_id uuid NOT NULL,
-  category USER-DEFINED NOT NULL,
+  category USER-DEFINED,
   CONSTRAINT product_categories_pkey PRIMARY KEY (product_id),
   CONSTRAINT product_categories_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.sewist_products(id)
 );
@@ -93,7 +106,7 @@ CREATE TABLE public.product_rejection_logs (
 CREATE TABLE public.product_sizes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   product_id uuid NOT NULL,
-  size USER-DEFINED NOT NULL,
+  size USER-DEFINED,
   CONSTRAINT product_sizes_pkey PRIMARY KEY (id),
   CONSTRAINT product_sizes_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.sewist_products(id)
 );
@@ -106,47 +119,27 @@ CREATE TABLE public.product_variants (
   CONSTRAINT product_variants_pkey PRIMARY KEY (id),
   CONSTRAINT product_variants_product_id_fkey FOREIGN KEY (product_id) REFERENCES public.sewist_products(id)
 );
-CREATE TABLE public.sewist_products (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL,
-  name character varying NOT NULL,
-  price numeric NOT NULL,
-  img_src text NOT NULL,
-  location character varying NOT NULL CHECK (location::text = ANY (ARRAY['NCR'::character varying, 'Luzon'::character varying, 'Visayas'::character varying, 'Mindanao'::character varying]::text[])),
-  type character varying NOT NULL CHECK (type::text = ANY (ARRAY['Kids'::character varying, 'Men'::character varying, 'Women'::character varying]::text[])),
-  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-  is_active boolean NOT NULL DEFAULT true,
-  rating numeric NOT NULL DEFAULT '0'::numeric,
-  sold integer NOT NULL DEFAULT 0,
-  description text,
-  sewist_name text,
-  deleted_at timestamp with time zone,
-  verification_status USER-DEFINED DEFAULT 'draft'::product_verification_status,
-  latest_rejection_log_id uuid,
-  CONSTRAINT sewist_products_pkey PRIMARY KEY (id),
-  CONSTRAINT sewist_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
-  CONSTRAINT sewist_products_latest_rejection_log_id_fkey FOREIGN KEY (latest_rejection_log_id) REFERENCES public.product_rejection_logs(id)
-);
 CREATE TABLE public.service_requests (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   client_id uuid NOT NULL,
   sewist_id uuid NOT NULL,
-  address_id uuid NOT NULL,
   service_type character varying NOT NULL CHECK (service_type::text = ANY (ARRAY['commission'::character varying::text, 'repair'::character varying::text, 'alteration'::character varying::text])),
   request_details text NOT NULL,
   appointment_date timestamp without time zone NOT NULL,
-  fabric text,
   measurement_profile_id uuid,
   status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying::text, 'accepted'::character varying::text, 'in_progress'::character varying::text, 'completed'::character varying::text, 'cancelled'::character varying::text])),
   created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
   subject character varying NOT NULL,
   deleted_at timestamp with time zone,
+  address_id uuid NOT NULL,
+  fabric text,
+  appointment_end_date timestamp with time zone,
   CONSTRAINT service_requests_pkey PRIMARY KEY (id),
-  CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
-  CONSTRAINT service_requests_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES public.users(id),
   CONSTRAINT service_requests_address_id_fkey FOREIGN KEY (address_id) REFERENCES public.user_addresses(id),
-  CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id)
+  CONSTRAINT service_requests_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.users(id),
+  CONSTRAINT service_requests_measurement_profile_id_fkey FOREIGN KEY (measurement_profile_id) REFERENCES public.user_measurements(id),
+  CONSTRAINT service_requests_sewist_id_fkey FOREIGN KEY (sewist_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.sewist_achievements (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -172,11 +165,41 @@ CREATE TABLE public.sewist_onboarding_surveys (
   owns_machine character varying,
   machine_owner character varying,
   makes_traditional_products character varying,
-  common_products_used_for character varying,
+  common_products_used for character varying,
   specific_products character varying,
   designs_garments character varying,
   CONSTRAINT sewist_onboarding_surveys_pkey PRIMARY KEY (user_id),
-  CONSTRAINT sewist_onboarding_surveys_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+  CONSTRAINT sewer_onboarding_surveys_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewist_products (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  name character varying NOT NULL,
+  price numeric NOT NULL,
+  img_src text NOT NULL,
+  location USER-DEFINED CHECK (location::text = ANY (ARRAY['NCR'::character varying::text, 'Luzon'::character varying::text, 'Visayas'::character varying::text, 'Mindanao'::character varying::text])),
+  type character varying NOT NULL CHECK (type::text = ANY (ARRAY['Kids'::character varying, 'Men'::character varying, 'Women'::character varying]::text[])),
+  created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  is_active boolean NOT NULL DEFAULT true,
+  rating numeric NOT NULL DEFAULT '0'::numeric,
+  sold integer NOT NULL DEFAULT 0,
+  description text,
+  deleted_at timestamp with time zone,
+  verification_status USER-DEFINED DEFAULT 'draft'::product_verification_status,
+  latest_rejection_log_id uuid,
+  CONSTRAINT sewist_products_pkey PRIMARY KEY (id),
+  CONSTRAINT sewist_products_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT seller_products_latest_rejection_log_id_fkey FOREIGN KEY (latest_rejection_log_id) REFERENCES public.product_rejection_logs(id)
+);
+CREATE TABLE public.sewist_schedule_overrides (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  override_date date NOT NULL,
+  is_closed boolean NOT NULL DEFAULT false,
+  start_time time without time zone,
+  end_time time without time zone,
+  CONSTRAINT sewist_schedule_overrides_pkey PRIMARY KEY (id),
+  CONSTRAINT sewist_schedule_overrides_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.sewist_settings (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -207,9 +230,20 @@ CREATE TABLE public.sewist_verifications (
   dti_sec_number character varying,
   id_card_url character varying,
   profile_document_url character varying,
-  verification_status character varying DEFAULT 'pending'::character varying,
+  verification_status USER-DEFINED DEFAULT 'pending'::verification_status_enum,
   CONSTRAINT sewist_verifications_pkey PRIMARY KEY (user_id),
-  CONSTRAINT sewist_verifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+  CONSTRAINT sewer_verifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.sewist_working_hours (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  day_of_week integer NOT NULL CHECK (day_of_week >= 0 AND day_of_week <= 6),
+  start_time time without time zone NOT NULL,
+  end_time time without time zone NOT NULL,
+  slot_duration_minutes integer NOT NULL DEFAULT 60,
+  max_customers_per_slot integer NOT NULL DEFAULT 1,
+  CONSTRAINT sewist_working_hours_pkey PRIMARY KEY (id),
+  CONSTRAINT sewist_working_hours_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
 CREATE TABLE public.user_addresses (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -224,7 +258,7 @@ CREATE TABLE public.user_addresses (
   contact_phone text,
   latitude double precision,
   longitude double precision,
-  address_type character varying DEFAULT 'shipping'::character varying CHECK (address_type::text = ANY (ARRAY['shipping'::character varying, 'billing'::character varying, 'shop'::character varying]::text[])),
+  address_type USER-DEFINED DEFAULT 'shipping'::address_type_enum,
   CONSTRAINT user_addresses_pkey PRIMARY KEY (id),
   CONSTRAINT user_addresses_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
 );
@@ -290,8 +324,6 @@ CREATE TABLE public.users (
   birthday date,
   gender USER-DEFINED,
   last_name text,
-  latitude double precision,
-  longitude double precision,
   CONSTRAINT users_pkey PRIMARY KEY (id),
   CONSTRAINT users_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
 );
