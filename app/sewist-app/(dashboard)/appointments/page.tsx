@@ -126,7 +126,7 @@ export default function AppointmentsSettingsPage() {
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center min-h-[500px]">
-        <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -149,7 +149,7 @@ export default function AppointmentsSettingsPage() {
         className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
       >
         <div className="p-8 border-b border-gray-100 bg-gray-50/50 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full bg-primary-light text-primary flex items-center justify-center">
             <Calendar className="w-6 h-6" />
           </div>
           <div>
@@ -175,7 +175,7 @@ export default function AppointmentsSettingsPage() {
                     id={`day-${day.value}`}
                     checked={!!isActive}
                     onChange={() => handleDayToggle(day.value)}
-                    className="w-5 h-5 rounded border-gray-300 text-[#2C2463] focus:ring-[#2C2463]"
+                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   <label htmlFor={`day-${day.value}`} className="font-medium text-gray-700 cursor-pointer select-none">
                     {day.label}
@@ -190,14 +190,14 @@ export default function AppointmentsSettingsPage() {
                         type="time" 
                         value={hours[day.value]?.start_time || "09:00"}
                         onChange={(e) => handleTimeChange(day.value, "start_time", e.target.value)}
-                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-pink-200 outline-none"
+                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
                       />
                       <span className="text-gray-400">-</span>
                       <input 
                         type="time" 
                         value={hours[day.value]?.end_time || "17:00"}
                         onChange={(e) => handleTimeChange(day.value, "end_time", e.target.value)}
-                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-pink-200 outline-none"
+                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
                       />
                     </div>
 
@@ -209,7 +209,7 @@ export default function AppointmentsSettingsPage() {
                         <select 
                           value={hours[day.value]?.slot_duration_minutes || 60}
                           onChange={(e) => handleTimeChange(day.value, "slot_duration_minutes", parseInt(e.target.value))}
-                          className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-pink-200 outline-none"
+                          className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
                         >
                           <option value={30}>30 mins</option>
                           <option value={45}>45 mins</option>
@@ -229,7 +229,7 @@ export default function AppointmentsSettingsPage() {
                           max="10"
                           value={hours[day.value]?.max_customers_per_slot || 1}
                           onChange={(e) => handleTimeChange(day.value, "max_customers_per_slot", parseInt(e.target.value))}
-                          className="w-20 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-pink-200 outline-none"
+                          className="w-20 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
                         />
                       </div>
                     </div>

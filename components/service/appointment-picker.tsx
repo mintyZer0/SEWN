@@ -52,12 +52,12 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
   const monthName = new Date(currentMonth.year, currentMonth.month - 1).toLocaleString('default', { month: 'long' });
 
   return (
-    <div className="w-full bg-white rounded-3xl border border-pink-100 shadow-sm overflow-hidden flex flex-col md:flex-row">
+    <div className="w-full bg-white rounded-3xl border border-primary-light/50 shadow-sm overflow-hidden flex flex-col md:flex-row">
       {/* Calendar Section */}
       <div className="flex-1 p-6 md:p-8 bg-gray-50/50">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary-light text-primary flex items-center justify-center">
               <CalendarIcon className="w-5 h-5" />
             </div>
             <div>
@@ -85,7 +85,7 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
 
         {loading ? (
           <div className="h-[280px] flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-pink-400" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
           <div className="grid grid-cols-7 gap-y-4 gap-x-2">
@@ -115,16 +115,16 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                   className={`
                     relative aspect-square flex items-center justify-center rounded-2xl text-sm font-medium transition-all duration-300
                     ${isSelected 
-                      ? 'bg-[#2C2463] text-white shadow-md scale-105' 
+                      ? 'bg-primary text-white shadow-md scale-105' 
                       : isAvailable 
-                        ? 'bg-white border border-gray-100 text-gray-700 hover:border-pink-300 hover:text-[#2C2463] hover:shadow-sm active:scale-95' 
+                        ? 'bg-white border border-gray-100 text-gray-700 hover:border-primary-light hover:text-primary hover:shadow-sm active:scale-95' 
                         : 'text-gray-300 opacity-50 cursor-not-allowed'
                     }
                   `}
                 >
                   <span className="relative z-10">{i + 1}</span>
                   {isToday && !isSelected && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-pink-400" />
+                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-third" />
                   )}
                 </button>
               );
@@ -136,7 +136,7 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
       {/* Time Slots Section */}
       <div className="md:w-72 border-t md:border-t-0 md:border-l border-gray-100 bg-white p-6 md:p-8 flex flex-col h-full">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-full bg-blue-50 text-[#2C2463] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-secondary text-primary flex items-center justify-center">
             <Clock className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-medium text-gray-900">Time</h3>
@@ -189,8 +189,8 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                       className={`
                         w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all duration-200 active:scale-[0.98]
                         ${isSelected 
-                          ? 'border-third bg-orange-50/50 text-third font-medium shadow-sm' 
-                          : 'border-gray-100 hover:border-pink-200 hover:bg-pink-50/30 text-gray-700'
+                          ? 'border-third bg-secondary/50 text-third font-medium shadow-sm' 
+                          : 'border-gray-100 hover:border-primary-light hover:bg-primary-light/30 text-gray-700'
                         }
                       `}
                     >
