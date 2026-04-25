@@ -1,4 +1,4 @@
-export default function LoginLayout({
+export default function SewistSignupLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

@@ -98,7 +98,7 @@ export default function OnboardingPage() {
       <div className="flex flex-col items-center justify-center py-12 px-4 md:px-10">
         {/* Progress Stepper */}
         <div className="w-full max-w-4xl mb-8 flex justify-between items-center relative">
-          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-white/30 -z-10 -translate-y-1/2" />
+          <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 -z-10 -translate-y-1/2" />
           {STEPS.map((s) => (
             <div key={s.id} className="flex flex-col items-center gap-2">
               <div className={cn(
@@ -109,7 +109,7 @@ export default function OnboardingPage() {
               </div>
               <span className={cn(
                 "text-sm font-medium",
-                step >= s.id ? "text-white" : "text-white/60"
+                step >= s.id ? "text-heading" : "text-heading/60"
               )}>{s.name}</span>
             </div>
           ))}

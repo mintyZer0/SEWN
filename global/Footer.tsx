@@ -7,11 +7,18 @@ interface FooterProps {
 }
 
 export default function Footer({ variant = "primary" }: FooterProps) {
+  const isSewist = variant === "sewist";
+  
   const bgStyles = {
     primary: "bg-primary",
     orchid: "bg-orchid-light",
     sewist: "third-gradient",
   };
+
+  const textColors = isSewist ? "text-primary-dark" : "text-white";
+  const separatorColor = isSewist ? "bg-primary-dark/20" : "bg-white/30";
+  const logoSrc = isSewist ? "/assets/logo.png" : "/assets/logo-white.png";
+
   const footerSections = [
     {
       title: "Browse",
@@ -36,12 +43,13 @@ export default function Footer({ variant = "primary" }: FooterProps) {
       ],
     },
   ];
+
   return (
     <footer className={cn("w-full overflow-hidden", bgStyles[variant])}>
       <div className="flex flex-col md:grid md:grid-cols-12 h-auto md:h-120 place-items-center md:items-center p-8 md:px-16 md:py-16">
         <div className="relative h-64 w-full md:h-120 md:w-120 md:col-span-5 flex justify-center items-center md:justify-start">
           <Image
-            src="/assets/logo-white.png"
+            src={logoSrc}
             fill
             alt="logo"
             className="object-contain"
@@ -54,10 +62,10 @@ export default function Footer({ variant = "primary" }: FooterProps) {
               key={sections.title}
               className="flex flex-col items-center md:items-start h-auto gap-2 md:gap-3 text-center md:text-left"
             >
-              <h3 className="text-white font-bold text-2xl md:text-3xl mb-1 md:mb-2">{sections.title}</h3>
+              <h3 className={cn("font-bold text-2xl md:text-3xl mb-1 md:mb-2", textColors)}>{sections.title}</h3>
               {sections.links.map((link) => (
                 <Link
-                  className="text-base md:text-lg text-white hover:opacity-80 transition-opacity"
+                  className={cn("text-base md:text-lg hover:opacity-80 transition-opacity", textColors)}
                   key={link.name}
                   href={link.href}
                 >
@@ -70,8 +78,8 @@ export default function Footer({ variant = "primary" }: FooterProps) {
       </div>
       
       <div className="w-full px-8 md:px-16 pb-8 text-center">
-        <div className="w-full h-px bg-white/30 mb-8"></div>
-        <p className="text-white text-base md:text-lg opacity-80 uppercase tracking-widest">
+        <div className={cn("w-full h-px mb-8", separatorColor)}></div>
+        <p className={cn("text-base md:text-lg opacity-80 uppercase tracking-widest", textColors)}>
           © 2025, SEWNTUKAN
         </p>
       </div>

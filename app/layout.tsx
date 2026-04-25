@@ -37,8 +37,8 @@ export default async function RootLayout({
   const isAdminApp = host.startsWith("admin.");
 
   return (
-    <html lang="en">
-      <body className={`${jost.className} antialiased overflow-x-hidden`}>
+    <html lang="en" data-theme="light">
+      <body className={`${jost.className} antialiased overflow-x-hidden bg-white text-foreground`}>
         <GoogleMapsProvider>
           <CartProvider>
             {children}
