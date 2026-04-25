@@ -88,6 +88,4 @@ html,
 body {
   max-width: 100%;
   overflow-x: hidden;
-  background-color: white;
-  min-height: 100vh;
 }

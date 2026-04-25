@@ -133,7 +133,7 @@ export function SignupForm({
       <Card
         {...props}
         className={cn(
-          "h-200 w-170 border-0 shadow-none",
+          "h-200 w-170 border-0 shadow-none bg-transparent",
           variants[variant].style,
           className,
         )}
