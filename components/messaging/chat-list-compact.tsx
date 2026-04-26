@@ -38,7 +38,9 @@ export function ChatListCompact({ onSelect, selectedId, threads }: ChatListCompa
             </div>
             <div className="flex items-center justify-between gap-2 mt-0.5">
               <p className="text-sm font-medium text-primary/60 truncate leading-tight">
-                {thread.lastMessage}
+                {thread.lastMessage.startsWith("s3-private://") 
+                  ? (/\.(mp4|webm|ogg|mov)$/i.test(thread.lastMessage) ? "Video 🎥" : "Photo 📸")
+                  : thread.lastMessage}
               </p>
               <span className="text-sm font-bold text-primary/40 shrink-0">
                 {thread.time}
