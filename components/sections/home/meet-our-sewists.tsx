@@ -3,13 +3,13 @@ import Link from "next/link";
 export default function MeetOurSewists() {
   return (
     <div className="flex flex-col md:flex-row w-full">
-      <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-orchid text-left justify-start p-6 md:p-8 px-6 md:px-16 text-4xl md:text-9xl">
+      <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-gradient-to-br from-[#7B3B7B] to-[#CBA0CB] text-left justify-start p-6 md:p-8 px-6 md:px-16 text-4xl md:text-9xl">
         <h2 className="text-secondary font-extralight my-6 md:my-8 mb-6 md:mb-16 tracking-wide">
           a way to <br />
           <span className="font-normal">represent</span>
         </h2>
-        <div className="py-2 md:p-4 text-lg md:text-3xl text-secondary">
-          <p>
+        <div className="py-2 md:p-4 text-lg md:text-2xl text-white">
+          <p className="max-w-3xl leading-relaxed">
             Explore a wide variety of skilled local sewists ready to turn your
             ideas into beautiful, handcrafted creations.
             <br />
@@ -32,6 +32,7 @@ export default function MeetOurSewists() {
         <Image
           src="/assets/meet-our-sewists.png"
           fill
+          sizes="(max-width: 768px) 100vw, 33vw"
           alt="meet our sewists"
           className="object-cover object-center md:object-right"
         ></Image>

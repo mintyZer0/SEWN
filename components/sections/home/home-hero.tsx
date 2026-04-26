@@ -9,6 +9,7 @@ export default function HomeHero() {
           src="/assets/home-image.png"
           alt="icon"
           fill={true}
+          sizes="100vw"
         ></Image>
         <div className="flex items-center justify-center h-auto z-1 px-4 text-center">
           <h1 className="text-3xl md:text-5xl lg:text-7xl text-white text-shadow-2xs italic">

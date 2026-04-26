@@ -14,7 +14,7 @@ interface ProductModalProps {
   isOpen: boolean;
   onClose: () => void;
   product?: (SectionItem & { rejectionLogId?: string }) | null;
-  onSave?: (product: Partial<SectionItem>, targetStatus: 'draft' | 'pending') => Promise<void>;
+  onSave?: (product: Partial<SectionItem> & { images?: File[] }, targetStatus: 'draft' | 'pending') => Promise<void>;
 }
 
 interface VariationGroup {
@@ -32,7 +32,7 @@ interface ProductVariant {
 }
 
 const CATEGORY_OPTIONS = MARKETPLACE_FILTERS.Categories.map((category) => ({
-  value: category.toLowerCase(),
+  value: category,
   label: category,
 }));
 
@@ -80,6 +80,9 @@ export const ProductModal = ({
   const [variationGroups, setVariationGroups] = useState<VariationGroup[]>([]);
 
   const [variants, setVariants] = useState<ProductVariant[]>([]);
+
+  const [selectedImages, setSelectedImages] = useState<(File | null)[]>(Array(7).fill(null));
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   
   const supabase = createClient();
 
@@ -183,6 +186,7 @@ export const ProductModal = ({
           .select(`
             *,
             product_categories (category),
+            product_images (image_url, is_main, display_order),
             product_variants (
               id,
               sku,
@@ -201,11 +205,9 @@ export const ProductModal = ({
           const rawCategoryValue = Array.isArray(data.product_categories)
             ? data.product_categories[0]?.category
             : data.product_categories?.category;
-          const normalizedCategory = typeof rawCategoryValue === "string"
-            ? rawCategoryValue.toLowerCase()
-            : "";
-          const categoryValue = CATEGORY_OPTIONS.some((option) => option.value === normalizedCategory)
-            ? normalizedCategory
+          
+          const categoryValue = CATEGORY_OPTIONS.some((option) => option.value === rawCategoryValue)
+            ? rawCategoryValue
             : CATEGORY_OPTIONS[0].value;
 
           setFormData((prev) => ({
@@ -221,6 +223,14 @@ export const ProductModal = ({
             careInstructions: data.care_instructions || "hand-wash",
             shippingTime: data.shipping_time || "",
           }));
+
+          // Set existing images
+          if (data.product_images && data.product_images.length > 0) {
+            const sortedImages = [...data.product_images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+            setExistingImages(sortedImages.map(img => img.image_url));
+          } else {
+            setExistingImages([]);
+          }
 
           if (data.product_variants && data.product_variants.length > 0) {
             const fetchedVariants: ProductVariant[] = data.product_variants.map((v: any) => {
@@ -279,6 +289,8 @@ export const ProductModal = ({
         });
         setVariationGroups([]);
         setVariants([]);
+        setExistingImages([]);
+        setSelectedImages(Array(7).fill(null));
       }
     }
     fetchFullProduct();
@@ -295,6 +307,14 @@ export const ProductModal = ({
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  const handlePhotoChange = (index: number) => (file: File) => {
+    setSelectedImages(prev => {
+      const next = [...prev];
+      next[index] = file;
+      return next;
+    });
+  };
 
   const [rejectionReason, setRejectionReason] = useState<{ reason: string, comment: string } | null>(null);
 
@@ -394,6 +414,12 @@ export const ProductModal = ({
       alert("Weight must be a valid number with up to 2 decimal places.");
       return;
     }
+
+    const hasImages = existingImages.length > 0 || selectedImages.some(img => img !== null);
+    if (!hasImages) {
+      alert("At least one product image is required.");
+      return;
+    }
     
     if (onSave) {
       try {
@@ -403,6 +429,8 @@ export const ProductModal = ({
           ...formData,
           name: formData.productName, // Map productName to name for DB
           price: Number(formData.price),
+          img_src: existingImages[0],
+          images: selectedImages.filter((img): img is File => img !== null),
           variants: variants.map(v => ({
             id: v.id,
             sku: v.sku,
@@ -462,17 +490,23 @@ export const ProductModal = ({
             <div className="grid grid-cols-5 gap-4">
               {/* Large Main Slot (Left) */}
               <div className="col-span-2 row-span-2">
-                <PhotoSlot size="lg" className="h-full" />
+                <PhotoSlot 
+                  size="lg" 
+                  className="h-full" 
+                  onChange={handlePhotoChange(0)}
+                  defaultImage={existingImages[0]}
+                />
               </div>
               {/* 6 Small Slots (Right) */}
-              <PhotoSlot />
-              <PhotoSlot />
-              <PhotoSlot />
-              <PhotoSlot />
-              <PhotoSlot />
-              <PhotoSlot />
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <PhotoSlot 
+                  key={i} 
+                  onChange={handlePhotoChange(i)} 
+                  defaultImage={existingImages[i]}
+                />
+              ))}
             </div>
-            <p className="text-sm text-gray-400 italic">* Image uploading coming soon</p>
+            <p className="text-sm text-gray-400 italic">* Select up to 7 photos. First photo is main.</p>
           </div>
 
           {/* Core Info */}

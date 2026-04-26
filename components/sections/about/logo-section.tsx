@@ -8,6 +8,7 @@ export default function LogoSection() {
           src="/assets/logo.png"
           alt="SEWN Logo"
           fill
+          sizes="(max-width: 768px) 256px, 800px"
           className="object-contain"
         />
       </div>

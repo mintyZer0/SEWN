@@ -34,6 +34,7 @@ export default function ManagementTeam() {
                   src={member.image}
                   alt={member.name}
                   fill
+                  sizes="(max-width: 768px) 160px, 192px"
                   className="object-cover rounded-full border-primary border-2"
                 />
               </div>

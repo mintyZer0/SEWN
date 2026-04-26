@@ -5,15 +5,19 @@ import { s3 } from "@/lib/s3";
 
 export async function POST(request: Request) {
   try {
-    const { filename, contentType, action = "upload" } = await request.json();
+    const { filename, contentType, action = "upload", bucketType = "public" } = await request.json();
 
     if (!filename) {
       return NextResponse.json({ error: "Filename is required" }, { status: 400 });
     }
 
-    const bucket = process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_BUCKET;
+    const publicBucket = process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_BUCKET;
+    const privateBucket = process.env.AWS_S3_PRIVATE_BUCKET;
+    
+    const bucket = bucketType === "private" ? privateBucket : publicBucket;
+
     if (!bucket) {
-      return NextResponse.json({ error: "S3 bucket not configured" }, { status: 500 });
+      return NextResponse.json({ error: `S3 ${bucketType} bucket not configured` }, { status: 500 });
     }
 
     if (action === "upload") {
@@ -26,8 +30,21 @@ export async function POST(request: Request) {
       const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
       return NextResponse.json({ 
         url: signedUrl, 
-        publicUrl: `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`
+        publicUrl: bucketType === "private" 
+          ? `s3-private://${filename}` // Internal marker for private content
+          : `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`
       });
+    }
+
+    if (action === "fetch") {
+      const { GetObjectCommand } = await import("@aws-sdk/client-s3");
+      const command = new GetObjectCommand({
+        Bucket: bucket,
+        Key: filename,
+      });
+
+      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+      return NextResponse.json({ url: signedUrl });
     }
 
     if (action === "delete") {

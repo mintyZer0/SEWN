@@ -1,6 +1,12 @@
-export default function VisionMission() {
+import { cn } from "@/lib/utils";
+
+interface VisionMissionProps {
+  className?: string;
+}
+
+export default function VisionMission({ className }: VisionMissionProps) {
   return (
-    <div className="w-full overflow-x-hidden bg-[#FFCFB1]">
+    <div className={cn("w-full overflow-x-hidden", className)}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 p-4 sm:p-8 lg:p-25 place-items-center">
         <div className="flex flex-col text-5xl lg:text-7xl text-center p-4 py-6 gap-4 w-full lg:w-140">
           <h2 className="text-heading">vision</h2>

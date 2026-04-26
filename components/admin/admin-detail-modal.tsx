@@ -35,6 +35,16 @@ export const AdminDetailModal = ({
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectionCode, setRejectionCode] = useState("INAPPROPRIATE_CONTENT");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [mainPreviewImage, setMainPreviewImage] = useState<string | null>(null);
+
+  // Sync main preview when data changes
+  React.useEffect(() => {
+    if (data?.imageUrl) {
+      setMainPreviewImage(data.imageUrl);
+    } else if (data?.productImages?.[0]) {
+      setMainPreviewImage(data.productImages[0]);
+    }
+  }, [data]);
 
   if (!isOpen || !data) return null;
 
@@ -194,18 +204,28 @@ export const AdminDetailModal = ({
                 <div className="space-y-6">
                    <div className="relative aspect-square rounded-[32px] bg-gray-100 overflow-hidden shadow-sm">
                       <img
-                        src={data.imageUrl || "https://placehold.co/600x600?text=Product+Image"}
+                        src={mainPreviewImage || "https://placehold.co/600x600?text=Product+Image"}
                         alt={data.productName || "Product"}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-all duration-300"
                       />
                    </div>
-                   <div className="grid grid-cols-4 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="aspect-square rounded-2xl bg-gray-100 overflow-hidden border-2 border-transparent hover:border-primary/30 transition-all cursor-pointer shadow-sm">
-                          <img src={`https://placehold.co/150x150?text=View+${i}`} alt="" className="w-full h-full object-cover" />
-                        </div>
-                      ))}
-                   </div>
+                   
+                   {data.productImages && data.productImages.length > 0 && (
+                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-48 overflow-y-auto p-1 custom-scrollbar">
+                        {data.productImages.map((imgUrl: string, idx: number) => (
+                          <div 
+                            key={idx} 
+                            onClick={() => setMainPreviewImage(imgUrl)}
+                            className={cn(
+                              "aspect-square rounded-2xl bg-gray-100 overflow-hidden border-2 transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95",
+                              mainPreviewImage === imgUrl ? "border-primary shadow-md" : "border-transparent opacity-70 hover:opacity-100"
+                            )}
+                          >
+                            <img src={imgUrl} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                        ))}
+                     </div>
+                   )}
                 </div>
 
                 {/* Quadrant 2: Specification */}

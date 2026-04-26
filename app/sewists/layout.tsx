@@ -7,10 +7,10 @@ export default function SewistProfilesLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div className="bg-white min-h-screen">
       <Header />
       {children}
       <Footer />
-    </>
+    </div>
   );
 }

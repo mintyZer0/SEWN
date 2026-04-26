@@ -2,6 +2,7 @@
 @plugin "daisyui";
 
 :root {
+  color-scheme: light;
   --background: #ffffff;
   --foreground: #171717;
   --primary: #7b3b7b;
@@ -10,6 +11,7 @@
   --secondary: #fff5cd;
   --third: #ff975e;
   --third-light: #ffb88c;
+  --light-pink: #FFC5FF;
   --heading: #7b3b7b;
 }
 
@@ -22,6 +24,7 @@
   --color-secondary: var(--secondary);
   --color-third: var(--third);
   --color-third-light: var(--third-light);
+  --color-light-pink: var(--light-pink);
   --color-heading: var(--heading);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -75,7 +78,7 @@
 } */
 
 body {
-  background: transparent;
+  background: white;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }

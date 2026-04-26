@@ -8,6 +8,7 @@ export default function TesdaCertified() {
           src="/assets/tesda-logo.png"
           alt="TESDA Certified"
           fill
+          sizes="220px"
           className="object-contain"
         />
       </div>

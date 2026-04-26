@@ -11,7 +11,20 @@ export default async function CheckoutPage({
   
   const { data: product } = await supabase
     .from('sewist_products')
-    .select('*')
+    .select(`
+      *,
+      users (first_name, last_name),
+      product_variants (
+        id,
+        sku,
+        stock_quantity,
+        price_override,
+        variant_attribute_values (
+          attribute_type,
+          attribute_value
+        )
+      )
+    `)
     .eq('id', productId)
     .eq('is_active', true)
     .single();

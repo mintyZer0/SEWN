@@ -8,6 +8,7 @@ import { ProfileButton } from "@/components/user-profile/profile-buttons";
 const sidebarItems = [
   { name: "Profile", href: "/" },
   { name: "Products", href: "/products" },
+  { name: "Availability", href: "/appointments" },
   { name: "Notifications", href: "/notifications" },
   { name: "Chat", href: "/chat" },
 ];

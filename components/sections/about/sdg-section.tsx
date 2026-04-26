@@ -10,7 +10,7 @@ export default function SDGSection() {
   ];
 
   return (
-    <div className="w-full bg-secondary-gradient-b py-12 md:py-16 px-4 md:px-8">
+    <div className="w-full bg-light-pink py-12 md:py-16 px-4 md:px-8">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl md:text-6xl font-light text-center mb-8 md:mb-12">
           Sustainable Development Goals Addressed
@@ -24,6 +24,7 @@ export default function SDGSection() {
                 src={sdg.icon}
                 alt={`SDG ${sdg.number}`}
                 fill
+                sizes="(max-width: 768px) 80px, 200px"
                 className="rounded-2xl md:rounded-4xl object-cover"
               />
             </div>

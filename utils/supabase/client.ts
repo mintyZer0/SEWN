@@ -1,8 +1,19 @@
 import { createBrowserClient } from "@supabase/ssr";
 
+const domain = typeof window !== 'undefined' && window.location.hostname.includes("sewn.local") 
+  ? ".sewn.local" 
+  : undefined;
+
 export const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+  {
+    cookieOptions: {
+      domain: domain,
+      path: "/",
+      sameSite: "lax",
+    }
+  }
 );
 
 export function createClient() {

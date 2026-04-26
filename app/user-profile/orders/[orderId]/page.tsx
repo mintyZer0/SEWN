@@ -111,6 +111,7 @@ export default function OrderDetailsPage() {
                 src={orderData.imageSrc}
                 alt={orderData.productName}
                 fill
+                sizes="160px"
                 className="object-cover"
               />
             </div>

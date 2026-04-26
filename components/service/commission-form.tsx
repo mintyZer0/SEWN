@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import AppointmentPicker from "./appointment-picker";
 
 interface CommissionFormProps {
   sewistName: string;
@@ -93,7 +94,8 @@ export default function CommissionForm({
     selectedMeasurementId: "",
     fabricToUse: "",
     orderDetails: "",
-    appointmentDate: "",
+    appointmentStart: "",
+    appointmentEnd: "",
     images: [] as File[],
   });
 
@@ -204,9 +206,12 @@ export default function CommissionForm({
         fabric: disableFabric ? null : formData.fabricToUse || null,
         request_details: finalDetails,
         measurement_profile_id: disableMeasurements ? null : selectedMeasurement?.id || null,
-        appointment_date: formData.appointmentDate
-          ? new Date(formData.appointmentDate).toISOString()
+        appointment_date: formData.appointmentStart
+          ? new Date(formData.appointmentStart).toISOString()
           : new Date().toISOString(), // Fallback if no date
+        appointment_end_date: formData.appointmentEnd
+          ? new Date(formData.appointmentEnd).toISOString()
+          : null,
         status: "pending"
       });
 
@@ -455,22 +460,16 @@ export default function CommissionForm({
 
         {!disableScheduleAppointment && (
           <div>
-            <label
-              htmlFor="appointmentDate"
-              className="block text-base font-light text-black mb-1"
-            >
+            <label className="block text-base font-light text-black mb-2">
               Schedule an appointment? <span className="text-red-500">*</span>
             </label>
-            <input
-              type="date"
-              id="appointmentDate"
-              name="appointmentDate"
-              required
-              value={formData.appointmentDate}
-              onChange={handleChange}
-              min={new Date().toISOString().split("T")[0]}
-              className="w-full px-4 py-2 rounded-2xl border border-gray-300 bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C2463] focus:border-transparent cursor-pointer"
+            <AppointmentPicker 
+              sewistId={sewistId} 
+              onSlotSelected={(start, end) => setFormData(prev => ({...prev, appointmentStart: start, appointmentEnd: end}))} 
             />
+            {(!formData.appointmentStart && !disableScheduleAppointment) && (
+              <input type="hidden" required /> 
+            )}
           </div>
         )}
 

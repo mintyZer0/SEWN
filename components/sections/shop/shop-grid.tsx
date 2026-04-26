@@ -19,7 +19,10 @@ interface Product {
   sold: number;
   verification_status: string;
   description?: string;
-  sewist_name?: string;
+  users?: {
+    first_name: string;
+    last_name: string;
+  };
 
   product_categories?: { category: string } | { category: string }[];
   product_variants?: {
@@ -54,6 +57,7 @@ export default function ShopGrid({ filters, type }: Props) {
           .from("sewist_products")
           .select(`
             *,
+            users (first_name, last_name),
             product_categories (category),
             product_variants (
               stock_quantity,

@@ -25,7 +25,7 @@ export function LoginForm({
       className={cn("flex flex-col gap-6 items-center", className)}
       {...props}
     >
-      <Card className="text-white h-200 w-150 border-0 shadow-none">
+      <Card className="text-white h-200 w-150 border-0 shadow-none bg-transparent">
         <CardHeader className="flex-row justify-center items-baseline gap-4">
           <CardTitle className="text-8xl font-normal">Login</CardTitle>
           <CardDescription className="text-2xl">

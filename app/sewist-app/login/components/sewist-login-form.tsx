@@ -29,7 +29,7 @@ export function SewistLoginForm({
       className={cn("flex flex-col gap-6 items-center", className)}
       {...props}
     >
-      <Card className="text-third h-200 w-150 border-0 shadow-none">
+      <Card className="text-third h-200 w-150 border-0 shadow-none bg-transparent">
         <CardHeader className="flex flex-col items-center gap-2 text-center">
           <CardTitle className="text-8xl font-normal">Sewist Login</CardTitle>
           <CardDescription className="text-2xl text-third">

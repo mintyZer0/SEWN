@@ -70,7 +70,15 @@ WHERE variant_id = 'uuid-123';
 The workflow for custom work.
 - **Service Types:** `commission`, `repair`, `alteration`.
 - **Status:** `pending`, `accepted`, `in_progress`, `completed`, `cancelled`.
-- **Fields:** `client_id`, `sewist_id`, `address_id`, `subject` (Required), `request_details`, `appointment_date`, `fabric` (text value), optional `measurement_profile_id`, and `deleted_at` (Timestamp).
+- **Fields:** `client_id`, `sewist_id`, `address_id`, `subject` (Required), `request_details`, `appointment_date`, `appointment_end_date` (Timestamptz), `fabric` (text value), optional `measurement_profile_id`, and `deleted_at` (Timestamp).
+
+### Appointments & Availability
+- **`sewist_working_hours`**: Defines recurring weekly availability.
+  - `user_id`, `day_of_week` (0-6), `start_time`, `end_time`, `slot_duration_minutes`, `max_customers_per_slot`.
+- **`sewist_schedule_overrides`**: Date-specific exceptions (e.g. holidays).
+  - `user_id`, `override_date`, `is_closed` (Boolean), `start_time`, `end_time`.
+- **`appointments`**: Tracks specific booked time slots.
+  - `service_request_id`, `sewist_id`, `client_id`, `start_time`, `end_time`, `status`.
 
 ### Sewist-Specific Config
 - **`sewist_settings`**: Toggles for `accepting_commissions`, `accepting_alterations`, `accepting_repairs`, and `accepting_appointments`.

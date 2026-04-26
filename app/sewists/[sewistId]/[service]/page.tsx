@@ -59,7 +59,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
   
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist";
   const avatarData = user.user_avatars;
-  const avatarUrl = Array.isArray(avatarData) ? avatarData[0]?.avatar_url : avatarData?.avatar_url;
+  const avatarUrl = Array.isArray(avatarData) ? (avatarData as any[])[0]?.avatar_url : (avatarData as any)?.avatar_url;
   const avatar = getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg");
 
   const renderServiceContent = () => {
@@ -103,6 +103,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -161,6 +162,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/repair-steps/repair-hero.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />
@@ -227,6 +229,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
                 fill
+                sizes="100vw"
                 className="object-cover"
                 priority
               />

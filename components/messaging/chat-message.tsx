@@ -1,5 +1,10 @@
+"use client";
+
 import { cn } from '@/lib/utils'
+import { Maximize2 } from 'lucide-react'
 import type { ChatMessage } from '@/hooks/use-realtime-chat'
+import PrivateVideoPlayer from './private-video-player'
+import PrivateImage from './private-image'
 
 interface ChatMessageItemProps {
   message: ChatMessage
@@ -7,18 +12,28 @@ interface ChatMessageItemProps {
   showHeader?: boolean
   variant?: "default" | "compact"
   isLatest?: boolean
+  onPreview?: (url: string, type: "image" | "video") => void
 }
 
-export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", isLatest = false }: ChatMessageItemProps) => {
+export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", isLatest = false, onPreview }: ChatMessageItemProps) => {
   const isCompact = variant === "compact";
   
   const timeString = message.createdAt 
     ? new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : '';
 
+  const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(message.content);
+  const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(message.content);
+  const isPrivate = message.content.startsWith("s3-private://");
+  const isMedia = isVideo || isImage || isPrivate;
+
   return (
     <div 
-      className={`flex w-full flex-col ${isOwnMessage ? 'items-end' : 'items-start'} ${isCompact ? 'mb-2' : 'mb-4'} group focus:outline-none`} 
+      className={cn(
+        "flex w-full flex-col group focus:outline-none",
+        isOwnMessage ? 'items-end' : 'items-start',
+        isCompact ? 'mb-2' : 'mb-4'
+      )}
       tabIndex={0}
     >
       <div className="relative flex max-w-[80%] items-center group/tooltip">
@@ -31,12 +46,31 @@ export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", is
 
         <div
           className={cn(
-            'shadow-sm text-white font-medium transition-transform active:scale-[0.98] w-full whitespace-pre-wrap break-words',
-            isCompact ? 'px-4 py-2 rounded-2xl text-sm bg-primary' : 'px-8 py-4 rounded-3xl text-lg third-gradient',
-            isOwnMessage ? (isCompact ? 'rounded-tr-none' : 'rounded-tr-none') : (isCompact ? 'rounded-tl-none' : 'rounded-tl-none')
+            'shadow-sm font-medium transition-transform active:scale-[0.98] w-full',
+            isMedia ? 'p-1 rounded-3xl bg-secondary/10 border-2 border-primary/5' : (
+              isCompact ? 'px-4 py-2 rounded-2xl text-sm bg-primary text-white whitespace-pre-wrap break-words' : 'px-8 py-4 rounded-3xl text-lg third-gradient text-white whitespace-pre-wrap break-words'
+            ),
+            isOwnMessage ? 'rounded-tr-none' : 'rounded-tl-none'
           )}
         >
-          {message.content}
+          {isMedia ? (
+            <div 
+              onClick={() => onPreview?.(message.content, (isVideo || (isPrivate && !isImage)) ? "video" : "image")}
+              className="cursor-pointer group/media relative"
+            >
+              {(isVideo || (isPrivate && !isImage)) 
+                ? <PrivateVideoPlayer url={message.content} className="w-full max-w-[320px] sm:max-w-[400px]" />
+                : <PrivateImage url={message.content} className="w-full max-w-[320px] sm:max-w-[400px]" />
+              }
+              <div className="absolute inset-0 bg-black/0 group-hover/media:bg-black/10 transition-colors rounded-2xl flex items-center justify-center opacity-0 group-hover/media:opacity-100">
+                  <div className="bg-black/40 p-2 rounded-full backdrop-blur-sm">
+                    <Maximize2 className="text-white h-5 w-5" />
+                  </div>
+              </div>
+            </div>
+          ) : (
+            message.content
+          )}
         </div>
 
         {/* Tooltip for other message (appears on the right) */}

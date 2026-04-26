@@ -7,6 +7,7 @@ export default function AboutHero() {
         src="/assets/about-page/bg-about.jpg"
         alt="About SEWN Background"
         fill
+        sizes="100vw"
         className="object-cover"
         priority
       />
