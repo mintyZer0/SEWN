@@ -39,7 +39,9 @@ export const ChatThreadItem = ({ thread, isSelected, onSelect }: ChatThreadItemP
           </span>
         </div>
         <p className="text-sm font-medium text-primary/60 truncate -mt-1">
-          {thread.lastMessage}
+          {thread.lastMessage.startsWith("s3-private://") 
+            ? (/\.(mp4|webm|ogg|mov)$/i.test(thread.lastMessage) ? "Video 🎥" : "Photo 📸")
+            : thread.lastMessage}
         </p>
       </div>
     </div>
