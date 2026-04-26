@@ -1,37 +1,50 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 import CategoriesCarousel from "../../ui/categories-carousel";
+
+type CategoryCarouselItem = {
+  imageSrc: string;
+  alt: string;
+  category: string;
+  id: string; 
+};
+
 export default function Categories() {
-  const itemsList = [
-    {
-      imageSrc: "/assets/categories-images/categories-shirts.jpg",
-      alt: "product",
-      category: "shirts",
-      id: "1",
-    },
-    {
-      imageSrc: "/assets/categories-images/categories-skirts.jpg",
-      alt: "product",
-      category: "skirts",
-      id: "2",
-    },
-    {
-      imageSrc: "/assets/categories-images/categories-dresses.jpg",
-      alt: "product",
-      category: "dresses",
-      id: "3",
-    },
-    {
-      imageSrc: "/assets/categories-images/categories-skirts.jpg",
-      alt: "product",
-      category: "dresses",
-      id: "4",
-    },
-    {
-      imageSrc: "/assets/categories-images/categories-dresses.jpg",
-      alt: "product",
-      category: "dresses",
-      id: "5",
-    },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [itemsList, setItemsList] = useState<CategoryCarouselItem[]>([]);
+  
+  useEffect(() => { const loadCategories = async () => {
+    try{    
+    setLoading(true);
+        
+        const{data: categoryRows, error} = await supabase.rpc(
+        'get_categories_with_images');
+
+        if (error) {
+          console.error("Error fetching categories:", error?.message, error);
+          setItemsList([]);
+        }
+        
+        const itemsList: CategoryCarouselItem[] =
+        categoryRows?.map((row: any, index: number) => ({
+          imageSrc: row.image_url ?? '/assets/categories-images/fallback.jpg',
+          alt: `Products in ${row.category}`,
+          category: row.category,
+          id: row.category.toLowerCase().replace(/\s/g, '-'),
+        })) || [];
+
+        setItemsList(itemsList);
+    }
+    catch (error) {
+      console.error("Unexpected error loading categories:", error);
+      setItemsList([]);
+    }
+  };
+    loadCategories();
+  }, []);
+
   return (
     <>
       <div className="flex mx-8">
@@ -39,7 +52,11 @@ export default function Categories() {
           categories
         </h2>
       </div>
-      <CategoriesCarousel items={itemsList}></CategoriesCarousel>
+      {loading ? (
+        <div className="mx-8 mt-4">Loading categories...</div>
+      ) : (
+        <CategoriesCarousel items={itemsList} />
+      )}
     </>
   );
 }
