@@ -40,6 +40,8 @@ export default function Categories() {
     catch (error) {
       console.error("Unexpected error loading categories:", error);
       setItemsList([]);
+    } finally {
+      setLoading(false);
     }
   };
     loadCategories();
