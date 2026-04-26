@@ -85,6 +85,11 @@ export default function ProductsPage() {
             last_name,
             created_at
           ),
+          product_images (
+            image_url,
+            display_order,
+            is_main
+          ),
           product_variants (
             id,
             sku,
@@ -100,22 +105,27 @@ export default function ProductsPage() {
         .order('created_at', { ascending: false });
 
       if (data) {
-        const mapped: any[] = data.map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.type,
-          sewistName: `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Sewist",
-          dateAdded: new Date(p.created_at).toLocaleDateString(),
-          price: `₱${p.price.toLocaleString()}`,
-          stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
-          status: p.verification_status === 'approved' ? 'Accepted' : (p.verification_status === 'rejected' ? 'Declined' : 'Pending') as StatusType,
-          // Full fields for modal
-          description: p.description,
-          location: p.location,
-          imageUrl: p.img_src,
-          sewistJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
-          variants: p.product_variants || [],
-        }));        setProducts(mapped);
+        const mapped: any[] = data.map(p => {
+          const sortedImages = (p.product_images || []).sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0));
+          return {
+            id: p.id,
+            name: p.name,
+            category: p.type,
+            sewistName: `${(p.users as any)?.first_name || ""} ${(p.users as any)?.last_name || ""}`.trim() || "Unknown Sewist",
+            dateAdded: new Date(p.created_at).toLocaleDateString(),
+            price: `₱${p.price.toLocaleString()}`,
+            stock: p.product_variants?.reduce((acc: number, v: any) => acc + v.stock_quantity, 0) + " items",
+            status: p.verification_status === 'approved' ? 'Accepted' : (p.verification_status === 'rejected' ? 'Declined' : 'Pending') as StatusType,
+            // Full fields for modal
+            description: p.description,
+            location: p.location,
+            imageUrl: p.img_src,
+            productImages: sortedImages.map((img: any) => img.image_url),
+            sewistJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
+            variants: p.product_variants || [],
+          };
+        });
+        setProducts(mapped);
       }
     } catch (err) {
       console.error("Error fetching admin products:", err);
