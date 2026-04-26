@@ -28,11 +28,12 @@ export default function Categories() {
         }
         
         const itemsList: CategoryCarouselItem[] =
-        categoryRows?.map((row: any, index: number) => ({
+        categoryRows?.map((row: any) => ({
           imageSrc: row.image_url ?? '/assets/categories-images/fallback.jpg',
           alt: `Products in ${row.category}`,
           category: row.category,
           id: row.category.toLowerCase().replace(/\s/g, '-'),
+          href: `browse/shop?category=${encodeURIComponent(row.category)}`,
         })) || [];
 
         setItemsList(itemsList);
@@ -57,7 +58,7 @@ export default function Categories() {
       {loading ? (
         <div className="mx-8 mt-4">Loading categories...</div>
       ) : (
-        <CategoriesCarousel items={itemsList} />
+        <CategoriesCarousel items={itemsList} header="browse" />
       )}
     </>
   );
