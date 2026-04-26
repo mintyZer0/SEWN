@@ -10,6 +10,7 @@ import { ProductModal } from "@/components/modals/product-modal";
 import { CommissionsModal } from "@/components/modals/commissions-modal";
 import { ViewPendingsModal } from "@/components/modals/view-pendings-modal";
 import { ServiceRequestDetailsModal, ServiceRequest } from "@/components/modals/service-request-details-modal";
+import { SuccessModal } from "@/components/modals/success-modal";
 import { createClient } from '@/utils/supabase/client';
 import { getS3PublicUrl } from '@/lib/s3-client';
 import { Loader2 } from "lucide-react";
@@ -35,6 +36,7 @@ export default function ProductsPage() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isCommissionsModalOpen, setIsCommissionsModalOpen] = useState(false);
   const [isViewPendingsModalOpen, setIsViewPendingsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
   
   const [openSections, setOpenSections] = useState({
@@ -156,6 +158,42 @@ export default function ProductsPage() {
 
   useEffect(() => {
     fetchData();
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('sewist-dashboard-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'sewist_products',
+        },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'order_items',
+        },
+        () => fetchData()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'service_requests',
+        },
+        () => fetchData()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const toggleSection = (section: keyof typeof openSections) => {
@@ -193,7 +231,8 @@ export default function ProductsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Insert/Update Product
+      // 1. Insert/Update Product "Shell"
+      // Note: Assumes img_src is nullable in DB to prevent constraint error on first insert
       const productPayload: any = {
         user_id: user.id,
         name: productData.name,
@@ -226,6 +265,12 @@ export default function ProductsPage() {
       if (productData.images && productData.images.length > 0) {
         const uploadedImageUrls: string[] = [];
         
+        // Count existing images to set display_order correctly
+        const { count: existingCount } = await supabase
+          .from('product_images')
+          .select('*', { count: 'exact', head: true })
+          .eq('product_id', product.id);
+
         for (let i = 0; i < productData.images.length; i++) {
           const file = productData.images[i];
           const fileExt = file.name.split('.').pop();
@@ -257,13 +302,13 @@ export default function ProductsPage() {
           await supabase.from('product_images').insert({
             product_id: product.id,
             image_url: publicUrl,
-            is_main: i === 0,
-            display_order: i,
+            is_main: i === 0 && !productData.img_src, // Main if first new and no existing main
+            display_order: i + (existingCount || 0),
           });
         }
 
-        // Update product's main image
-        if (uploadedImageUrls.length > 0) {
+        // Update product's main thumbnail if a new main image was uploaded or none exists
+        if (uploadedImageUrls.length > 0 && !productData.img_src) {
           await supabase
             .from('sewist_products')
             .update({ img_src: uploadedImageUrls[0] })
@@ -272,11 +317,14 @@ export default function ProductsPage() {
       }
 
       // 3. Save selected product category.
+      const rawCategory = String(productData.category ?? "").trim();
+      const capitalizedCategory = rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1).toLowerCase();
+
       const { error: categoryError } = await supabase
         .from("product_categories")
         .upsert({
           product_id: product.id,
-          category: String(productData.category ?? "").toLowerCase(),
+          category: capitalizedCategory,
         });
 
       if (categoryError) throw categoryError;
@@ -310,7 +358,7 @@ export default function ProductsPage() {
           // B. Map Attributes for this variant (e.g., this SKU is both 'Red' and 'Small')
           const attributeEntries = Object.entries(variantData.attributes).map(([type, value]) => ({
             variant_id: variant.id,
-            attribute_type: String(type).trim().toLowerCase(),
+            attribute_type: String(type).trim().toLowerCase(), // DB expects lowercase
             attribute_value: value as string,
           }));
 
@@ -320,11 +368,17 @@ export default function ProductsPage() {
 
           if (attrError) {
             console.error("Attribute mapping error:", attrError);
+            throw attrError;
           }
         }
       }
       await fetchData();
       setIsProductModalOpen(false);
+
+      // Trigger success modal only if submitted for review (not draft)
+      if (targetStatus === 'pending') {
+        setIsSuccessModalOpen(true);
+      }
     } catch (error: any) {
       console.error("Failed to save product:", error);
       alert("Failed to save product: " + (error.message || "Unknown error"));
@@ -501,6 +555,12 @@ export default function ProductsPage() {
         request={selectedRequest}
         onClose={() => setIsRequestModalOpen(false)}
         onStatusUpdate={handleStatusUpdate}
+      />
+
+      <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+        variant="product"
       />
     </div>
   );

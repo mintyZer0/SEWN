@@ -32,7 +32,7 @@ interface ProductVariant {
 }
 
 const CATEGORY_OPTIONS = MARKETPLACE_FILTERS.Categories.map((category) => ({
-  value: category.toLowerCase(),
+  value: category,
   label: category,
 }));
 
@@ -205,11 +205,9 @@ export const ProductModal = ({
           const rawCategoryValue = Array.isArray(data.product_categories)
             ? data.product_categories[0]?.category
             : data.product_categories?.category;
-          const normalizedCategory = typeof rawCategoryValue === "string"
-            ? rawCategoryValue.toLowerCase()
-            : "";
-          const categoryValue = CATEGORY_OPTIONS.some((option) => option.value === normalizedCategory)
-            ? normalizedCategory
+          
+          const categoryValue = CATEGORY_OPTIONS.some((option) => option.value === rawCategoryValue)
+            ? rawCategoryValue
             : CATEGORY_OPTIONS[0].value;
 
           setFormData((prev) => ({
@@ -416,6 +414,12 @@ export const ProductModal = ({
       alert("Weight must be a valid number with up to 2 decimal places.");
       return;
     }
+
+    const hasImages = existingImages.length > 0 || selectedImages.some(img => img !== null);
+    if (!hasImages) {
+      alert("At least one product image is required.");
+      return;
+    }
     
     if (onSave) {
       try {
@@ -425,6 +429,7 @@ export const ProductModal = ({
           ...formData,
           name: formData.productName, // Map productName to name for DB
           price: Number(formData.price),
+          img_src: existingImages[0],
           images: selectedImages.filter((img): img is File => img !== null),
           variants: variants.map(v => ({
             id: v.id,
