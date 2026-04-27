@@ -29,7 +29,7 @@ export default function Categories() {
         
         const itemsList: CategoryCarouselItem[] =
         categoryRows?.map((row: any) => ({
-          imageSrc: row.image_url ?? '/assets/categories-images/fallback.jpg',
+          imageSrc: row.image_url ?? '/assets/categories-images/def_Clothes.png',
           alt: `Products in ${row.category}`,
           category: row.category,
           id: row.category.toLowerCase().replace(/\s/g, '-'),
@@ -58,7 +58,7 @@ export default function Categories() {
       {loading ? (
         <div className="mx-8 mt-4">Loading categories...</div>
       ) : (
-        <CategoriesCarousel items={itemsList} header="browse" />
+        <CategoriesCarousel items={itemsList}/>
       )}
     </>
   );
