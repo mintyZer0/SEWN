@@ -2,12 +2,15 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "react-feather";
+import { useRouter } from 'next/navigation'; // or useRouter from next/router if pages router
+import Link from 'next/link';
 
 export interface CarouselItem {
   imageSrc: string;
   alt: string;
   category: string;
   id: string;
+  href?: string;
 }
 interface CategoriesCarouselProps {
   items: CarouselItem[];
@@ -15,6 +18,7 @@ interface CategoriesCarouselProps {
 
 export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -27,6 +31,15 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
     }
   };
 
+  const handleCategoryClick = (category: string, href?: string) => {
+    if (href) {
+      router.push(href);
+    } else {
+      // Fallback
+      router.push(`/store?category=${encodeURIComponent(category)}`);
+    }
+  };
+
   return (
     <div className="rounded-box relative w-full py-2">
       <div
@@ -35,7 +48,12 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {items.map((item) => (
-          <div className="relative shrink-0 w-80 lg:w-155 group" key={item.id}>
+          <Link
+            key = {item.id}
+            href = {item.href || '/store?category=' + encodeURIComponent(item.category)}
+            className = "relative shrink-0 w-80 lg:w-155 group cursor-pointer hover:scale-[1,02] transform transition-transform duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="relative w-full h-60 lg:h-96">
               <Image
                 className="w-full h-full object-cover rounded-lg group-hover:scale-102 transform transition-transform duration-500 "
@@ -51,7 +69,7 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
               </div>
               <div className="absolute inset-0 bg-linear-to-t from-black/70 from-5% via-40% via-gray-300/30 to-100% to-white/5 group-hover:scale-102 transform transition-transform duration-500"></div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
       <div className="absolute inset-0 z-20 flex items-center justify-between px-4 pointer-events-none">
