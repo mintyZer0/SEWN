@@ -93,12 +93,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<{
     notifications: StatusItem[];
-    orders: StatusItem[];
-    commissions: StatusItem[];
   }>({
     notifications: [],
-    orders: [],
-    commissions: [],
   });
 
   const formatDate = (dateString: string) => {
@@ -122,97 +118,27 @@ export default function NotificationsPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // 1. Fetch Notifications
-        const { data: notificationsData } = await supabase
+        // Fetch all notifications from the single table
+        const { data: notificationsData, error } = await supabase
           .from('notifications')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        // 2. Fetch Orders (Order Items belonging to this sewist's products)
-        const { data: orderItemsData } = await supabase
-          .from('order_items')
-          .select(`
-            id,
-            orders!inner (
-              created_at,
-              users (
-                first_name,
-                last_name
-              )
-            ),
-            sewist_products!inner (
-              name,
-              user_id
-            )
-          `)
-          .eq('sewist_products.user_id', user.id);
+        if (error) throw error;
 
-        // 3. Fetch Commissions
-        const { data: commissionsData } = await supabase
-          .from('service_requests')
-          .select(`
-            id,
-            created_at,
-            client_id,
-            users!service_requests_client_id_fkey (
-              first_name,
-              last_name
-            )
-          `)
-          .eq('sewist_id', user.id)
-          .eq('service_type', 'commission')
-          .order('created_at', { ascending: false });
-
-        // Format Notifications
+        // Format all notifications uniformly
         const formattedNotifications: StatusItem[] = (notificationsData || []).map(n => ({
           id: n.id,
           title: n.title,
           description: n.message || "",
           timestamp: formatDate(n.created_at),
-          type: "notification",
+          type: (n.type as "notification" | "order" | "commission") || "notification",
           link: n.action_link
         }));
 
-        // Format Orders
-        // Note: orderItemsData.orders.users might be an array or single object depending on PostgREST setup.
-        // We'll handle both cases safely.
-        let formattedOrders: StatusItem[] = (orderItemsData || []).map((item: any) => {
-          const order = Array.isArray(item.orders) ? item.orders[0] : item.orders;
-          const customer = order?.users ? (Array.isArray(order.users) ? order.users[0] : order.users) : null;
-          const product = Array.isArray(item.sewist_products) ? item.sewist_products[0] : item.sewist_products;
-          
-          const customerName = customer ? `${customer.first_name || ""} ${customer.last_name || ""}`.trim() : "Customer";
-          
-          return {
-            id: item.id,
-            title: `${customerName} bought ${product?.name || "a product"}!`,
-            description: "Click to go to products summary",
-            timestamp: formatDate(order?.created_at),
-            type: "order",
-          };
-        });
-
-        // Sort orders by timestamp descending manually since we fetched via join
-        formattedOrders.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-
-        // Format Commissions
-        const formattedCommissions: StatusItem[] = (commissionsData || []).map((c: any) => {
-           const client = Array.isArray(c.users) ? c.users[0] : c.users;
-           const clientName = client ? `${client.first_name || ""} ${client.last_name || ""}`.trim() : "Customer";
-           return {
-            id: c.id,
-            title: `${clientName} would like to commission you!`,
-            description: "Click to check details",
-            timestamp: formatDate(c.created_at),
-            type: "commission",
-          };
-        });
-
         setData({
           notifications: formattedNotifications,
-          orders: formattedOrders,
-          commissions: formattedCommissions,
         });
 
       } catch (error) {
@@ -225,11 +151,15 @@ export default function NotificationsPage() {
     fetchSewistStatus();
   }, [supabase]);
 
+  const generalNotifs = data.notifications.filter(n => n.type === "notification");
+  const orderNotifs = data.notifications.filter(n => n.type === "order");
+  const commissionNotifs = data.notifications.filter(n => n.type === "commission");
+
   return (
     <div className="p-16 max-w-6xl mx-auto">
-      <StatusSection title="Notifications" items={data.notifications} loading={loading} />
-      <StatusSection title="Orders" items={data.orders} loading={loading} />
-      <StatusSection title="Commissions" items={data.commissions} loading={loading} />
+      <StatusSection title="Notifications" items={generalNotifs} loading={loading} />
+      <StatusSection title="Orders" items={orderNotifs} loading={loading} />
+      <StatusSection title="Commissions" items={commissionNotifs} loading={loading} />
     </div>
   );
 }
