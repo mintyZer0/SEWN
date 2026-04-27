@@ -11,6 +11,7 @@ type Section = {
 interface Props {
   section: Section;
   onFilterChange: (section: string, values: string[]) => void;
+  selectedValues?: string[];
 }
 
 export default function FilterCollapsibleSection({
