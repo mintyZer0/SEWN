@@ -57,7 +57,10 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex flex-col bg-black/95 backdrop-blur-md animate-in fade-in duration-300">
+    <div 
+      className="fixed inset-0 z-[200] flex flex-col bg-black/95 backdrop-blur-md animate-in fade-in duration-300"
+      onClick={onClose}
+    >
       {/* Header */}
       <div className="flex items-center justify-end p-6 text-white z-20 bg-linear-to-b from-black/60 to-transparent">
         <div className="flex items-center gap-4">
@@ -68,12 +71,16 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
               target="_blank"
               rel="noopener noreferrer"
               className="p-3 hover:bg-white/10 rounded-full transition-colors"
+              onClick={(e) => e.stopPropagation()}
             >
               <Download className="h-6 w-6" />
             </a>
           )}
           <button 
-            onClick={onClose}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
             className="p-3 hover:bg-rose-500 rounded-full transition-all active:scale-95"
           >
             <X className="h-8 w-8" />
@@ -84,14 +91,14 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
       {/* Main Content Area */}
       <div className="flex-1 relative flex items-center justify-center p-4 sm:p-12 overflow-hidden">
         {loading && (
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
              <Loader2 className="h-12 w-12 animate-spin text-primary" />
              <p className="text-white/40 font-medium">Securing content...</p>
           </div>
         )}
 
         {error && (
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-4" onClick={(e) => e.stopPropagation()}>
              <div className="bg-rose-500/20 p-6 rounded-full inline-block">
                 <X className="h-12 w-12 text-rose-500" />
              </div>
@@ -107,6 +114,7 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
                 src={signedUrl} 
                 alt="Full size preview"
                 className="max-w-full max-h-full object-contain rounded-lg shadow-2xl shadow-black"
+                onClick={(e) => e.stopPropagation()}
               />
             ) : (
               <video 
@@ -114,6 +122,7 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
                 controls 
                 autoPlay
                 className="max-w-full max-h-full rounded-lg shadow-2xl shadow-black"
+                onClick={(e) => e.stopPropagation()}
               />
             )}
           </div>
