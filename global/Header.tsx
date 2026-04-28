@@ -6,6 +6,7 @@ import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
 import { useRef, useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
+import FlatListDropDown from "@/components/ui/flatlistdropdown";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +80,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
         {/* Search Bar: Desktop Row 2 */}
         <div className="col-start-2 col-end-6 row-start-2 row-end-2 px-0 mt-2">
           <SearchBar />
+          <FlatListDropDown />
         </div>
 
         {/* Icons: Desktop Col 6 Row 1 */}
