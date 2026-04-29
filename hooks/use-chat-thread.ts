@@ -1,6 +1,7 @@
 // hooks/useChatThreads.ts
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export interface ChatThread {
   id: string;
@@ -45,14 +46,22 @@ export function useChatThreads() {
     
     const { data: usersData } = await supabase
       .from("users")
-      .select("id, first_name, last_name")
+      .select("id, first_name, last_name, user_avatars(avatar_url)")
       .in("id", recipientIds);
       
-    const usersMap = new Map(usersData?.map(u => [u.id, `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.id.substring(0,8)}`]) || []);
+    const usersMap = new Map(usersData?.map(u => {
+      const avatarData = u.user_avatars;
+      const avatarUrl = Array.isArray(avatarData) ? (avatarData as any[])[0]?.avatar_url : (avatarData as any)?.avatar_url;
+      const avatar = getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg");
+      return [u.id, {
+        name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || `User ${u.id.substring(0,8)}`,
+        avatar
+      }];
+    }) || []);
 
     const mapped = conversations.map((c: any) => {
       const recipientId = c.buyer_id === user.id ? c.sewist_id : c.buyer_id;
-      const userName = usersMap.get(recipientId) || `User ${recipientId.substring(0, 8)}`;
+      const userInfo = usersMap.get(recipientId) || { name: `User ${recipientId.substring(0, 8)}`, avatar: getS3PublicUrl("/assets/sewist-photos/1.jpg") };
       
       const sortedMessages = (c.chat_messages || []).sort(
         (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
@@ -61,12 +70,13 @@ export function useChatThreads() {
 
       return {
         id: c.id,
-        name: userName,
+        name: userInfo.name,
         lastMessage: lastMsg,
         last_message_at: c.last_message_at,
         time: c.last_message_at
           ? new Date(c.last_message_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })
           : "New Chat",
+        avatar: userInfo.avatar,
       };
     });
 

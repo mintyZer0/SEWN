@@ -241,10 +241,8 @@ export default function SewistCenterPage() {
             existingAvatar.avatar_url !== "avatars/default.jpg" &&
             existingAvatar.avatar_url !== filePath
           ) {
-            await fetch('/api/s3-upload', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ filename: existingAvatar.avatar_url, action: 'delete' })
+            await fetch(`/api/media?filename=${encodeURIComponent(existingAvatar.avatar_url)}`, {
+              method: 'DELETE',
             });
           }
 

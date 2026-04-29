@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Download, Maximize2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPrivateMediaUrl } from "@/lib/s3-client";
 
 interface MediaPreviewModalProps {
   isOpen: boolean;
@@ -20,29 +21,11 @@ export default function MediaPreviewModal({ isOpen, onClose, url, type }: MediaP
     if (!isOpen || !url) return;
 
     async function fetchSignedUrl() {
-      if (!url?.startsWith("s3-private://")) {
-        setSignedUrl(url);
-        return;
-      }
-
       try {
         setLoading(true);
         setError(null);
-        const filename = url.replace("s3-private://", "").replace(/^\/+/, "");
-        
-        const res = await fetch("/api/s3-upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            filename, 
-            action: "fetch", 
-            bucketType: "private" 
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to get signed URL");
-        setSignedUrl(data.url);
+        const resolvedUrl = await getPrivateMediaUrl(url);
+        setSignedUrl(resolvedUrl);
       } catch (err: any) {
         console.error("Preview fetch error:", err);
         setError(err.message);

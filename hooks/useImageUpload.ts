@@ -74,7 +74,7 @@ export const useImageUpload = (options: UploadOptions = {}) => {
         }
 
         // 1. Get presigned URL from our API
-        const res = await fetch('/api/s3-upload', {
+        const res = await fetch('/api/media', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

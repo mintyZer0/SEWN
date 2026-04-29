@@ -28,7 +28,11 @@ export const ChatThreadItem = ({ thread, isSelected, onSelect }: ChatThreadItemP
         isSelected ? "bg-third/20 shadow-inner" : ""
       )}
     >
-      <div className="w-14 h-14 rounded-full bg-white/60 shrink-0" />
+      {thread.avatar ? (
+        <img src={thread.avatar} alt={thread.name} className="w-14 h-14 rounded-full object-cover shrink-0" />
+      ) : (
+        <div className="w-14 h-14 rounded-full bg-white/60 shrink-0" />
+      )}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <h4 className="font-black text-primary text-lg truncate leading-tight">

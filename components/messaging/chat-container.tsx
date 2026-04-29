@@ -5,6 +5,7 @@ import { ChatList } from "./chat-list";
 import { RealtimeChat } from "./realtime-chat";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface ChatContainerProps {
   initialConversationId: string | null;
@@ -19,6 +20,7 @@ export function ChatContainer({
 }: ChatContainerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(initialConversationId);
   const [targetName, setTargetName] = useState("Select a Chat");
+  const [targetAvatar, setTargetAvatar] = useState<string | undefined>(undefined);
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,12 +53,15 @@ export function ChatContainer({
 
         const { data: otherUser } = await supabase
           .from("users")
-          .select("first_name, last_name")
+          .select("first_name, last_name, user_avatars(avatar_url)")
           .eq("id", otherId)
           .single();
 
         if (otherUser) {
-          setTargetName(`${otherUser.first_name} ${otherUser.last_name}`.trim());
+          setTargetName(`${otherUser.first_name || ''} ${otherUser.last_name || ''}`.trim() || `User ${otherId.substring(0,8)}`);
+          const avatarData = otherUser.user_avatars;
+          const avatarUrl = Array.isArray(avatarData) ? (avatarData as any[])[0]?.avatar_url : (avatarData as any)?.avatar_url;
+          setTargetAvatar(getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg"));
         }
       }
     }
@@ -80,7 +85,7 @@ export function ChatContainer({
             key={roomName}
             roomName={roomName}
             username={initialUsername}
-            targetUser={{ name: targetName }}
+            targetUser={{ name: targetName, avatar: targetAvatar }}
           />
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-primary/40">

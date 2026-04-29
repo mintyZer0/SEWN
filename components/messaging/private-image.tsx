@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Loader2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPrivateMediaUrl } from "@/lib/s3-client";
 
 interface PrivateImageProps {
   url: string;
@@ -19,29 +20,11 @@ export default function PrivateImage({ url, alt = "Shared image", className }: P
 
   useEffect(() => {
     async function fetchSignedUrl() {
-      if (!url.startsWith("s3-private://")) {
-        setSignedUrl(url);
-        return;
-      }
-
       try {
         setLoading(true);
         setError(null);
-        const filename = url.replace("s3-private://", "").replace(/^\/+/, "");
-        
-        const res = await fetch("/api/s3-upload", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            filename, 
-            action: "fetch", 
-            bucketType: "private" 
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to get signed URL");
-        setSignedUrl(data.url);
+        const resolvedUrl = await getPrivateMediaUrl(url);
+        setSignedUrl(resolvedUrl);
       } catch (err: any) {
         console.error("Image fetch error:", err);
         setError(err.message);

@@ -137,7 +137,7 @@ export const RealtimeChat = ({
       const fileName = `${folder}/${roomName}/${Date.now()}.${fileExt}`;
 
       // 1. Get signed upload URL for private bucket
-      const res = await fetch('/api/s3-upload', {
+      const res = await fetch('/api/media', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -173,15 +173,28 @@ export const RealtimeChat = ({
 
   return (
     <div className="flex flex-col h-full w-full bg-background antialiased">
-      {/* Header - Hidden in compact view as the Widget has its own header */}
-      {!isCompact && (
+      {/* Header */}
+      {!isCompact ? (
         <>
           <div className="p-8 flex items-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex-shrink-0 shadow-sm" />
+            {targetUser.avatar ? (
+              <img src={targetUser.avatar} alt={targetUser.name} className="w-16 h-16 rounded-full object-cover shadow-sm flex-shrink-0" />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex-shrink-0 shadow-sm" />
+            )}
             <h3 className="text-2xl font-black text-primary">{targetUser.name}</h3>
           </div>
           <div className="mx-8 border-b border-primary/10" />
         </>
+      ) : (
+        <div className="p-4 flex items-center gap-3 bg-white/50 border-b border-primary/5 shrink-0 shadow-sm">
+          {targetUser.avatar ? (
+            <img src={targetUser.avatar} alt={targetUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 shadow-sm" />
+          )}
+          <h3 className="text-md font-bold text-primary truncate">{targetUser.name}</h3>
+        </div>
       )}
 
       {/* Messages */}
