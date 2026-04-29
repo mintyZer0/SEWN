@@ -18,7 +18,7 @@ interface Props{
   onSelect?: () => void;
 }
 
-export default function FlatListDropdown({ data }: Props) {
+export default function FlatListDropdown({ data, onSelect }: Props) {
   const router = useRouter();
 
   if(!data || data.length === 0) {
