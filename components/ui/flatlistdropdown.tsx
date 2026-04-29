@@ -1,83 +1,65 @@
-import React, { Component } from "react";
-import { View, Text, FlatList, TextInput, ListItem } from "react-native";
+"use client";
 
-interface FlatListDropDownProps {}
+import { useRealtimeChat } from "@/hooks/use-realtime-chat";
+import { RotateCwSquare } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-interface FlatListDropDownState {
-  data: { name: string }[];
-  value: string;
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  imageUrl: string;
+  rating?: number;
 }
 
-class FlatListDropDown extends Component<FlatListDropDownProps, FlatListDropDownState> {
-  constructor(props: FlatListDropDownProps) {
-    super(props);
-
-    this.state = {
-      data: [],
-      value: "",
-    };
-
-    this.arrayNew = [{ name: "Robert" }, { name: "Bryan" }, { name: "Vicente" }, { name: "Tristan" }, { name: "Marie" }, { name: "Onni" }, { name: "sophie" }, { name: "Brad" }, { name: "Samual" }, { name: "Omur" }, { name: "Ower" }, { name: "Awery" }, { name: "Ann" }, { name: "Jhone" }, { name: "z" }, { name: "bb" }, { name: "cc" }, { name: "d" }, { name: "e" }, { name: "f" }, { name: "g" }, { name: "h" }, { name: "i" }, { name: "j" }, { name: "k" }, { name: "l" }];
-  }
-
-  renderSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: "100%",
-          backgroundColor: "#CED0CE",
-        }}
-      />
-    );
-  };
-
-  searchItems = (text) => {
-    const newData = this.arrayNew.filter((item) => {
-      const itemData = `${item.name.toUpperCase()}`;
-      const textData = text.toUpperCase();
-      return itemData.indexOf(textData) > -1;
-    });
-    this.setState({
-      data: newData,
-      value: text,
-    });
-  };
-
-  renderHeader = () => {
-    return (
-      <TextInput
-        style={{ height: 60, borderColor: "#000", borderWidth: 1 }}
-        placeholder="   Type Here...Key word"
-        onChangeText={(text) => this.searchItems(text)}
-        value={this.state.value}
-      />
-    );
-  };
-
-  render() {
-    return (
-      <View
-        style={{
-          flex: 1,
-          padding: 25,
-          width: "98%",
-          alignSelf: "center",
-          justifyContent: "center",
-        }}
-      >
-        <FlatList
-          data={this.state.data}
-          renderItem={({ item }) => (
-            <Text style={{ padding: 10 }}>{item.name} </Text>
-          )}
-          keyExtractor={(item) => item.name}
-          ItemSeparatorComponent={this.renderSeparator}
-          ListHeaderComponent={this.renderHeader}
-        />
-      </View>
-    );
-  }
+interface Props{
+  data: Product[];
+  onSelect?: () => void;
 }
 
-export default FlatListDropDown;
+export default function FlatListDropdown({ data }: Props) {
+  const router = useRouter();
+
+  if(!data || data.length === 0) {
+    return(
+      <div className = "bg-white shadow rounded mt-1">
+        <p className="p-4 text-gray-500 text-sm">No results found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white shadow rounded mt-1 max-h-80 overflow-y-auto border">
+      {data.map((item) => (
+        <div 
+          key={item.id} 
+          onClick={() => {
+            router.push(`/checkout?id=${item.id}`);
+            onSelect?.();
+          }}
+          className="flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer transition"
+        >
+
+          {/*Img*/}
+          <img
+            src = {item.imageUrl}
+            alt = {item.name}
+            className="w-12 h-12 object-cover rounded"
+          />
+
+          {/*Deets*/}
+          <div className="flex flex-col">
+            <p className="font-medium text-sm truncate">{item.name}</p>
+            <p className="text-xs text-gray-500">₱{item.price}</p>
+          </div>
+
+          {/*Rating*/}
+          <div className = "text-xs text-yellow-500 whitespace-nowrap">
+            ⭐ {item.rating ?? 0}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
