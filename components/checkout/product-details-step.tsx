@@ -126,7 +126,7 @@ export default function ProductDetailsStep({
       </div>
 
       <button
-        disabled={!canProceed || (selectedVariant && selectedVariant.stock_quantity <= 0)}
+        disabled={!canProceed || Boolean(selectedVariant && selectedVariant.stock_quantity <= 0)}
         className={cn(
           "relative h-60 w-[calc(100%-400px)] mx-auto block mb-20 rounded-2xl overflow-hidden shadow-xl transition-all active:scale-95 group disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed",
           canProceed ? "hover:shadow-primary/20" : ""
