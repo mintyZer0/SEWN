@@ -278,7 +278,7 @@ export default function ProductsPage() {
           const filePath = `products/${product.id}/${fileName}`;
 
           // Get presigned URL
-          const res = await fetch('/api/s3-upload', {
+          const res = await fetch('/api/media', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ filename: filePath, contentType: file.type }),

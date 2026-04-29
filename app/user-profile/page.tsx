@@ -180,20 +180,16 @@ export default function UserProfilePage() {
         .single();
 
         if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/default.jpg") {
-          await fetch('/api/s3-upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: existingAvatar.avatar_url, action: 'delete' })
+          await fetch(`/api/media?filename=${encodeURIComponent(existingAvatar.avatar_url)}`, {
+            method: 'DELETE',
           });
         }
 
       if (completedUpload?.filePath && !completedUpload.filePath.endsWith("/")) {
         // Delete old image from storage if it exists
         if (currentAvatarRecord?.avatar_url) {
-          await fetch('/api/s3-upload', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: currentAvatarRecord.avatar_url, action: 'delete' })
+          await fetch(`/api/media?filename=${encodeURIComponent(currentAvatarRecord.avatar_url)}`, {
+            method: 'DELETE',
           });
         }
 

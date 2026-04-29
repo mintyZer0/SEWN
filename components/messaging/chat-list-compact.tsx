@@ -29,7 +29,11 @@ export function ChatListCompact({ onSelect, selectedId, threads }: ChatListCompa
             selectedId === thread.id ? "bg-white/60 shadow-inner" : "hover:bg-white/30"
           )}
         >
-          <div className="w-10 h-10 rounded-full bg-primary/20 shrink-0" />
+          {thread.avatar ? (
+            <img src={thread.avatar} alt={thread.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-primary/20 shrink-0" />
+          )}
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-start">
               <h4 className="font-bold text-primary text-md truncate leading-tight">

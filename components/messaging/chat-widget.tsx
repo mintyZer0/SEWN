@@ -95,6 +95,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
     threads.find((t) => t.id === selectedConversationId) ||
     (threads.length > 0 ? threads[0] : null);
   const targetName = target?.name || "User";
+  const targetAvatar = target?.avatar;
 
   const initialMessages: any[] = [];
 
@@ -155,7 +156,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
                     roomName={roomName}
                     username={username}
                     variant="compact"
-                    targetUser={{ name: targetName }}
+                    targetUser={{ name: targetName, avatar: targetAvatar }}
                     messages={initialMessages}
                   />
                 </div>
@@ -174,7 +175,7 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
                     roomName={roomName}
                     username={username}
                     variant="compact"
-                    targetUser={{ name: targetName }}
+                    targetUser={{ name: targetName, avatar: targetAvatar }}
                     messages={initialMessages}
                   />
                 )}
