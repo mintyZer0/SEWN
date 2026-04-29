@@ -3,11 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, use } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
+import FlatListDropDown from "@/components/ui/flatlistdropdown";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 interface HeaderProps {
   variant?: "default" | "sewist";
@@ -16,6 +18,9 @@ interface HeaderProps {
 export default function Header({ variant = "default" }: HeaderProps) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [searchData, setSearchData] = useState<any[]>([]);
+  const [fullData, setFullData] = useState<any[]>([]);
 
   const bgStyles = {
     default: "bg-orchid-light",
@@ -24,6 +29,38 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
   const { cart, getCartCount, getCartTotal, updateQuantity, removeFromCart } = useCart();
   
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase
+        .from("sewist_products")
+        .select("id, name, price, img_src, rating");
+      
+      if (error) {
+        console.error("Error fetching data:", error);
+        return;
+      }
+
+      const sorted = (data || []).sort(
+      (a, b) => (b.rating ?? 0) - (a.rating ?? 0)
+    );
+
+      setFullData(sorted);
+      setSearchData(sorted);
+    };
+
+    fetchData();
+  }, []);
+
+  const handleSearch = (text: string) => {
+    setSearchValue(text);
+
+    const filtered = fullData.filter((item) =>
+      item.name.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setSearchData(filtered);
+  };
+
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Shop", href: "/browse/shop" },
@@ -78,7 +115,15 @@ export default function Header({ variant = "default" }: HeaderProps) {
 
         {/* Search Bar: Desktop Row 2 */}
         <div className="col-start-2 col-end-6 row-start-2 row-end-2 px-0 mt-2">
-          <SearchBar />
+          <div className = "relative  ">
+            <SearchBar value={searchValue} onChange={handleSearch} />
+
+            {searchValue && (
+              <div className = "absolute top-full left-0 w-full z-[1002]">
+                <FlatListDropDown data={searchData} />
+              </div>
+              )}
+          </div>
         </div>
 
         {/* Icons: Desktop Col 6 Row 1 */}
