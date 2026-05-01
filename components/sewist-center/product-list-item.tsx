@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { SquarePen, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProductListItemProps {
@@ -23,41 +23,35 @@ export const ProductListItem = ({
   onDelete,
   onClick,
 }: ProductListItemProps) => (
-  <div className="bg-white rounded-2xl p-5 mb-4 flex items-center justify-between shadow-md hover:shadow-lg transition-all border border-gray-100/50">
+  <div className="bg-white rounded-full md:rounded-2xl py-2 px-6 md:py-4 md:px-8 mb-2 flex items-center justify-between shadow-sm border border-gray-100/50 group hover:border-third-light/30 transition-colors">
     <div 
-      className="flex items-center gap-4 text-xl text-gray-700 flex-1 cursor-pointer"
+      className="flex items-center gap-2 md:gap-4 text-base md:text-xl text-primary-dark font-medium flex-1 cursor-pointer min-w-0"
       onClick={onClick}
     >
-      <span className="font-medium">{index}.</span>
-      <span>{name}</span>
+      <span className="shrink-0">{index}.</span>
+      <span className="truncate">({name})</span>
     </div>
 
-    <div className="flex items-center gap-4">
-      {type && (
-        <span className={cn(
-          "text-lg border-l border-gray-200 pl-6 h-8 min-w-24 flex items-center font-bold uppercase tracking-tighter",
-          (type === "pending" || type === "draft") ? "text-orange-500" : 
-          (type === "accepted" || type === "approved") ? "text-green-500" : 
-          (type === "rejected") ? "text-red-500" :
-          "text-gray-400"
-        )}>
-          {type}
-        </span>
-      )}
-...
+    <div className="flex items-center gap-2 md:gap-6 shrink-0">
       {showEdit && (
         <button
-          onClick={onEdit}
-          className="text-gray-600 hover:text-primary transition-colors cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit?.();
+          }}
+          className="text-primary hover:text-third transition-colors cursor-pointer p-1"
         >
-          <Pencil className="w-6 h-6" />
+          <SquarePen className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
         </button>
       )}
       <button
-        onClick={onDelete}
-        className="text-gray-600 hover:text-red-500 transition-colors cursor-pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete?.();
+        }}
+        className="text-primary hover:text-red-500 transition-all cursor-pointer p-1"
       >
-        <Trash2 className="w-6 h-6" />
+        <Trash2 className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
       </button>
     </div>
   </div>

@@ -33,6 +33,7 @@ export default async function ChatPage({ searchParams }: PageProps) {
       initialConversationId={conversationId}
       currentUserId={user.id}
       initialUsername={username}
+      isSewistApp={true}
     />
   );
 }

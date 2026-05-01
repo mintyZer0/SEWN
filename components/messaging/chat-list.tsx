@@ -33,7 +33,7 @@ export function ChatList({ onSelect, selectedId: selectedIdProp }: ChatListProps
 
   if (loading) {
     return (
-      <div className="w-80 flex flex-col overflow-y-auto border-r border-white/10 p-4">
+      <div className="w-full h-full flex flex-col overflow-y-auto border-r border-white/10 p-4">
         <div className="h-16 w-full bg-gray-200 animate-pulse rounded mb-2" />
         <div className="h-16 w-full bg-gray-200 animate-pulse rounded mb-2" />
       </div>
@@ -41,7 +41,7 @@ export function ChatList({ onSelect, selectedId: selectedIdProp }: ChatListProps
   }
 
   return (
-    <div className="w-80 bg-secondary/60 flex flex-col overflow-y-auto border-r border-white/10">
+    <div className="w-full h-full bg-secondary/60 flex flex-col overflow-y-auto border-r border-white/10">
       {threads.map((thread) => (
         <ChatThreadItem
           key={thread.id}

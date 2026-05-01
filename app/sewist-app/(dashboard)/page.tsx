@@ -368,197 +368,25 @@ export default function SewistCenterPage() {
   const currentPreview = images[images.length - 1]?.preview || avatarUrl;
 
   return (
-    <div className="p-12">
+    <div className="p-4 md:p-12">
       <form onSubmit={handleSubmit} className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-3xl font-bold text-primary">Profile</h2>
+        <div className="flex flex-col md:flex-row md:justify-between items-center mb-8 relative">
+          <h2 className="text-3xl font-bold text-primary mb-4 md:mb-0">Profile</h2>
           {!isEditing && (
-            <ProfileButton type="button" variant="ghost" onClick={() => setIsEditing(true)}>
-              Edit Profile
-            </ProfileButton>
+            <div className="md:static absolute top-0 right-0">
+              <ProfileButton type="button" variant="ghost" onClick={() => setIsEditing(true)}>
+                Edit
+              </ProfileButton>
+            </div>
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {/* Left Column: Form Fields */}
-          <div className="md:col-span-2 space-y-6">
-            <div>
-              <label className="block text-primary text-xl font-medium mb-2">
-                Sewist Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                disabled={!isEditing || isSaving}
-                placeholder="Renerie"
-                className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div>
-              <label className="block text-primary text-xl font-medium mb-2">
-                Profile Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                disabled={!isEditing || isSaving}
-                rows={4}
-                placeholder="Talented and hardworking sewist, dedicated to crafting you the best of the best sews ever"
-                className="w-full p-4 rounded-3xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none resize-none disabled:opacity-70 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-primary text-xl font-medium mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  disabled
-                  placeholder="ren@gmail.com"
-                  className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none opacity-70 cursor-not-allowed"
-                />
-              </div>
-              <div>
-                <label className="block text-primary text-xl font-medium mb-2">
-                  Phone Number
-                </label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  disabled={!isEditing || isSaving}
-                  placeholder="091961494946"
-                  className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-primary text-xl font-medium mb-2">
-                  Address
-                </label>
-                {isEditing ? (
-                  <LocationPicker
-                    name="location"
-                    onChange={setLocation}
-                    placeholder="Select Region / Province / City / Barangay"
-                    triggerClassName="h-auto p-4 rounded-2xl border-none shadow-sm text-lg"
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    value={dbLocationDisplay}
-                    disabled
-                    className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                  />
-                )}
-              </div>
-              <div>
-                <label className="block text-primary text-xl font-medium mb-2">
-                  Zip Code
-                </label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  disabled={!isEditing || isSaving}
-                  placeholder="2300"
-                  className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-primary text-xl font-medium mb-2">
-                Detailed Address
-              </label>
-              <textarea
-                name="address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                disabled={!isEditing || isSaving}
-                rows={2}
-                placeholder="Street Address, Building, House No."
-                className="w-full p-4 rounded-3xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none resize-none disabled:opacity-70 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-primary text-xl font-medium mb-2">
-                  Social Media Link
-                </label>
-                <input
-                  type="text"
-                  name="social_link"
-                  value={formData.social_link}
-                  onChange={handleChange}
-                  disabled={!isEditing || isSaving}
-                  placeholder="https://fb.ren.com"
-                  className="w-full p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-primary text-xl font-medium mb-4">
-                Achievements
-              </label>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <span className="text-xl text-primary font-medium">1.</span>
-                  <input
-                    type="text"
-                    name="achievement_1"
-                    value={formData.achievement_1}
-                    onChange={handleChange}
-                    disabled={!isEditing || isSaving}
-                    placeholder="Best sewist"
-                    className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xl text-primary font-medium">2.</span>
-                  <input
-                    type="text"
-                    name="achievement_2"
-                    value={formData.achievement_2}
-                    onChange={handleChange}
-                    disabled={!isEditing || isSaving}
-                    className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-xl text-primary font-medium">3.</span>
-                  <input
-                    type="text"
-                    name="achievement_3"
-                    value={formData.achievement_3}
-                    onChange={handleChange}
-                    disabled={!isEditing || isSaving}
-                    className="flex-1 p-4 rounded-2xl border-none bg-white shadow-sm text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Profile Image */}
-          <div className="flex flex-col items-center pt-8 gap-4">
+        <div className="flex flex-col md:grid md:grid-cols-3 gap-8 md:gap-12">
+          {/* Right Column (Mobile Top): Profile Image */}
+          <div className="flex flex-col items-center md:pt-8 gap-4 order-1 md:order-2 md:col-span-1">
             <div
               onClick={() => isEditing && fileInputRef.current?.click()}
-              className="w-64 h-64 rounded-full bg-gray-500 flex items-center justify-center relative overflow-hidden group cursor-pointer border-4 border-white shadow-xl"
+              className="w-32 h-32 md:w-64 md:h-64 rounded-full bg-gray-500 flex items-center justify-center relative overflow-hidden group cursor-pointer border-4 border-white shadow-xl"
             >
               {currentPreview ? (
                 <img
@@ -567,14 +395,14 @@ export default function SewistCenterPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-white font-medium text-lg">
+                <span className="text-white font-medium text-sm md:text-lg text-center px-2">
                   Select Image
                 </span>
               )}
 
               {uploading && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <Loader2 className="w-10 h-10 text-white animate-spin" />
+                  <Loader2 className="w-8 h-8 md:w-10 md:h-10 text-white animate-spin" />
                 </div>
               )}
 
@@ -587,13 +415,201 @@ export default function SewistCenterPage() {
               />
             </div>
           </div>
+
+          {/* Left Column (Mobile Bottom): Form Fields */}
+          <div className="order-2 md:order-1 md:col-span-2 space-y-6">
+            <div>
+              <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                Sewist Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                disabled={!isEditing || isSaving}
+                placeholder="Renerie"
+                className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                Profile Description
+              </label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                disabled={!isEditing || isSaving}
+                rows={4}
+                placeholder="Talented and hardworking sewist, dedicated to crafting you the best of the best sews ever"
+                className="w-full p-4 rounded-3xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none resize-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  disabled
+                  placeholder="ren@gmail.com"
+                  className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none opacity-70 cursor-not-allowed"
+                />
+              </div>
+              <div className="hidden md:block">
+                <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  disabled={!isEditing || isSaving}
+                  placeholder="091961494946"
+                  className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                Social Media Link
+              </label>
+              <input
+                type="text"
+                name="social_link"
+                value={formData.social_link}
+                onChange={handleChange}
+                disabled={!isEditing || isSaving}
+                placeholder="https://fb.ren.com"
+                className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                  Company Address
+                </label>
+                {isEditing ? (
+                  <LocationPicker
+                    name="location"
+                    onChange={setLocation}
+                    placeholder="Select Region / Province / City / Barangay"
+                    triggerClassName="h-auto p-4 rounded-2xl border border-primary/20 md:border-none shadow-sm text-base md:text-lg"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={dbLocationDisplay}
+                    disabled
+                    placeholder="Ren Avenue, Manila"
+                    className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  />
+                )}
+              </div>
+              <div className="hidden md:block">
+                <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                  Zip Code
+                </label>
+                <input
+                  type="text"
+                  name="zipCode"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  disabled={!isEditing || isSaving}
+                  placeholder="2300"
+                  className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            <div className="hidden md:block">
+              <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                Detailed Address
+              </label>
+              <textarea
+                name="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                disabled={!isEditing || isSaving}
+                rows={2}
+                placeholder="Street Address, Building, House No."
+                className="w-full p-4 rounded-3xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none resize-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+            
+            <div className="md:hidden">
+              <label className="block text-primary text-lg md:text-xl font-medium mb-2">
+                Phone Number
+              </label>
+              <input
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                disabled={!isEditing || isSaving}
+                placeholder="091961494946"
+                className="w-full p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-primary text-lg md:text-xl font-medium mb-4">
+                Achievements
+              </label>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <span className="text-lg md:text-xl text-primary font-medium">1.</span>
+                  <input
+                    type="text"
+                    name="achievement_1"
+                    value={formData.achievement_1}
+                    onChange={handleChange}
+                    disabled={!isEditing || isSaving}
+                    placeholder="Best sewist"
+                    className="flex-1 p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-lg md:text-xl text-primary font-medium">2.</span>
+                  <input
+                    type="text"
+                    name="achievement_2"
+                    value={formData.achievement_2}
+                    onChange={handleChange}
+                    disabled={!isEditing || isSaving}
+                    className="flex-1 p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-lg md:text-xl text-primary font-medium">3.</span>
+                  <input
+                    type="text"
+                    name="achievement_3"
+                    value={formData.achievement_3}
+                    onChange={handleChange}
+                    disabled={!isEditing || isSaving}
+                    className="flex-1 p-4 rounded-2xl border border-primary/20 md:border-none bg-white shadow-sm text-base md:text-lg focus:ring-2 focus:ring-third outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Services Offered Section */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-medium text-primary mb-6 flex items-center gap-8">
+        <div className="mt-8 md:mt-12">
+          <h3 className="text-xl md:text-2xl font-medium text-primary mb-4 md:mb-6 flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-8">
             Services Offered:
-            <div className="flex items-center gap-12 font-normal text-xl text-primary">
+            <div className="flex flex-wrap items-center gap-4 md:gap-12 font-normal text-base md:text-xl text-primary">
               <CustomCheckbox
                 label="Alterations"
                 name="services"
@@ -635,11 +651,11 @@ export default function SewistCenterPage() {
         </div>
 
         {/* Map Section */}
-        <div className="mt-12 text-center">
-          <h3 className="text-3xl font-bold text-primary mb-6">
+        <div className="mt-8 md:mt-12 text-center">
+          <h3 className="text-xl md:text-3xl font-medium md:font-bold text-primary mb-4 md:mb-6">
             Pin your workplace
           </h3>
-          <div className="max-w-[80%] mx-auto space-y-4">
+          <div className="w-full md:max-w-[80%] mx-auto space-y-4">
             {isEditing && (
               <MapSearchBox 
                 onPlaceSelected={handlePlaceSelected} 
@@ -649,9 +665,8 @@ export default function SewistCenterPage() {
             )}
             <MapComponent
               position={position}
-              height={600}
-              width="100%"
-              className="shadow-lg"
+              height="100%"
+              className="shadow-lg h-[300px] md:h-[600px] w-full"
               draggable={isEditing && !isSaving}
               onPositionChange={handlePositionChange}
             />
@@ -662,12 +677,12 @@ export default function SewistCenterPage() {
 
         {/* Action Buttons */}
         {isEditing && (
-          <div className="mt-16 flex justify-end gap-6 pb-20">
-            <ProfileButton type="button" variant="white" size="xl" onClick={() => window.location.reload()} disabled={isSaving}>
+          <div className="mt-8 md:mt-16 flex flex-row justify-center gap-4 md:gap-6 pb-12 md:pb-20">
+            <ProfileButton type="button" variant="white" size="xl" onClick={() => window.location.reload()} disabled={isSaving} className="text-sm md:text-lg bg-red-500 hover:bg-red-600 text-white border-red-500">
               Discard
             </ProfileButton>
-            <ProfileButton type="submit" variant="orange" size="xl" disabled={isSaving} className="flex items-center justify-center gap-2">
-              {isSaving && <Loader2 className="w-6 h-6 animate-spin" />}
+            <ProfileButton type="submit" variant="orange" size="xl" disabled={isSaving} className="text-sm md:text-lg flex items-center justify-center gap-2">
+              {isSaving && <Loader2 className="w-4 h-4 md:w-6 md:h-6 animate-spin" />}
               Confirm Changes
             </ProfileButton>
           </div>

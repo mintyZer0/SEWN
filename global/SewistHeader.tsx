@@ -13,7 +13,7 @@ export default function SewistHeader() {
 
   return (
     <header className="sticky top-0 left-0 right-0 z-[1001] shadow third-gradient">
-      <div className="flex items-center justify-between py-4 px-8 w-full max-w-[100vw]">
+      <div className="flex items-center justify-between py-4 px-4 md:px-8 w-full">
         {/* Logo linking to Sewist Dashboard Home */}
         <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
           <Image

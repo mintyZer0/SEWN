@@ -17,20 +17,20 @@ export default function SewistSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-80 bg-secondary-gradient-b min-h-screen flex flex-col py-12 px-10 gap-8 shadow-lg border-r border-white/20 sticky top-0">
+    <aside className="w-80 bg-secondary-gradient-b h-auto self-stretch flex flex-col py-12 px-10 gap-8 shadow-lg border-r border-white/20 sticky top-[92px]">
       {sidebarItems.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
         return (
           <ProfileButton
             key={item.name}
-            variant={isActive ? "white" : "white"} // Always white but maybe diff opacity
+            variant="white"
             size="xl"
             asChild
             className={cn(
               "w-full rounded-full transition-all duration-300 transform",
               isActive 
-                ? "opacity-100 scale-105 shadow-2xl" 
-                : "opacity-60 scale-100 hover:opacity-90 shadow-md"
+                ? "opacity-100 scale-105 shadow-2xl ring-2 ring-white/30" 
+                : "opacity-60 scale-100 hover:opacity-90 shadow-md hover:scale-[1.02]"
             )}
           >
             <Link href={item.href}>

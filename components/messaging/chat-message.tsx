@@ -13,9 +13,10 @@ interface ChatMessageItemProps {
   variant?: "default" | "compact"
   isLatest?: boolean
   onPreview?: (url: string, type: "image" | "video") => void
+  isSewistApp?: boolean
 }
 
-export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", isLatest = false, onPreview }: ChatMessageItemProps) => {
+export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", isLatest = false, onPreview, isSewistApp = false }: ChatMessageItemProps) => {
   const isCompact = variant === "compact";
   
   const timeString = message.createdAt 
@@ -47,10 +48,23 @@ export const ChatMessageItem = ({ message, isOwnMessage, variant = "default", is
         <div
           className={cn(
             'shadow-sm font-medium transition-transform active:scale-[0.98] w-full',
-            isMedia ? 'p-1 rounded-3xl bg-secondary/10 border-2 border-primary/5' : (
-              isCompact ? 'px-4 py-2 rounded-2xl text-sm bg-primary text-white whitespace-pre-wrap break-words' : 'px-8 py-4 rounded-3xl text-lg third-gradient text-white whitespace-pre-wrap break-words'
+            isMedia ? 'p-1 rounded-3xl bg-secondary/20 border-2 border-primary/5' : (
+              isCompact 
+                ? 'px-4 py-3 rounded-[20px] text-sm whitespace-pre-wrap break-words' 
+                : 'px-6 py-4 md:px-8 md:py-4 rounded-[24px] text-base md:text-lg whitespace-pre-wrap break-words'
             ),
-            isOwnMessage ? 'rounded-tr-none' : 'rounded-tl-none'
+            // Sewist App Styling (Orange Theme)
+            !isMedia && isSewistApp && (
+              isOwnMessage 
+                ? 'bg-third-light text-white rounded-tr-none' 
+                : 'bg-third text-white rounded-tl-none'
+            ),
+            // Buyer/Customer App Styling (Purple Theme)
+            !isMedia && !isSewistApp && (
+              isOwnMessage 
+                ? (isCompact ? 'bg-primary text-white rounded-tr-none' : 'third-gradient text-white rounded-tr-none') 
+                : 'bg-white text-primary border border-primary/10 rounded-tl-none shadow-inner'
+            )
           )}
         >
           {isMedia ? (

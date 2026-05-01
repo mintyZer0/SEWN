@@ -1,8 +1,6 @@
-import SewistHeader from "@/global/SewistHeader";
-import Footer from "@/global/Footer";
-import SewistSidebar from "@/components/sewist-profile/sewist-sidebar";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import SewistDashboardClientLayout from "./dashboard-client-layout";
 
 export default async function SewistLayout({
   children,
@@ -40,16 +38,8 @@ export default async function SewistLayout({
   }
 
   return (
-    <>
-      <SewistHeader />
-      <div className="flex items-center justify-center py-10 text-8xl text-third font-light bg-white">
-        SEWIST CENTER
-      </div>
-      <div className="flex bg-[#FFF5CD]/30 min-h-screen">
-        <SewistSidebar />
-        <main className="flex-1">{children}</main>
-      </div>
-      <Footer variant="sewist" />
-    </>
+    <SewistDashboardClientLayout>
+      {children}
+    </SewistDashboardClientLayout>
   );
 }

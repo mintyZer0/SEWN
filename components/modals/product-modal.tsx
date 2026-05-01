@@ -133,7 +133,7 @@ export const ProductModal = ({
   const isEdit = !!product;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[4000] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
@@ -143,7 +143,7 @@ export const ProductModal = ({
         {/* Header */}
         <div className="sticky top-0 bg-white z-20 px-10 pt-12 pb-6 flex justify-between items-start border-b border-gray-100">
           <div className="flex flex-col gap-2">
-            <h2 className="text-6xl font-bold text-third">
+            <h2 className="text-4xl md:text-6xl font-bold text-third">
               {isEdit ? "Edit Product" : "Add Product"}
             </h2>
             {product?.type === 'rejected' && rejectionReason && (
@@ -158,14 +158,18 @@ export const ProductModal = ({
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (confirm("Are you sure you want to discard your changes?")) {
+                onClose();
+              }
+            }}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ArrowLeft className="w-12 h-12 text-third" />
+            <ArrowLeft className="w-8 h-8 md:w-12 md:h-12 text-third" />
           </button>
         </div>
 
-        <form onSubmit={(e) => handleSubmit(e, 'pending')} className="p-10 space-y-12">
+        <form onSubmit={(e) => handleSubmit(e, 'pending')} className="p-6 md:p-10 space-y-8 md:space-y-12">
           <ProductPhotos 
             existingImages={existingImages} 
             handlePhotoChange={handlePhotoChange} 
@@ -189,20 +193,14 @@ export const ProductModal = ({
           />
 
           {/* Footer Actions */}
-          <div className="pt-8 flex justify-end gap-6 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-12 py-3 rounded-full text-xl font-bold text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              Discard
-            </button>
+          <div className="pt-8 flex flex-wrap justify-end gap-3 md:gap-6 border-t border-gray-100">
             <ProfileButton 
               type="button"
               variant="white"
               size="xl"
               onClick={(e: any) => handleSubmit(e, 'draft')}
               disabled={isSubmitting || product?.type === 'pending'}
+              className="flex-1 md:flex-none text-base md:text-2xl px-6 py-2.5 md:px-12 md:py-3.5 rounded-xl md:rounded-[22px] order-2"
             >
               Save as Draft
             </ProfileButton>
@@ -211,10 +209,12 @@ export const ProductModal = ({
               variant="orange" 
               size="xl"
               disabled={isSubmitting || product?.type === 'pending'}
-              className="flex items-center gap-3"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 md:gap-3 text-base md:text-2xl px-6 py-2.5 md:px-12 md:py-3.5 rounded-xl md:rounded-[22px] order-1 md:order-3"
             >
-              {isSubmitting && <Loader2 className="w-6 h-6 animate-spin" />}
-              {product?.type === 'pending' ? "Under Review" : (product?.type === 'rejected' ? "Resubmit for Review" : "Submit for Review")}
+              {isSubmitting && <Loader2 className="w-4 h-4 md:w-6 md:h-6 animate-spin" />}
+              <span className="whitespace-nowrap">
+                {product?.type === 'pending' ? "Under Review" : (product?.type === 'rejected' ? "Resubmit" : "Submit for Review")}
+              </span>
             </ProfileButton>
           </div>
         </form>
