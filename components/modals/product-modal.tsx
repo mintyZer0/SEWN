@@ -24,10 +24,10 @@ export const ProductModal = ({
     setFormData,
     variationGroups,
     variants,
-    selectedImages,
-    existingImages,
+    photos,
     rejectionReason,
     handlePhotoChange,
+    handlePhotoRemove,
     addVariationGroup,
     updateGroup,
     removeGroup,
@@ -97,7 +97,7 @@ export const ProductModal = ({
       return;
     }
 
-    const hasImages = existingImages.length > 0 || selectedImages.some((img) => img !== null);
+    const hasImages = photos.some((p) => p.file || p.url);
     if (!hasImages) {
       alert("At least one product image is required.");
       return;
@@ -111,8 +111,7 @@ export const ProductModal = ({
           ...formData,
           name: formData.productName, // Map productName to name for DB
           price: Number(formData.price),
-          img_src: existingImages[0],
-          images: selectedImages.filter((img): img is File => img !== null),
+          photos, // Pass unified photo state
           variants: variants.map((v) => ({
             id: v.id,
             sku: v.sku,
@@ -171,8 +170,9 @@ export const ProductModal = ({
 
         <form onSubmit={(e) => handleSubmit(e, 'pending')} className="p-6 md:p-10 space-y-8 md:space-y-12">
           <ProductPhotos 
-            existingImages={existingImages} 
+            photos={photos} 
             handlePhotoChange={handlePhotoChange} 
+            handlePhotoRemove={handlePhotoRemove}
           />
 
           <ProductBasicInfo 

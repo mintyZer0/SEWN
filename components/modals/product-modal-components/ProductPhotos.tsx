@@ -2,11 +2,12 @@ import React from "react";
 import { PhotoSlot } from "@/components/ui/photo-slot";
 
 interface ProductPhotosProps {
-  existingImages: string[];
+  photos: { file: File | null; url: string | null }[];
   handlePhotoChange: (index: number) => (file: File) => void;
+  handlePhotoRemove: (index: number) => () => void;
 }
 
-export const ProductPhotos = ({ existingImages, handlePhotoChange }: ProductPhotosProps) => {
+export const ProductPhotos = ({ photos, handlePhotoChange, handlePhotoRemove }: ProductPhotosProps) => {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-bold text-third">Add photos</h3>
@@ -17,7 +18,8 @@ export const ProductPhotos = ({ existingImages, handlePhotoChange }: ProductPhot
             size="lg" 
             className="h-full" 
             onChange={handlePhotoChange(0)}
-            defaultImage={existingImages[0]}
+            onRemove={handlePhotoRemove(0)}
+            defaultImage={photos[0]?.url || undefined}
           />
         </div>
         {/* 6 Small Slots (Right) */}
@@ -25,7 +27,8 @@ export const ProductPhotos = ({ existingImages, handlePhotoChange }: ProductPhot
           <PhotoSlot 
             key={i} 
             onChange={handlePhotoChange(i)} 
-            defaultImage={existingImages[i]}
+            onRemove={handlePhotoRemove(i)}
+            defaultImage={photos[i]?.url || undefined}
           />
         ))}
       </div>
