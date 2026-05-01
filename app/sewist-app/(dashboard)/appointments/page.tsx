@@ -132,33 +132,33 @@ export default function AppointmentsSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-6">
+    <div className="max-w-4xl mx-auto py-6 px-4 md:py-10 md:px-6 pb-32 md:pb-10">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-10"
+        className="mb-8 md:mb-10 text-center md:text-left"
       >
-        <h1 className="text-4xl font-medium text-gray-900 tracking-tight">Availability</h1>
-        <p className="text-gray-500 mt-2 text-lg">Define your weekly schedule and slot capacity.</p>
+        <h1 className="text-3xl md:text-4xl font-medium text-gray-900 tracking-tight">Availability</h1>
+        <p className="text-gray-500 mt-2 text-base md:text-lg">Define your weekly schedule and slot capacity.</p>
       </motion.div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+        className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
       >
-        <div className="p-8 border-b border-gray-100 bg-gray-50/50 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-primary-light text-primary flex items-center justify-center">
-            <Calendar className="w-6 h-6" />
+        <div className="p-4 md:p-8 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary-light text-primary flex items-center justify-center shrink-0">
+            <Calendar className="w-5 h-5 md:w-6 md:h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-medium text-gray-900">Weekly Hours</h2>
-            <p className="text-sm text-gray-500">Set your recurring availability for commissions.</p>
+            <h2 className="text-lg md:text-xl font-medium text-gray-900">Weekly Hours</h2>
+            <p className="text-xs md:text-sm text-gray-500">Set your recurring availability for commissions.</p>
           </div>
         </div>
 
-        <div className="p-8 space-y-6">
+        <div className="p-4 md:p-8 space-y-4 md:space-y-6">
           {DAYS.map((day) => {
             const isActive = hours[day.value]?.active;
             return (

@@ -105,7 +105,10 @@ export default function MapComponent({
   return (
     <div
       className={cn("relative overflow-hidden rounded-lg", className)}
-      style={{ height, width }}
+      style={{ 
+        height: height && !className?.includes('h-[') ? height : undefined, 
+        width: width && !className?.includes('w-[') ? width : undefined 
+      }}
     >
       <MapContent
         position={position}

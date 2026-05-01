@@ -441,16 +441,17 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="p-12">
+    <div className="p-4 md:p-12 pb-32 md:pb-12">
       <div className="max-w-6xl mx-auto">
         {/* Tools Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-primary mb-6">Tools</h2>
-          <div className="flex gap-6 justify-around">
+        <div className="mb-8 md:mb-12">
+          <h2 className="text-xl md:text-3xl font-bold text-primary mb-4 md:mb-6 text-center md:text-left">Tools</h2>
+          <div className="flex flex-row md:flex-row gap-2 md:gap-6 justify-between md:justify-around">
             <ProfileButton 
               variant="orange" 
               size="xl"
               onClick={handleAddProduct}
+              className="flex-1 md:flex-none text-[10px] md:text-2xl px-2 py-2 md:px-12 md:py-3.5 rounded-xl md:rounded-[22px] whitespace-nowrap min-w-0 md:min-w-max font-bold md:font-black"
             >
               Add Product
             </ProfileButton>
@@ -458,6 +459,7 @@ export default function ProductsPage() {
               variant="orange" 
               size="xl"
               onClick={() => setIsCommissionsModalOpen(true)}
+              className="flex-1 md:flex-none text-[10px] md:text-2xl px-2 py-2 md:px-12 md:py-3.5 rounded-xl md:rounded-[22px] whitespace-nowrap min-w-0 md:min-w-max font-bold md:font-black"
             >
               Commissions
             </ProfileButton>
@@ -465,13 +467,14 @@ export default function ProductsPage() {
               variant="orange" 
               size="xl"
               onClick={() => setIsViewPendingsModalOpen(true)}
+              className="flex-1 md:flex-none text-[10px] md:text-2xl px-2 py-2 md:px-12 md:py-3.5 rounded-xl md:rounded-[22px] whitespace-nowrap min-w-0 md:min-w-max font-bold md:font-black"
             >
               View Pendings
             </ProfileButton>
           </div>
         </div>
 
-        <p className="text-xl text-gray-500 italic mb-8">
+        <p className="text-lg md:text-xl text-gray-500 italic mb-6 md:mb-8 text-center md:text-left">
           Click to accept order, commission, or appointment
         </p>
 

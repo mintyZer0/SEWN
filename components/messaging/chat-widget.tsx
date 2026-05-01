@@ -30,12 +30,15 @@ export function ChatWidget({ initialUsername = "Guest", setIsOpen: setIsOpenExte
 
   const { threads, loading } = useChatThreads();
 
+  const [isSewist, setIsSewist] = useState(false);
+
   useEffect(() => {
-    // Hide on sewist subdomain or auth pages
+    // Hide on auth pages
     const isSewistDomain = typeof window !== "undefined" && window.location.hostname.startsWith("sewist.");
+    setIsSewist(isSewistDomain);
     const isAuthPage = pathname?.startsWith("/auth") || pathname === "/login" || pathname === "/signup";
     
-    if (isSewistDomain || isAuthPage) {
+    if (isAuthPage || isSewistDomain) {
       setCurrentUserId(null); // Force hidden
       setIsCheckingUser(false); // Resolve loading state
       return;

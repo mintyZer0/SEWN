@@ -22,6 +22,7 @@ interface RealtimeChatProps {
     avatar?: string;
   };
   variant?: "default" | "compact";
+  isSewistApp?: boolean;
 }
 
 export const RealtimeChat = ({
@@ -31,6 +32,7 @@ export const RealtimeChat = ({
   messages: initialMessages = [],
   targetUser = { name: "Chini De Bertha" },
   variant = "default",
+  isSewistApp = false,
 }: RealtimeChatProps) => {
   const { containerRef, scrollToBottom } = useChatScroll()
   const isCompact = variant === "compact";
@@ -172,10 +174,10 @@ export const RealtimeChat = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-background antialiased">
+    <div className="flex flex-col flex-1 w-full bg-transparent md:bg-background antialiased min-h-0 h-full">
       {/* Header */}
       {!isCompact ? (
-        <>
+        <div className="hidden md:block shrink-0">
           <div className="p-8 flex items-center gap-6">
             {targetUser.avatar ? (
               <img src={targetUser.avatar} alt={targetUser.name} className="w-16 h-16 rounded-full object-cover shadow-sm flex-shrink-0" />
@@ -185,9 +187,9 @@ export const RealtimeChat = ({
             <h3 className="text-2xl font-black text-primary">{targetUser.name}</h3>
           </div>
           <div className="mx-8 border-b border-primary/10" />
-        </>
+        </div>
       ) : (
-        <div className="p-4 flex items-center gap-3 bg-white/50 border-b border-primary/5 shrink-0 shadow-sm">
+        <div className="hidden md:flex p-4 items-center gap-3 bg-white/50 border-b border-primary/5 shrink-0 shadow-sm">
           {targetUser.avatar ? (
             <img src={targetUser.avatar} alt={targetUser.name} className="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0" />
           ) : (
@@ -198,43 +200,46 @@ export const RealtimeChat = ({
       )}
 
       {/* Messages */}
-      <div 
-        ref={containerRef} 
-        className={cn(
-          "flex-1 overflow-y-auto custom-scrollbar",
-          isCompact ? "px-4 py-4 space-y-1" : "px-12 py-8 space-y-2"
-        )}
-      >
-        {allMessages.length === 0 ? (
-          <div className="text-center text-sm text-primary/40 mt-10">
-            Start a conversation with {targetUser.name}
-          </div>
-        ) : null}
-        
-        {allMessages.map((message, index) => (
-          <ChatMessageItem
-            key={message.id}
-            message={message}
-            isOwnMessage={message.user.name === username}
-            variant={variant}
-            isLatest={index === allMessages.length - 1}
-            onPreview={(url, type) => setPreviewData({ url, type })}
-          />
-        ))}
+      <div className="flex-1 relative min-h-0">
+        <div 
+          ref={containerRef} 
+          className={cn(
+            "absolute inset-0 overflow-y-auto custom-scrollbar",
+            isCompact ? "px-4 py-4 space-y-1" : "px-12 py-8 space-y-2"
+          )}
+        >
+          {allMessages.length === 0 ? (
+            <div className="text-center text-sm text-primary/40 mt-10">
+              Start a conversation with {targetUser.name}
+            </div>
+          ) : null}
+          
+          {allMessages.map((message, index) => (
+            <ChatMessageItem
+              key={message.id}
+              message={message}
+              isOwnMessage={message.user.name === username}
+              variant={variant}
+              isLatest={index === allMessages.length - 1}
+              onPreview={(url, type) => setPreviewData({ url, type })}
+              isSewistApp={isSewistApp}
+            />
+          ))}
 
-        {isUploading && (
-          <div className="flex justify-end mb-4 animate-pulse px-12">
-             <div className="px-6 py-3 rounded-3xl bg-secondary/20 border border-primary/10 text-primary/40 text-sm flex items-center gap-2 font-medium">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Uploading media...
-             </div>
-          </div>
-        )}
+          {isUploading && (
+            <div className="flex justify-end mb-4 animate-pulse px-12">
+               <div className="px-6 py-3 rounded-3xl bg-secondary/20 border border-primary/10 text-primary/40 text-sm flex items-center gap-2 font-medium">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading media...
+               </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Media Preview Overlay */}
       {stagedMedia && (
-        <div className="px-8 pb-4 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="px-8 pb-4 animate-in slide-in-from-bottom-4 duration-300 shrink-0">
            <div className="relative group bg-secondary/10 rounded-3xl p-4 border-2 border-primary/5 flex items-center gap-6 shadow-sm overflow-hidden">
               <div className="relative h-32 w-32 shrink-0 rounded-2xl overflow-hidden bg-black shadow-md border border-white/20">
                 {stagedMedia.type === 'image' ? (
@@ -273,54 +278,55 @@ export const RealtimeChat = ({
       )}
 
       {/* Input Area */}
-      <div className={cn(!isCompact ? "p-8 pt-0 space-y-4" : "p-4 pt-0 space-y-2")}>
+      <div className={cn("p-4 md:p-8 pt-0 space-y-3 shrink-0", isCompact ? "md:p-4" : "")}>
         <form 
           onSubmit={handleSendMessage} 
           className={cn("relative group transition-opacity", stagedMedia ? "opacity-50 pointer-events-none grayscale" : "opacity-100")}
         >
-          <textarea
-            ref={textareaRef}
-            rows = {2}
-            className={cn(
-              "w-full bg-secondary/20 border-2 border-primary/5 transition-all placeholder:text-primary/20 text-primary resize-none overflow-hidden",
-              isCompact ? "py-2 px-4 text-sm pr-10 rounded-2xl" : "py-4 px-8 text-lg pr-16 rounded-3xl"
-            )}
-            value={newMessage}
-            onChange={(e) => {  
-              setNewMessage(e.target.value);
-              const elem = e.target;
+          <div className="relative flex items-center">
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              className={cn(
+                "w-full bg-transparent border border-primary/40 transition-all placeholder:text-primary/60 text-primary-dark resize-none overflow-hidden rounded-full py-3 px-6 text-sm md:text-lg pr-12 focus:outline-none focus:ring-1 focus:ring-primary/50 shadow-inner",
+                isCompact ? "md:py-2 md:px-4 md:text-sm md:pr-10" : ""
+              )}
+              value={newMessage}
+              onChange={(e) => {  
+                setNewMessage(e.target.value);
+                const elem = e.target;
 
-              // reset size
-              elem.style.height = "auto";
+                // reset size to measure content correctly
+                elem.style.height = "auto";
 
-              //comp height
-              const lnheight = parseInt(window.getComputedStyle(elem).lineHeight)
-              const maxHeight = lnheight * 5; // limit to 5 lines
-              
-              //set new height
-              elem.style.height = Math.min (elem.scrollHeight, maxHeight) + "px";
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage(e as any);
-              }
-            }}
-            placeholder={stagedMedia ? "Media ready to send" : "Type your message here"}
-            disabled={!isConnected || !!stagedMedia}
-          />
-          <button
-            type="submit"
-            disabled={!isConnected || !newMessage.trim() || isUploading || !!stagedMedia}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-third hover:scale-110 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100"
-          >
-
-            <SendHorizontal className={cn(isCompact ? "size-6 text-primary" : "size-8")} />
-          </button>
+                // compute height based on scrollHeight
+                const lnheight = parseInt(window.getComputedStyle(elem).lineHeight || "24");
+                const maxHeight = lnheight * 5; // limit to 5 lines
+                
+                elem.style.height = Math.min(elem.scrollHeight, maxHeight) + "px";
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e as any);
+                }
+              }}
+              placeholder={stagedMedia ? "Media ready to send" : "Type your message here"}
+              disabled={!isConnected || !!stagedMedia}
+              style={{ minHeight: '44px' }}
+            />
+            <button
+              type="submit"
+              disabled={!isConnected || !newMessage.trim() || isUploading || !!stagedMedia}
+              className="absolute right-4 text-third hover:scale-110 active:scale-95 transition-all disabled:opacity-30 disabled:hover:scale-100 p-1"
+            >
+              <SendHorizontal className="size-5 md:size-6" strokeWidth={2.5} />
+            </button>
+          </div>
         </form>
 
         {/* Action Icons */}
-        <div className={cn("flex gap-4", isCompact ? "px-1" : "px-2 pl-4")}>
+        <div className="flex gap-4 px-4 pb-2">
           <input
             type="file"
             ref={mediaInputRef}
@@ -329,18 +335,19 @@ export const RealtimeChat = ({
             className="hidden"
           />
           {[
-            { Icon: Smile },
-            { Icon: ImageIcon, onClick: () => mediaInputRef.current?.click() },
-            { Icon: Copy }
-          ].map(({ Icon, onClick }, idx) => (
+            { Icon: Smile, label: "Emojis" },
+            { Icon: ImageIcon, onClick: () => mediaInputRef.current?.click(), label: "Media" },
+            { Icon: Copy, label: "Copy Template" }
+          ].map(({ Icon, onClick, label }, idx) => (
             <button 
               key={idx} 
               type="button"
               onClick={onClick}
+              title={label}
               disabled={isUploading || !!stagedMedia}
-              className="text-primary/40 hover:text-third transition-colors disabled:opacity-50"
+              className="text-primary/70 hover:text-primary transition-colors disabled:opacity-50"
             >
-              <Icon className={cn(isCompact ? "size-4" : "size-5")} />
+              <Icon className="size-5 md:size-6" />
             </button>
           ))}
         </div>

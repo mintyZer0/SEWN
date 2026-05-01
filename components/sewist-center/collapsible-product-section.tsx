@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Filter, ChevronDown } from "lucide-react";
+import { Search, ListFilter, ChevronDown } from "lucide-react";
 import { ProductListItem } from "./product-list-item";
 import { cn } from "@/lib/utils";
 import { DeleteConfirmationModal } from "@/components/modals/delete-confirmation-modal";
@@ -58,35 +58,37 @@ export const CollapsibleProductSection = ({
   };
 
   return (
-    <section className="mb-8">
+    <section className="mb-8 md:mb-12">
       {/* Section Header */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-2 md:gap-4 mb-4">
         <button
           onClick={onToggle}
-          className="flex items-center gap-2 text-primary text-2xl font-bold hover:opacity-80 transition-opacity cursor-pointer whitespace-nowrap"
+          className="flex items-center gap-1 text-primary hover:opacity-80 transition-opacity cursor-pointer shrink-0"
         >
           <ChevronDown
             className={cn(
-              "w-8 h-8 transition-transform duration-200",
+              "w-6 h-6 md:w-8 md:h-8 transition-transform duration-200",
               !isOpen && "-rotate-90"
             )}
+            strokeWidth={3}
           />
-          {title} ({items.length})
+          <span className="text-xl md:text-3xl font-bold">{title}</span>
+          <span className="text-xl md:text-3xl font-bold ml-1">({items.length})</span>
         </button>
 
-        <div className="flex-1 relative max-w-xl ml-4">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-            <Search className="w-5 h-5" />
+        <div className="flex-1 relative">
+          <div className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-primary">
+            <Search className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
           </div>
           <input
             type="text"
             placeholder="Search"
-            className="w-full pl-12 pr-4 py-2 rounded-full border-[3px] border-third focus:border-third outline-none bg-white text-lg shadow-sm"
+            className="w-full pl-9 md:pl-12 pr-4 py-1 md:py-1.5 rounded-full border-[2.5px] md:border-[3.5px] border-third-light focus:border-third outline-none bg-white text-sm md:text-lg shadow-sm placeholder:text-gray-400 transition-colors"
           />
         </div>
 
-        <button className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer text-primary">
-          <Filter className="w-8 h-8" />
+        <button className="p-1 hover:opacity-70 transition-all cursor-pointer text-primary shrink-0">
+          <ListFilter className="w-6 h-6 md:w-9 md:h-9" strokeWidth={2.5} />
         </button>
       </div>
 
@@ -95,7 +97,7 @@ export const CollapsibleProductSection = ({
         <div 
           className={cn(
             "pl-4 transition-all duration-300",
-            items.length > 5 && "max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"
+            items.length > 5 && "max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
           )}
         >
           {items.map((item, index) => (
