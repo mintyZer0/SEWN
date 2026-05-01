@@ -71,13 +71,13 @@ export default function VariantSelector({
   if (attributeTypes.length === 0) return null;
 
   return (
-    <div className="space-y-8 mt-4 border-t border-gray-100 pt-6">
+    <div className="space-y-10">
       {attributeTypes.map((type) => (
-        <div key={type} className="space-y-4">
-          <h4 className="text-2xl font-bold text-heading uppercase tracking-wide">
-            {type}
+        <div key={type} className="space-y-3">
+          <h4 className="text-2xl font-bold text-heading">
+            {type.charAt(0).toUpperCase() + type.slice(1)}
           </h4>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-4">
             {attributeGroups[type].map((value) => {
               const isSelected = selectedAttributes[type] === value;
               return (
@@ -85,10 +85,10 @@ export default function VariantSelector({
                   key={value}
                   onClick={() => handleAttributeSelect(type, value)}
                   className={cn(
-                    "px-8 py-3 rounded-2xl text-xl font-semibold transition-all border-2",
+                    "min-w-[100px] py-2 rounded-full text-lg font-medium transition-all border-2",
                     isSelected 
-                      ? "bg-primary border-primary text-white shadow-lg scale-105" 
-                      : "bg-white border-gray-200 text-gray-700 hover:border-primary/50"
+                      ? "bg-primary border-primary text-white" 
+                      : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"
                   )}
                 >
                   {value}

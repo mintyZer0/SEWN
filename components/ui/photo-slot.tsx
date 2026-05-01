@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PhotoSlotProps {
@@ -9,10 +9,11 @@ interface PhotoSlotProps {
   name?: string;
   className?: string;
   onChange?: (file: File) => void;
+  onRemove?: () => void;
   defaultImage?: string;
 }
 
-export const PhotoSlot = ({ size = "sm", name, className, onChange, defaultImage }: PhotoSlotProps) => {
+export const PhotoSlot = ({ size = "sm", name, className, onChange, onRemove, defaultImage }: PhotoSlotProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -32,6 +33,15 @@ export const PhotoSlot = ({ size = "sm", name, className, onChange, defaultImage
     }
   };
 
+  const handleRemove = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (onRemove) onRemove();
+  };
+
+  const hasImage = !!(preview || defaultImage);
+
   return (
     <div
       onClick={handleClick}
@@ -49,12 +59,20 @@ export const PhotoSlot = ({ size = "sm", name, className, onChange, defaultImage
         accept="image/*"
         onChange={handleFileChange}
       />
-      {preview || defaultImage ? (
-        <img
-          src={preview || defaultImage}
-          alt="Preview"
-          className="w-full h-full object-cover"
-        />
+      {hasImage ? (
+        <>
+          <img
+            src={preview || defaultImage}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
+          <button
+            onClick={handleRemove}
+            className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10 hover:bg-red-600 shadow-md"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </>
       ) : (
         <Plus className="text-third w-10 h-10 group-hover:scale-110 transition-transform" />
       )}

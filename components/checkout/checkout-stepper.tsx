@@ -8,37 +8,31 @@ interface CheckoutStepperProps {
 
 export default function CheckoutStepper({ currentStep }: CheckoutStepperProps) {
   const steps = [
-    { number: 1, label: "Product Details" },
-    { number: 2, label: "Address" },
-    { number: 3, label: "Payment" },
-    { number: 4, label: "Confirmation" },
+    { number: 1, label: "product details" },
+    { number: 2, label: "address" },
+    { number: 3, label: "payment" },
+    { number: 4, label: "confirmation" },
   ];
 
   return (
-    <div className="w-full py-8">
-      <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
+    <div className="w-full py-12">
+      <div className="flex items-start justify-center gap-12 max-w-5xl mx-auto">
         {steps.map((step) => (
-          <div key={step.number} className="flex flex-col items-center">
+          <div key={step.number} className="flex flex-col items-center min-w-[120px]">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-                currentStep > step.number
-                  ? "bg-primary text-white"
-                  : currentStep === step.number
-                  ? "bg-primary text-white"
-                  : "bg-white text-heading border-2 border-primary"
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all border-2 ${
+                currentStep >= step.number
+                  ? "bg-orchid-vertical-b border-transparent text-white"
+                  : "bg-white text-heading border-gray-200"
               }`}
             >
-              {currentStep > step.number ? (
-                <Check size={24} strokeWidth={3} />
-              ) : (
-                <span className="text-xl font-semibold">{step.number}</span>
-              )}
+              <span className="text-5xl font-light">{step.number}</span>
             </div>
             <span
-              className={`mt-2 text-sm ${
+              className={`mt-4 text-xl font-medium ${
                 currentStep >= step.number
-                  ? "text-heading font-medium"
-                  : "text-gray-500"
+                  ? "text-heading"
+                  : "text-gray-400"
               }`}
             >
               {step.label}

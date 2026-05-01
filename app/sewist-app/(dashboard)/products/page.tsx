@@ -261,57 +261,68 @@ export default function ProductsPage() {
 
       if (productError) throw productError;
 
-      // 2. Handle Image Uploads
-      if (productData.images && productData.images.length > 0) {
-        const uploadedImageUrls: string[] = [];
+      // 2. Handle Image Reconciliation & Uploads
+      if (productData.photos && productData.photos.length > 0) {
+        const finalImageUrls: string[] = [];
         
-        // Count existing images to set display_order correctly
-        const { count: existingCount } = await supabase
+        // Delete all old image mappings to start fresh (sync approach)
+        await supabase
           .from('product_images')
-          .select('*', { count: 'exact', head: true })
+          .delete()
           .eq('product_id', product.id);
 
-        for (let i = 0; i < productData.images.length; i++) {
-          const file = productData.images[i];
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${Date.now()}-${i}.${fileExt}`;
-          const filePath = `products/${product.id}/${fileName}`;
+        for (let i = 0; i < productData.photos.length; i++) {
+          const slot = productData.photos[i];
+          if (!slot.file && !slot.url) continue; // Empty slot
 
-          // Get presigned URL
-          const res = await fetch('/api/media', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filename: filePath, contentType: file.type }),
-          });
+          let imageUrl = slot.url;
 
-          if (!res.ok) throw new Error('Failed to get upload URL');
-          const { url, publicUrl } = await res.json();
+          if (slot.file) {
+            // New file upload
+            const file = slot.file;
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${i}.${fileExt}`;
+            const filePath = `products/${product.id}/${fileName}`;
 
-          // Upload to S3
-          const uploadRes = await fetch(url, {
-            method: 'PUT',
-            body: file,
-            headers: { 'Content-Type': file.type },
-          });
+            // Get presigned URL
+            const res = await fetch('/api/media', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: filePath, contentType: file.type }),
+            });
 
-          if (!uploadRes.ok) throw new Error('Failed to upload image to S3');
-          
-          uploadedImageUrls.push(publicUrl);
+            if (!res.ok) throw new Error('Failed to get upload URL');
+            const { url, publicUrl } = await res.json();
 
-          // Save to product_images table
-          await supabase.from('product_images').insert({
-            product_id: product.id,
-            image_url: publicUrl,
-            is_main: i === 0 && !productData.img_src, // Main if first new and no existing main
-            display_order: i + (existingCount || 0),
-          });
+            // Upload to S3
+            const uploadRes = await fetch(url, {
+              method: 'PUT',
+              body: file,
+              headers: { 'Content-Type': file.type },
+            });
+
+            if (!uploadRes.ok) throw new Error('Failed to upload image to S3');
+            imageUrl = publicUrl;
+          }
+
+          if (imageUrl) {
+            finalImageUrls.push(imageUrl);
+
+            // Save to product_images table
+            await supabase.from('product_images').insert({
+              product_id: product.id,
+              image_url: imageUrl,
+              is_main: finalImageUrls.length === 1, // First valid image is main
+              display_order: i,
+            });
+          }
         }
 
-        // Update product's main thumbnail if a new main image was uploaded or none exists
-        if (uploadedImageUrls.length > 0 && !productData.img_src) {
+        // Update product's main thumbnail
+        if (finalImageUrls.length > 0) {
           await supabase
             .from('sewist_products')
-            .update({ img_src: uploadedImageUrls[0] })
+            .update({ img_src: finalImageUrls[0] })
             .eq('id', product.id);
         }
       }

@@ -24,8 +24,10 @@ export const useProductModalState = (
 
   const [variationGroups, setVariationGroups] = useState<VariationGroup[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [selectedImages, setSelectedImages] = useState<(File | null)[]>(Array(7).fill(null));
-  const [existingImages, setExistingImages] = useState<string[]>([]);
+  // Unified photo state: 7 slots, each can have an existing URL or a new File
+  const [photos, setPhotos] = useState<{ file: File | null; url: string | null }[]>(
+    Array(7).fill({ file: null, url: null })
+  );
   const [rejectionReason, setRejectionReason] = useState<{ reason: string, comment: string } | null>(null);
 
   const supabase = createClient();
@@ -157,9 +159,13 @@ export const useProductModalState = (
 
           if (data.product_images && data.product_images.length > 0) {
             const sortedImages = [...data.product_images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
-            setExistingImages(sortedImages.map((img: any) => img.image_url));
+            const initialPhotos = Array(7).fill({ file: null, url: null });
+            sortedImages.slice(0, 7).forEach((img: any, idx: number) => {
+              initialPhotos[idx] = { file: null, url: img.image_url };
+            });
+            setPhotos(initialPhotos);
           } else {
-            setExistingImages([]);
+            setPhotos(Array(7).fill({ file: null, url: null }));
           }
 
           if (data.product_variants && data.product_variants.length > 0) {
@@ -219,8 +225,7 @@ export const useProductModalState = (
         });
         setVariationGroups([]);
         setVariants([]);
-        setExistingImages([]);
-        setSelectedImages(Array(7).fill(null));
+        setPhotos(Array(7).fill({ file: null, url: null }));
       }
     }
     fetchFullProduct();
@@ -249,9 +254,17 @@ export const useProductModalState = (
   }, [product, isOpen, supabase]);
 
   const handlePhotoChange = (index: number) => (file: File) => {
-    setSelectedImages((prev) => {
+    setPhotos((prev) => {
       const next = [...prev];
-      next[index] = file;
+      next[index] = { ...next[index], file };
+      return next;
+    });
+  };
+
+  const handlePhotoRemove = (index: number) => () => {
+    setPhotos((prev) => {
+      const next = [...prev];
+      next[index] = { file: null, url: null };
       return next;
     });
   };
@@ -285,10 +298,10 @@ export const useProductModalState = (
     setFormData,
     variationGroups,
     variants,
-    selectedImages,
-    existingImages,
+    photos,
     rejectionReason,
     handlePhotoChange,
+    handlePhotoRemove,
     addVariationGroup,
     updateGroup,
     removeGroup,

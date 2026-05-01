@@ -14,6 +14,7 @@ export default async function CheckoutPage({
     .select(`
       *,
       users (first_name, last_name),
+      product_images (image_url, display_order),
       product_variants (
         id,
         sku,
