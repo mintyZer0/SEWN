@@ -4,8 +4,9 @@ import SewistHeader from "@/global/SewistHeader";
 import Footer from "@/global/Footer";
 import SewistSidebar from "@/components/sewist-profile/sewist-sidebar";
 import SewistMobileNav from "@/components/sewist-profile/sewist-mobile-nav";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export default function SewistDashboardClientLayout({
   children,
@@ -13,6 +14,7 @@ export default function SewistDashboardClientLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { unreadCount } = useNotifications();
   // Robust check for chat page across subdomains and main domain
   const isChatPage = pathname === "/chat" || pathname?.endsWith("/chat");
 
@@ -35,7 +37,7 @@ export default function SewistDashboardClientLayout({
       <div className="flex flex-1 items-stretch bg-secondary/30 relative">
         {/* Desktop Sidebar */}
         <div className="hidden md:flex shrink-0">
-          <SewistSidebar />
+          <SewistSidebar unreadCount={unreadCount} />
         </div>
 
         {/* Dynamic content area */}
@@ -57,7 +59,7 @@ export default function SewistDashboardClientLayout({
       </div>
 
       {/* Mobile Bottom Navigation - Hidden on mobile chat room handled by ChatContainer overlay */}
-      <SewistMobileNav />
+      <SewistMobileNav unreadCount={unreadCount} />
     </div>
   );
 }

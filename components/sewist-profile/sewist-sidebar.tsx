@@ -13,7 +13,7 @@ const sidebarItems = [
   { name: "Chat", href: "/chat" },
 ];
 
-export default function SewistSidebar() {
+export default function SewistSidebar({ unreadCount = 0 }: { unreadCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -34,7 +34,14 @@ export default function SewistSidebar() {
             )}
           >
             <Link href={item.href}>
-              {item.name}
+              <span className="flex items-center justify-center gap-2">
+                {item.name}
+                {item.href === "/notifications" && unreadCount > 0 ? (
+                  <span className="inline-flex min-w-6 h-6 items-center justify-center rounded-full bg-third px-2 text-xs font-bold text-white">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                ) : null}
+              </span>
             </Link>
           </ProfileButton>
         );

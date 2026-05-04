@@ -1,44 +1,49 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import React from "react";
 import OrderUpdateCard from "@/components/user-profile/order-update-card";
 import ProfileSection from "@/components/user-profile/profile-section";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export default function OrderUpdatesPage() {
-  const supabase = createClient();
-  const [loading, setLoading] = useState(true);
-  const [updates, setUpdates] = useState<any[]>([]);
+  const { notifications, loading, markAllAsRead } = useNotifications();
+  const updates = notifications.filter((notification) => notification.type === "order");
 
-  useEffect(() => {
-    async function fetchUpdates() {
-      try {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-      } catch (error) {
-        console.error("Error fetching updates:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchUpdates();
-  }, [supabase]);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
 
   if (loading) return <div className="flex h-[400px] items-center justify-center">Loading...</div>;
 
   return (
     <ProfileSection title="Order Updates">
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={() =>
+            void markAllAsRead(["order"]).catch((error) => {
+              console.error("Failed to mark order updates as read:", error);
+            })
+          }
+          className="rounded-full bg-third px-4 py-2 text-xs md:text-sm text-white font-bold transition-all active:scale-95"
+        >
+          Mark orders as read
+        </button>
+      </div>
       <div className="space-y-6">
         {updates.length > 0 ? (
           updates.map((update) => (
             <OrderUpdateCard
               key={update.id}
-              productName={update.product_name}
-              sewistName={update.sewist_name}
-              statusMessage={update.status_message}
-              date={update.created_at}
-              imageSrc={update.image_url}
+              productName={update.title}
+              statusMessage={update.message || "Order status changed."}
+              date={formatDate(update.createdAt)}
+              imageSrc="/assets/sewist-photos/1.jpg"
             />
           ))
         ) : (

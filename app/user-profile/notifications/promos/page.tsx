@@ -1,44 +1,51 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import React from "react";
 import PromotionCard from "@/components/user-profile/promotion-card";
 import ProfileSection from "@/components/user-profile/profile-section";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export default function PromotionsPage() {
-  const supabase = createClient();
-  const [loading, setLoading] = useState(true);
-  const [promos, setPromos] = useState<any[]>([]);
+  const { notifications, loading, markAllAsRead } = useNotifications();
+  const promos = notifications.filter(
+    (notification) => notification.type === "promotion" || notification.type === "notification"
+  );
 
-  useEffect(() => {
-    async function fetchPromos() {
-      try {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-      } catch (error) {
-        console.error("Error fetching promos:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPromos();
-  }, [supabase]);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
 
   if (loading) return <div className="flex h-[400px] items-center justify-center">Loading...</div>;
 
   return (
     <ProfileSection title="Promotions">
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={() =>
+            void markAllAsRead(["notification", "promotion"]).catch((error) => {
+              console.error("Failed to mark promotions as read:", error);
+            })
+          }
+          className="rounded-full bg-third px-4 py-2 text-xs md:text-sm text-white font-bold transition-all active:scale-95"
+        >
+          Mark promotions as read
+        </button>
+      </div>
       <div className="space-y-6">
         {promos.length > 0 ? (
           promos.map((promo) => (
             <PromotionCard
               key={promo.id}
               title={promo.title}
-              description={promo.description}
-              priceInfo={promo.price_info}
-              date={promo.created_at}
-              imageSrc={promo.image_url}
+              description={promo.message || "New update available."}
+              date={formatDate(promo.createdAt)}
+              imageSrc="/assets/sewist-photos/1.jpg"
             />
           ))
         ) : (
