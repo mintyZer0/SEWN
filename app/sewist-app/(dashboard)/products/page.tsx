@@ -15,6 +15,21 @@ import { createClient } from '@/utils/supabase/client';
 import { getS3PublicUrl } from '@/lib/s3-client';
 import { Loader2 } from "lucide-react";
 
+const PRODUCTS_CACHE_VERSION = 1;
+const PRODUCTS_LAST_CACHE_KEY = "sewist-products-last-cache";
+
+type ProductsCachePayload = {
+  version: number;
+  cachedAt: number;
+  data: {
+    products: SectionItem[];
+    orders: SectionItem[];
+    commissions: SectionItem[];
+    appointments: SectionItem[];
+    allServiceRequests: ServiceRequest[];
+  };
+};
+
 {/*There is nothing wrong with this code despite the syntax errors, I've tried to fix
   it but it just results in the page breaking despite removeing the syntax errors,
   I do not know how to remove it, and I plan on not trying to fix it, because it is WORKING*/}
@@ -38,6 +53,7 @@ export default function ProductsPage() {
   const [isViewPendingsModalOpen, setIsViewPendingsModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<SectionItem | null>(null);
+  const [hasHydratedInitialCache, setHasHydratedInitialCache] = useState(false);
   
   const [openSections, setOpenSections] = useState({
     activeProducts: true,
@@ -47,11 +63,75 @@ export default function ProductsPage() {
     appointments: true,
   });
 
+  const applyCachedData = (cachedData: ProductsCachePayload["data"]) => {
+    setProducts(cachedData.products || []);
+    setOrders(cachedData.orders || []);
+    setCommissions(cachedData.commissions || []);
+    setAppointments(cachedData.appointments || []);
+    setAllServiceRequests(cachedData.allServiceRequests || []);
+  };
+
+  const readProductsCache = (userId: string): ProductsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(`sewist-products-cache:${userId}`);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as ProductsCachePayload;
+      if (parsed.version !== PRODUCTS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse products cache:", error);
+      return null;
+    }
+  };
+
+  const readLatestProductsCache = (): ProductsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(PRODUCTS_LAST_CACHE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as ProductsCachePayload;
+      if (parsed.version !== PRODUCTS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse latest products cache:", error);
+      return null;
+    }
+  };
+
+  const writeProductsCache = (userId: string, data: ProductsCachePayload["data"]) => {
+    if (typeof window === "undefined") return;
+    const payload: ProductsCachePayload = {
+      version: PRODUCTS_CACHE_VERSION,
+      cachedAt: Date.now(),
+      data,
+    };
+    window.localStorage.setItem(`sewist-products-cache:${userId}`, JSON.stringify(payload));
+    window.localStorage.setItem(PRODUCTS_LAST_CACHE_KEY, JSON.stringify(payload));
+  };
+
+  useEffect(() => {
+    const latest = readLatestProductsCache();
+    if (latest?.data) {
+      applyCachedData(latest.data);
+      setLoading(false);
+    }
+    setHasHydratedInitialCache(true);
+  }, []);
+
   const fetchData = async () => {
     try {
-      setLoading(true);
+      if (products.length === 0 && orders.length === 0 && commissions.length === 0) {
+        setLoading(true);
+      }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      const cached = readProductsCache(user.id);
+      if (cached?.data) {
+        applyCachedData(cached.data);
+        setLoading(false);
+      }
 
       // 1. Fetch Products
       const { data: productsData } = await supabase
@@ -60,14 +140,15 @@ export default function ProductsPage() {
         .eq('user_id', user.id)
         .is('deleted_at', null); // Only fetch active products
       
-      if (productsData) {
-        setProducts(productsData.map(p => ({ 
+      const nextProducts: SectionItem[] = productsData
+        ? productsData.map(p => ({
           id: p.id, 
           name: p.name, 
           type: p.verification_status,
           rejectionLogId: p.latest_rejection_log_id
-        })));
-      }
+        }))
+        : [];
+      setProducts(nextProducts);
 
       // 2. Fetch Orders (simplified for now)
       const { data: ordersData } = await supabase
@@ -83,12 +164,13 @@ export default function ProductsPage() {
         .eq('sewist_products.user_id', user.id)
         .is('sewist_products.deleted_at', null);
       
-      if (ordersData) {
-        setOrders(ordersData.map((o: any) => ({ 
+      const nextOrders: SectionItem[] = ordersData
+        ? ordersData.map((o: any) => ({ 
           id: o.id, 
           name: o.sewist_products?.name || "Product Order" 
-        })));
-      }
+        }))
+        : [];
+      setOrders(nextOrders);
 
       // 3. Fetch Service Requests (Commissions & Appointments)
       const { data: requestsData } = await supabase
@@ -123,8 +205,7 @@ export default function ProductsPage() {
         .is('deleted_at', null) // Only fetch non-archived requests
         .order('created_at', { ascending: false });
 
-      if (requestsData) {
-        const normalizedRequests = requestsData.map((request: any) => {
+      const normalizedRequests = (requestsData ?? []).map((request: any) => {
           const client = Array.isArray(request.users) ? request.users[0] : request.users;
           const address = Array.isArray(request.user_addresses) ? request.user_addresses[0] : request.user_addresses;
           return {
@@ -133,21 +214,28 @@ export default function ProductsPage() {
             user_addresses: address || null,
           };
         });
-        setAllServiceRequests(normalizedRequests as ServiceRequest[]);
-        
-        // Filter into Commissions (Commissions, Repairs, Alterations)
-        const commissionsList = normalizedRequests
-          .filter(r => ['commission', 'repair', 'alteration'].includes(r.service_type))
-          .map(r => ({
-            id: r.id,
-            name: `${`${r.users?.first_name || ""} ${r.users?.last_name || ""}`.trim() || "Customer"} - ${r.subject || r.service_type}`,
-            type: r.status
-          }));
-        setCommissions(commissionsList);
+      setAllServiceRequests(normalizedRequests as ServiceRequest[]);
+      
+      // Filter into Commissions (Commissions, Repairs, Alterations)
+      const commissionsList = normalizedRequests
+        .filter(r => ['commission', 'repair', 'alteration'].includes(r.service_type))
+        .map(r => ({
+          id: r.id,
+          name: `${`${r.users?.first_name || ""} ${r.users?.last_name || ""}`.trim() || "Customer"} - ${r.subject || r.service_type}`,
+          type: r.status
+        }));
+      setCommissions(commissionsList);
 
-        // Clear Appointments for now as requested
-        setAppointments([]);
-      }
+      // Clear Appointments for now as requested
+      setAppointments([]);
+
+      writeProductsCache(user.id, {
+        products: nextProducts,
+        orders: nextOrders,
+        commissions: commissionsList,
+        appointments: [],
+        allServiceRequests: normalizedRequests as ServiceRequest[],
+      });
 
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -157,6 +245,7 @@ export default function ProductsPage() {
   };
 
   useEffect(() => {
+    if (!hasHydratedInitialCache) return;
     fetchData();
 
     // Set up real-time subscription
@@ -194,7 +283,7 @@ export default function ProductsPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [hasHydratedInitialCache]);
 
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));

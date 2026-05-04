@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
 export type NotificationType =
@@ -24,6 +24,14 @@ export interface NotificationItem {
 }
 
 const DEFAULT_NOTIFICATION_TYPE: NotificationType = "notification";
+const NOTIFICATIONS_CACHE_VERSION = 1;
+const NOTIFICATIONS_LAST_CACHE_KEY = "sewist-notifications-last-cache";
+
+type NotificationsCachePayload = {
+  version: number;
+  cachedAt: number;
+  notifications: NotificationItem[];
+};
 
 function normalizeNotificationType(value: unknown): NotificationType {
   if (
@@ -59,9 +67,50 @@ export function useNotifications() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [hasHydratedInitialCache, setHasHydratedInitialCache] = useState(false);
+  const hasBootDataRef = useRef(false);
+
+  const readNotificationsCache = useCallback((nextUserId: string): NotificationsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(`sewist-notifications-cache:${nextUserId}`);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as NotificationsCachePayload;
+      if (parsed.version !== NOTIFICATIONS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (parseError) {
+      console.error("Failed to parse notifications cache:", parseError);
+      return null;
+    }
+  }, []);
+
+  const readLatestNotificationsCache = useCallback((): NotificationsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(NOTIFICATIONS_LAST_CACHE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as NotificationsCachePayload;
+      if (parsed.version !== NOTIFICATIONS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (parseError) {
+      console.error("Failed to parse latest notifications cache:", parseError);
+      return null;
+    }
+  }, []);
+
+  const writeNotificationsCache = useCallback((nextUserId: string, items: NotificationItem[]) => {
+    if (typeof window === "undefined") return;
+    const payload: NotificationsCachePayload = {
+      version: NOTIFICATIONS_CACHE_VERSION,
+      cachedAt: Date.now(),
+      notifications: items,
+    };
+    window.localStorage.setItem(`sewist-notifications-cache:${nextUserId}`, JSON.stringify(payload));
+    window.localStorage.setItem(NOTIFICATIONS_LAST_CACHE_KEY, JSON.stringify(payload));
+  }, []);
 
   const loadNotifications = useCallback(async () => {
-    setLoading(true);
+    setLoading(!hasBootDataRef.current);
     setError(null);
 
     const {
@@ -86,6 +135,12 @@ export function useNotifications() {
     }
 
     setUserId(user.id);
+    const cached = readNotificationsCache(user.id);
+    if (cached?.notifications?.length) {
+      setNotifications(cached.notifications);
+      hasBootDataRef.current = true;
+      setLoading(false);
+    }
 
     const { data, error: fetchError } = await supabase
       .from("notifications")
@@ -103,8 +158,10 @@ export function useNotifications() {
 
     const normalized = (data ?? []).map((row) => normalizeNotificationRow(row));
     setNotifications(normalized);
+    writeNotificationsCache(user.id, normalized);
+    hasBootDataRef.current = true;
     setLoading(false);
-  }, [supabase]);
+  }, [readNotificationsCache, supabase, writeNotificationsCache]);
 
   const markAsRead = useCallback(
     async (id: string) => {
@@ -122,12 +179,18 @@ export function useNotifications() {
       }
 
       setNotifications((prev) =>
-        prev.map((notification) =>
-          notification.id === id ? { ...notification, isRead: true } : notification
-        )
+        {
+          const updated = prev.map((notification) =>
+            notification.id === id ? { ...notification, isRead: true } : notification
+          );
+          if (userId) {
+            writeNotificationsCache(userId, updated);
+          }
+          return updated;
+        }
       );
     },
-    [supabase, userId]
+    [supabase, userId, writeNotificationsCache]
   );
 
   const markAllAsRead = useCallback(
@@ -150,20 +213,35 @@ export function useNotifications() {
       }
 
       const typeSet = new Set(types ?? []);
-      setNotifications((prev) =>
-        prev.map((notification) => {
+      setNotifications((prev) => {
+        const updated = prev.map((notification) => {
           if (notification.isRead) return notification;
           if (typeSet.size > 0 && !typeSet.has(notification.type)) return notification;
           return { ...notification, isRead: true };
-        })
-      );
+        });
+        if (userId) {
+          writeNotificationsCache(userId, updated);
+        }
+        return updated;
+      });
     },
-    [supabase, userId]
+    [supabase, userId, writeNotificationsCache]
   );
 
   useEffect(() => {
+    const latest = readLatestNotificationsCache();
+    if (latest?.notifications?.length) {
+      setNotifications(latest.notifications);
+      hasBootDataRef.current = true;
+      setLoading(false);
+    }
+    setHasHydratedInitialCache(true);
+  }, [readLatestNotificationsCache]);
+
+  useEffect(() => {
+    if (!hasHydratedInitialCache) return;
     void loadNotifications();
-  }, [loadNotifications]);
+  }, [hasHydratedInitialCache, loadNotifications]);
 
   useEffect(() => {
     if (!userId) return;
@@ -182,7 +260,11 @@ export function useNotifications() {
           const incoming = normalizeNotificationRow(payload.new as Record<string, unknown>);
           setNotifications((prev) => {
             if (prev.some((notification) => notification.id === incoming.id)) return prev;
-            return [incoming, ...prev];
+            const merged = [incoming, ...prev];
+            if (userId) {
+              writeNotificationsCache(userId, merged);
+            }
+            return merged;
           });
         }
       )
@@ -196,11 +278,15 @@ export function useNotifications() {
         },
         (payload) => {
           const incoming = normalizeNotificationRow(payload.new as Record<string, unknown>);
-          setNotifications((prev) =>
-            prev.map((notification) =>
+          setNotifications((prev) => {
+            const merged = prev.map((notification) =>
               notification.id === incoming.id ? incoming : notification
-            )
-          );
+            );
+            if (userId) {
+              writeNotificationsCache(userId, merged);
+            }
+            return merged;
+          });
         }
       )
       .subscribe();
@@ -208,7 +294,7 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [supabase, userId]);
+  }, [supabase, userId, writeNotificationsCache]);
 
   const unreadCount = useMemo(
     () => notifications.reduce((count, notification) => count + (notification.isRead ? 0 : 1), 0),

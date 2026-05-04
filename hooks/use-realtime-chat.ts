@@ -20,6 +20,37 @@ interface UseRealtimeChatOptions {
 
 // Simple global cache to store messages for each conversationId
 const messageCache: Record<string, ChatMessage[]> = {};
+const CHAT_MESSAGES_CACHE_VERSION = 1;
+
+type ChatMessagesCachePayload = {
+  version: number;
+  cachedAt: number;
+  messages: ChatMessage[];
+};
+
+function readMessagesCache(conversationId: string): ChatMessage[] | null {
+  if (typeof window === "undefined") return null;
+  const raw = window.localStorage.getItem(`chat-messages-cache:${conversationId}`);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as ChatMessagesCachePayload;
+    if (parsed.version !== CHAT_MESSAGES_CACHE_VERSION) return null;
+    return parsed.messages || null;
+  } catch (error) {
+    console.error("Failed to parse chat messages cache:", error);
+    return null;
+  }
+}
+
+function writeMessagesCache(conversationId: string, messages: ChatMessage[]) {
+  if (typeof window === "undefined") return;
+  const payload: ChatMessagesCachePayload = {
+    version: CHAT_MESSAGES_CACHE_VERSION,
+    cachedAt: Date.now(),
+    messages,
+  };
+  window.localStorage.setItem(`chat-messages-cache:${conversationId}`, JSON.stringify(payload));
+}
 
 export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) {
   const supabase = createClient();
@@ -39,7 +70,13 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
       if (messageCache[conversationId]) {
         setMessages(messageCache[conversationId]);
       } else {
-        setMessages([]); // Clear list while loading if not in cache
+        const cachedMessages = readMessagesCache(conversationId);
+        if (cachedMessages?.length) {
+          messageCache[conversationId] = cachedMessages;
+          setMessages(cachedMessages);
+        } else {
+          setMessages([]); // Clear list while loading if not in cache
+        }
       }
 
       const { data: dbMessages, error } = await supabase
@@ -73,6 +110,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
 
       // 2. Update cache and state with fresh data from DB
       messageCache[conversationId] = mapped;
+      writeMessagesCache(conversationId, mapped);
       setMessages(mapped);
     };
 
@@ -111,6 +149,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
     setMessages((prev) => {
       const updated = [...prev, optimisticMsg];
       messageCache[conversationId] = updated;
+      writeMessagesCache(conversationId, updated);
       return updated;
     });
     // --- OPTIMISTIC UI END ---
@@ -175,6 +214,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
     setMessages((prev) => {
       const updated = prev.map(m => m.id === optimisticId ? realMsg : m);
       messageCache[conversationId] = updated;
+      writeMessagesCache(conversationId, updated);
       return updated;
     });
   };
@@ -223,6 +263,7 @@ export function useRealtimeChat({ roomName, username }: UseRealtimeChatOptions) 
               if (prev.some((m) => m.id === newMsg.id)) return prev;
               const updated = [...prev, newMsg];
               messageCache[conversationId] = updated; // Update cache
+              writeMessagesCache(conversationId, updated);
               return updated;
             });
           }
