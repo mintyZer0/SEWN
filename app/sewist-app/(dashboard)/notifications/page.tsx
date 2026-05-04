@@ -34,10 +34,10 @@ const StatusCard = ({ item, onOpen }: { item: StatusItem; onOpen: (item: StatusI
   return (
     <div
       onClick={() => onOpen(item)}
-      className="bg-white rounded-2xl md:rounded-[30px] p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 shadow-sm hover:shadow-md transition-all active:scale-95 group cursor-pointer relative overflow-hidden shrink-0"
+      className="bg-white rounded-2xl md:rounded-[30px] p-3 sm:p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6 shadow-sm hover:shadow-md transition-all active:scale-95 group cursor-pointer relative overflow-hidden shrink-0"
     >
       {/* Image/Icon Slot */}
-      <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 flex-shrink-0 relative overflow-hidden flex items-center justify-center border-2 border-gray-50">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-gray-100 flex-shrink-0 relative overflow-hidden flex items-center justify-center border-2 border-gray-50">
         {item.image ? (
           <Image
             src={item.image}
@@ -53,21 +53,21 @@ const StatusCard = ({ item, onOpen }: { item: StatusItem; onOpen: (item: StatusI
 
       {/* Content */}
       <div className="flex-1 min-w-0 md:pr-24">
-        <h4 className="text-xl md:text-2xl font-bold text-third truncate leading-tight">
+        <h4 className="text-base sm:text-lg md:text-2xl font-bold text-third whitespace-normal break-words md:truncate leading-tight">
           {item.title}
         </h4>
-        <p className="text-sm md:text-lg text-gray-500 font-medium mt-1">
+        <p className="text-xs sm:text-sm md:text-lg text-gray-500 font-medium mt-1">
           {item.description}
         </p>
       </div>
 
       {/* Timestamp - Bottom Right */}
-      <div className="static mt-2 md:absolute md:bottom-4 md:right-6 w-full md:w-auto text-right">
+      <div className="static mt-1 md:absolute md:bottom-4 md:right-6 w-full md:w-auto text-left md:text-right">
         <span className="text-[10px] md:text-xs font-bold text-gray-400/80 uppercase tracking-tighter">
           {item.timestamp}
         </span>
         {!item.isRead ? (
-          <span className="mt-1 inline-block w-2 h-2 rounded-full bg-third" />
+          <span className="ml-2 md:ml-0 md:mt-1 inline-block w-2 h-2 rounded-full bg-third" />
         ) : null}
       </div>
     </div>
@@ -86,23 +86,23 @@ const StatusSection = ({
   onOpen: (item: StatusItem) => void;
 }) => {
   return (
-    <div className="third-gradient rounded-3xl md:rounded-[50px] p-6 md:p-10 mb-8 md:mb-12 shadow-inner border-t-4 border-white/20 min-h-[300px] flex flex-col">
-      <h3 className="text-3xl md:text-5xl font-bold text-white mb-6 md:mb-8 tracking-tight drop-shadow-sm text-center md:text-left">
+    <div className="third-gradient rounded-2xl md:rounded-[50px] p-4 sm:p-6 md:p-10 mb-4 md:mb-12 shadow-inner border-t-4 border-white/20 min-h-0 md:min-h-[300px] flex flex-col">
+      <h3 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-4 md:mb-8 tracking-tight drop-shadow-sm text-left">
         {title}
       </h3>
-      <div className="space-y-4 md:space-y-6 max-h-[400px] md:max-h-[600px] overflow-y-auto pr-2 md:pr-4 custom-scrollbar flex flex-col flex-1">
+      <div className="space-y-3 md:space-y-6 max-h-none md:max-h-[600px] overflow-visible md:overflow-y-auto pr-0 md:pr-4 custom-scrollbar flex flex-col flex-1">
         {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center py-8 md:py-12 text-white/80 gap-4">
+          <div className="flex-1 flex flex-col items-center justify-center py-6 md:py-12 text-white/80 gap-3 md:gap-4">
             <Loader2 className="w-8 h-8 md:w-12 md:h-12 animate-spin" />
-            <span className="text-xl md:text-2xl font-medium">Loading {title.toLowerCase()}...</span>
+            <span className="text-base md:text-2xl font-medium">Loading {title.toLowerCase()}...</span>
           </div>
         ) : items.length > 0 ? (
           items.map((item) => (
             <StatusCard key={item.id} item={item} onOpen={onOpen} />
           ))
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center py-8 md:py-12 text-white/60">
-            <span className="text-xl md:text-2xl font-medium italic">No {title.toLowerCase()} found</span>
+          <div className="flex-1 flex flex-col items-center justify-center py-6 md:py-12 text-white/60">
+            <span className="text-base md:text-2xl font-medium italic">No {title.toLowerCase()} found</span>
           </div>
         )}
       </div>
@@ -263,7 +263,7 @@ export default function NotificationsPage() {
   );
 
   return (
-    <div className="p-4 md:p-16 pb-32 md:pb-16 max-w-6xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-16 pb-28 md:pb-16 max-w-6xl mx-auto">
       <div className="mb-6 flex items-center justify-end">
         <button
           type="button"
@@ -273,7 +273,7 @@ export default function NotificationsPage() {
             })
           }
           disabled={unreadCount === 0}
-          className="rounded-full bg-third px-4 py-2 text-white text-sm font-bold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full sm:w-auto rounded-full bg-third px-4 py-2 text-white text-sm font-bold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Mark all as read
         </button>

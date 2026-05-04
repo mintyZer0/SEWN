@@ -143,39 +143,39 @@ export const ServiceRequestDetailsModal = ({
     : "No address found";
 
   return (
-    <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[1300] flex items-center justify-center p-2 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className="relative bg-white rounded-[40px] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+      <div className="relative bg-white rounded-3xl md:rounded-[40px] w-full max-w-2xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[92vh]">
         {/* Header */}
-        <div className="bg-third p-8 text-white flex justify-between items-start">
-          <div>
-            <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold uppercase tracking-wider mb-2 inline-block">
+        <div className="bg-third p-4 sm:p-6 md:p-8 text-white flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span className="bg-white/20 px-3 py-1 rounded-full text-[10px] sm:text-xs md:text-sm font-bold uppercase tracking-wider mb-2 inline-block">
               {request.service_type} Request
             </span>
-            <h2 className="text-4xl font-bold leading-tight">{request.subject}</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold leading-tight break-words">{request.subject}</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-            <X className="w-8 h-8" />
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors shrink-0">
+            <X className="w-6 h-6 md:w-8 md:h-8" />
           </button>
         </div>
 
-        <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+        <div className="p-4 sm:p-6 md:p-8 space-y-5 md:space-y-8 max-h-[58vh] sm:max-h-[60vh] md:max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* Client Info */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gray-600">
                 <User className="w-5 h-5 text-third" />
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-bold text-gray-400 uppercase">Client</p>
-                  <p className="font-semibold text-lg">{clientName}</p>
+                  <p className="font-semibold text-base md:text-lg break-words">{clientName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-gray-600">
                 <Mail className="w-5 h-5 text-third" />
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-bold text-gray-400 uppercase">Email</p>
-                  <p className="font-semibold">{clientEmail}</p>
+                  <p className="font-semibold text-sm md:text-base break-words">{clientEmail}</p>
                 </div>
               </div>
             </div>
@@ -184,36 +184,36 @@ export const ServiceRequestDetailsModal = ({
                 <Calendar className="w-5 h-5 text-third" />
                 <div>
                   <p className="text-xs font-bold text-gray-400 uppercase">Requested Date</p>
-                  <p className="font-semibold">{formatDate(request.appointment_date)}</p>
+                  <p className="font-semibold text-sm md:text-base">{formatDate(request.appointment_date)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 text-gray-600">
                 <Phone className="w-5 h-5 text-third" />
-                <div>
+                <div className="min-w-0">
                   <p className="text-xs font-bold text-gray-400 uppercase">Phone</p>
-                  <p className="font-semibold">{clientPhone}</p>
+                  <p className="font-semibold text-sm md:text-base break-words">{clientPhone}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-100 pt-6">
+          <div className="border-t border-gray-100 pt-4 md:pt-6">
             <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Address</h3>
-            <div className="bg-gray-50 rounded-2xl p-4 text-gray-700 leading-relaxed">
+            <div className="bg-gray-50 rounded-2xl p-3 md:p-4 text-gray-700 leading-relaxed text-sm md:text-base break-words">
               {clientAddress}
             </div>
           </div>
 
-          <div className="border-t border-gray-100 pt-6">
+          <div className="border-t border-gray-100 pt-4 md:pt-6">
             <h3 className="text-sm font-bold text-gray-400 uppercase mb-3">Request Details</h3>
-            <div className="bg-gray-50 rounded-2xl p-6 text-gray-700 whitespace-pre-wrap leading-relaxed text-lg italic">
+            <div className="bg-gray-50 rounded-2xl p-4 md:p-6 text-gray-700 whitespace-pre-wrap leading-relaxed text-sm md:text-lg italic break-words">
               "{request.request_details}"
             </div>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="p-8 bg-gray-50 flex gap-4 border-t border-gray-100">
+        <div className="p-4 sm:p-6 md:p-8 bg-gray-50 flex flex-col sm:flex-row gap-3 sm:gap-4 border-t border-gray-100">
           {request.status === "pending" ? (
             <>
               <ProfileButton
@@ -221,7 +221,7 @@ export const ServiceRequestDetailsModal = ({
                 onClick={() => handleUpdateStatus("accepted")}
                 variant="green"
                 size="lg"
-                className="flex-1 gap-2"
+                className="w-full sm:flex-1 gap-2"
               >
                 {isUpdating ? <Loader2 className="animate-spin" /> : <CheckCircle />}
                 Accept Request
@@ -231,17 +231,17 @@ export const ServiceRequestDetailsModal = ({
                 onClick={() => handleUpdateStatus("cancelled")}
                 variant="orange"
                 size="lg"
-                className="flex-1 gap-2"
+                className="w-full sm:flex-1 gap-2"
               >
                 <XCircle />
                 Decline
               </ProfileButton>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-between">
+            <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="flex items-center gap-2">
                 <span className={cn(
-                  "px-4 py-2 rounded-full font-bold uppercase tracking-tighter text-sm",
+                  "px-3 md:px-4 py-2 rounded-full font-bold uppercase tracking-tighter text-xs md:text-sm",
                   request.status === "accepted" ? "bg-green-100 text-green-600" : 
                   request.status === "completed" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"
                 )}>
@@ -252,7 +252,7 @@ export const ServiceRequestDetailsModal = ({
                 onClick={handleOpenChat}
                 variant="orange"
                 size="md"
-                className="gap-2"
+                className="w-full sm:w-auto gap-2"
               >
                 <MessageSquare className="w-5 h-5" />
                 Open Chat
