@@ -16,6 +16,18 @@ const DAYS = [
   { value: 0, label: "Sunday" },
 ];
 
+const APPOINTMENTS_CACHE_VERSION = 1;
+const APPOINTMENTS_LAST_CACHE_KEY = "sewist-appointments-last-cache";
+
+type AppointmentsCachePayload = {
+  version: number;
+  cachedAt: number;
+  data: {
+    userId: string;
+    hours: Record<number, any>;
+  };
+};
+
 export default function AppointmentsSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -23,12 +35,71 @@ export default function AppointmentsSettingsPage() {
 
   const [hours, setHours] = useState<Record<number, any>>({});
   const [userId, setUserId] = useState<string>("");
+  const [hasHydratedInitialCache, setHasHydratedInitialCache] = useState(false);
+
+  const readAppointmentsCache = (nextUserId: string): AppointmentsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(`sewist-appointments-cache:${nextUserId}`);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as AppointmentsCachePayload;
+      if (parsed.version !== APPOINTMENTS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse appointments cache:", error);
+      return null;
+    }
+  };
+
+  const readLatestAppointmentsCache = (): AppointmentsCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(APPOINTMENTS_LAST_CACHE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as AppointmentsCachePayload;
+      if (parsed.version !== APPOINTMENTS_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse latest appointments cache:", error);
+      return null;
+    }
+  };
+
+  const writeAppointmentsCache = (nextUserId: string, nextHours: Record<number, any>) => {
+    if (typeof window === "undefined") return;
+    const payload: AppointmentsCachePayload = {
+      version: APPOINTMENTS_CACHE_VERSION,
+      cachedAt: Date.now(),
+      data: {
+        userId: nextUserId,
+        hours: nextHours,
+      },
+    };
+    window.localStorage.setItem(`sewist-appointments-cache:${nextUserId}`, JSON.stringify(payload));
+    window.localStorage.setItem(APPOINTMENTS_LAST_CACHE_KEY, JSON.stringify(payload));
+  };
 
   useEffect(() => {
+    const latest = readLatestAppointmentsCache();
+    if (latest?.data) {
+      setUserId(latest.data.userId || "");
+      setHours(latest.data.hours || {});
+      setLoading(false);
+    }
+    setHasHydratedInitialCache(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasHydratedInitialCache) return;
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        const cached = readAppointmentsCache(user.id);
+        if (cached?.data) {
+          setHours(cached.data.hours || {});
+          setLoading(false);
+        }
         const { data } = await supabase.from("sewist_working_hours").select("*").eq("user_id", user.id);
         
         const mappedHours: Record<number, any> = {};
@@ -44,11 +115,12 @@ export default function AppointmentsSettingsPage() {
           });
         }
         setHours(mappedHours);
+        writeAppointmentsCache(user.id, mappedHours);
       }
       setLoading(false);
     }
     load();
-  }, []);
+  }, [hasHydratedInitialCache]);
 
   const handleDayToggle = (day: number) => {
     setHours(prev => {

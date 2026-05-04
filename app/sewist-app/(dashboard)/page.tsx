@@ -22,6 +22,17 @@ const MapSearchBox = dynamic(() => import("@/components/ui/map-search-box"), {
   ssr: false,
 });
 
+const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+const DASHBOARD_CACHE_VERSION = 1;
+const DASHBOARD_LAST_CACHE_KEY = "sewist-dashboard-last-cache";
+const DASHBOARD_LAST_USER_KEY = "sewist-dashboard-last-user-id";
+
+type DashboardCachePayload = {
+  version: number;
+  cachedAt: number;
+  profileData: any;
+};
+
 {/*There is nothing wrong with this code despite the syntax errors, I've tried to fix
   it but it just results in the page breaking despite removeing the syntax errors,
   I do not know how to remove it, and I plan on not trying to fix it, because it is WORKING*/}
@@ -78,6 +89,47 @@ export default function SewistCenterPage() {
   
   // Keep track of the current avatar record to handle deletion of old files
   const [currentAvatarRecord, setCurrentAvatarRecord] = useState<{id?: string, avatar_url: string} | null>(null);
+  const [hasHydratedInitialCache, setHasHydratedInitialCache] = useState(false);
+
+  const readDashboardCache = (userId: string): DashboardCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(`sewist-dashboard-cache:${userId}`);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as DashboardCachePayload;
+      if (parsed.version !== DASHBOARD_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse sewist dashboard cache:", error);
+      return null;
+    }
+  };
+
+  const writeDashboardCache = (userId: string, profileData: any) => {
+    if (typeof window === "undefined") return;
+    const payload: DashboardCachePayload = {
+      version: DASHBOARD_CACHE_VERSION,
+      cachedAt: Date.now(),
+      profileData,
+    };
+    window.localStorage.setItem(`sewist-dashboard-cache:${userId}`, JSON.stringify(payload));
+    window.localStorage.setItem(DASHBOARD_LAST_USER_KEY, userId);
+    window.localStorage.setItem(DASHBOARD_LAST_CACHE_KEY, JSON.stringify(payload));
+  };
+
+  const readLatestDashboardCache = (): DashboardCachePayload | null => {
+    if (typeof window === "undefined") return null;
+    const raw = window.localStorage.getItem(DASHBOARD_LAST_CACHE_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw) as DashboardCachePayload;
+      if (parsed.version !== DASHBOARD_CACHE_VERSION) return null;
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse latest sewist dashboard cache:", error);
+      return null;
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -97,10 +149,102 @@ export default function SewistCenterPage() {
     appointments: false,
   });
 
+  const hydrateFromProfileData = useCallback((profileData: any) => {
+    const addresses = Array.isArray(profileData.user_addresses) ? profileData.user_addresses : [profileData.user_addresses].filter(Boolean);
+    const shopAddress = addresses.find((a: any) => a?.address_type === 'shop' && a?.is_primary) 
+        || addresses.find((a: any) => a?.address_type === 'shop') 
+        || addresses[0];
+    
+    const phones = Array.isArray(profileData.user_phones) ? profileData.user_phones : [profileData.user_phones].filter(Boolean);
+    const phone = phones[0]?.phone;
+
+    const socials = Array.isArray(profileData.user_socials) ? profileData.user_socials : [profileData.user_socials].filter(Boolean);
+    const social = socials[0];
+
+    const achievements = Array.isArray(profileData.sewist_achievements) ? profileData.sewist_achievements : [profileData.sewist_achievements].filter(Boolean);
+
+    const settingsArray = Array.isArray(profileData.sewist_settings) ? profileData.sewist_settings : [profileData.sewist_settings].filter(Boolean);
+    const settings = settingsArray[0];
+
+    const avatar = profileData.user_avatars;
+
+    setFormData({
+      name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim(),
+      description: "", // Shop description is not yet linked to a DB field
+      email: profileData.email || "",
+      social_link: social?.handle || "",
+      phone: phone || "",
+      achievement_1: achievements[0]?.title || "",
+      achievement_2: achievements[1]?.title || "",
+      achievement_3: achievements[2]?.title || "",
+    });
+
+    if (shopAddress) {
+        setAddress(shopAddress.full_address || "");
+        setZipCode(shopAddress.zip_code?.toString() || "");
+        
+        // Format existing location for display when not editing
+        const locParts = [shopAddress.province, shopAddress.city, shopAddress.barangay].filter(Boolean);
+        setDbLocationDisplay(locParts.join(", ") || "No location set");
+
+        if (shopAddress.latitude && shopAddress.longitude) {
+            setPosition({ lat: shopAddress.latitude, lng: shopAddress.longitude });
+        }
+    }
+
+    if (settings) {
+        setServices({
+            alterations: settings.accepting_alterations || false,
+            repair: settings.accepting_repairs || false,
+            commissions: settings.accepting_commissions || false,
+            appointments: settings.accepting_appointments || false,
+        });
+    }
+
+    if (avatar) {
+      const avatarObj = Array.isArray(avatar) ? avatar[0] : avatar;
+      let publicAvatarUrl = "";
+      
+      if (avatarObj?.avatar_url) {
+        publicAvatarUrl = getS3PublicUrl(avatarObj.avatar_url);
+      } 
+      else {
+        publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
+      }
+      console.log("FETCHED DATA:", profileData.user_avatars);
+      setAvatarUrl(publicAvatarUrl);
+    }
+  }, []);
+
   useEffect(() => {
+    const latestCached = readLatestDashboardCache();
+    if (latestCached?.profileData) {
+      hydrateFromProfileData(latestCached.profileData);
+      setLoading(false);
+    }
+    setHasHydratedInitialCache(true);
+  }, [hydrateFromProfileData]);
+
+  useEffect(() => {
+    let active = true;
+
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        if (active) setLoading(false);
+        return;
+      }
+
+      const cached = readDashboardCache(user.id);
+      const isFreshCache =
+        !!cached &&
+        Date.now() - cached.cachedAt < DASHBOARD_CACHE_TTL_MS &&
+        !!cached.profileData;
+
+      if (cached?.profileData) {
+        hydrateFromProfileData(cached.profileData);
+        if (active) setLoading(false);
+      }
 
       const { data: profileData } = await supabase
         .from('users')
@@ -119,75 +263,21 @@ export default function SewistCenterPage() {
         .single();
 
       if (profileData) {
-        const addresses = Array.isArray(profileData.user_addresses) ? profileData.user_addresses : [profileData.user_addresses].filter(Boolean);
-        const shopAddress = addresses.find((a: any) => a?.address_type === 'shop' && a?.is_primary) 
-            || addresses.find((a: any) => a?.address_type === 'shop') 
-            || addresses[0];
-        
-        const phones = Array.isArray(profileData.user_phones) ? profileData.user_phones : [profileData.user_phones].filter(Boolean);
-        const phone = phones[0]?.phone;
+        hydrateFromProfileData(profileData);
+        writeDashboardCache(user.id, profileData);
+      };
 
-        const socials = Array.isArray(profileData.user_socials) ? profileData.user_socials : [profileData.user_socials].filter(Boolean);
-        const social = socials[0];
-
-        const achievements = Array.isArray(profileData.sewist_achievements) ? profileData.sewist_achievements : [profileData.sewist_achievements].filter(Boolean);
-
-        const settingsArray = Array.isArray(profileData.sewist_settings) ? profileData.sewist_settings : [profileData.sewist_settings].filter(Boolean);
-        const settings = settingsArray[0];
-
-        const avatar = profileData.user_avatars;
-
-        setFormData({
-          name: `${profileData.first_name || ""} ${profileData.last_name || ""}`.trim(),
-          description: "", // Shop description is not yet linked to a DB field
-          email: profileData.email || "",
-          social_link: social?.handle || "",
-          phone: phone || "",
-          achievement_1: achievements[0]?.title || "",
-          achievement_2: achievements[1]?.title || "",
-          achievement_3: achievements[2]?.title || "",
-        });
-
-        if (shopAddress) {
-            setAddress(shopAddress.full_address || "");
-            setZipCode(shopAddress.zip_code?.toString() || "");
-            
-            // Format existing location for display when not editing
-            const locParts = [shopAddress.province, shopAddress.city, shopAddress.barangay].filter(Boolean);
-            setDbLocationDisplay(locParts.join(", ") || "No location set");
-
-            if (shopAddress.latitude && shopAddress.longitude) {
-                setPosition({ lat: shopAddress.latitude, lng: shopAddress.longitude });
-            }
-        }
-
-        if (settings) {
-            setServices({
-                alterations: settings.accepting_alterations || false,
-                repair: settings.accepting_repairs || false,
-                commissions: settings.accepting_commissions || false,
-                appointments: settings.accepting_appointments || false,
-            });
-        }
-
-        if (avatar) {
-          const avatarObj = Array.isArray(avatar) ? avatar[0] : avatar;
-          let publicAvatarUrl = "";
-          
-          if (avatarObj?.avatar_url) {
-            publicAvatarUrl = getS3PublicUrl(avatarObj.avatar_url);
-            } 
-          else {
-            publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
-            }
-          console.log("FETCHED DATA:", profileData.user_avatars);
-          setAvatarUrl(publicAvatarUrl);
+      if (active) {
+        setLoading(false);
       }
-      setLoading(false);
     };
-  }
+
     fetchData();
-  }, [supabase]);
+
+    return () => {
+      active = false;
+    };
+  }, [supabase, hydrateFromProfileData, hasHydratedInitialCache]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
