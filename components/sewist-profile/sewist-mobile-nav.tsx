@@ -13,7 +13,7 @@ const navItems = [
   { name: "Chat", href: "/chat", icon: MessageCircle },
 ];
 
-export default function SewistMobileNav() {
+export default function SewistMobileNav({ unreadCount = 0 }: { unreadCount?: number }) {
   const pathname = usePathname();
 
   return (
@@ -26,7 +26,7 @@ export default function SewistMobileNav() {
             key={item.name}
             href={item.href}
             className={cn(
-              "flex flex-col items-center justify-center min-w-[64px] gap-1 transition-colors",
+              "relative flex flex-col items-center justify-center min-w-[64px] gap-1 transition-colors",
               isActive ? "text-third" : "text-gray-400 hover:text-primary"
             )}
           >
@@ -40,6 +40,11 @@ export default function SewistMobileNav() {
             )}>
               {item.name}
             </span>
+            {item.href === "/notifications" && unreadCount > 0 ? (
+              <span className="absolute -top-1 right-2 inline-flex min-w-5 h-5 items-center justify-center rounded-full bg-third px-1 text-[10px] font-bold text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            ) : null}
           </Link>
         );
       })}

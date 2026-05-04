@@ -1,10 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { User, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useNotifications, type NotificationItem } from "@/hooks/use-notifications";
 import { createClient } from "@/utils/supabase/client";
+import {
+  ServiceRequestDetailsModal,
+  type ServiceRequest,
+} from "@/components/modals/service-request-details-modal";
 
 interface StatusItem {
   id: string;
@@ -12,13 +17,25 @@ interface StatusItem {
   description: string;
   timestamp: string;
   image?: string;
-  type: "notification" | "order" | "commission";
+  type:
+    | "notification"
+    | "order"
+    | "commission"
+    | "alteration"
+    | "repair"
+    | "promotion"
+    | "appointment";
   link?: string;
+  isRead: boolean;
+  createdAt: string;
 }
 
-const StatusCard = ({ item }: { item: StatusItem }) => {
+const StatusCard = ({ item, onOpen }: { item: StatusItem; onOpen: (item: StatusItem) => void }) => {
   return (
-    <div className="bg-white rounded-2xl md:rounded-[30px] p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 shadow-sm hover:shadow-md transition-shadow group cursor-pointer relative overflow-hidden shrink-0">
+    <div
+      onClick={() => onOpen(item)}
+      className="bg-white rounded-2xl md:rounded-[30px] p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 shadow-sm hover:shadow-md transition-all active:scale-95 group cursor-pointer relative overflow-hidden shrink-0"
+    >
       {/* Image/Icon Slot */}
       <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gray-100 flex-shrink-0 relative overflow-hidden flex items-center justify-center border-2 border-gray-50">
         {item.image ? (
@@ -49,19 +66,24 @@ const StatusCard = ({ item }: { item: StatusItem }) => {
         <span className="text-[10px] md:text-xs font-bold text-gray-400/80 uppercase tracking-tighter">
           {item.timestamp}
         </span>
+        {!item.isRead ? (
+          <span className="mt-1 inline-block w-2 h-2 rounded-full bg-third" />
+        ) : null}
       </div>
     </div>
   );
 };
 
-const StatusSection = ({ 
-  title, 
-  items, 
-  loading 
-}: { 
-  title: string; 
-  items: StatusItem[]; 
-  loading: boolean 
+const StatusSection = ({
+  title,
+  items,
+  loading,
+  onOpen,
+}: {
+  title: string;
+  items: StatusItem[];
+  loading: boolean;
+  onOpen: (item: StatusItem) => void;
 }) => {
   return (
     <div className="third-gradient rounded-3xl md:rounded-[50px] p-6 md:p-10 mb-8 md:mb-12 shadow-inner border-t-4 border-white/20 min-h-[300px] flex flex-col">
@@ -76,7 +98,7 @@ const StatusSection = ({
           </div>
         ) : items.length > 0 ? (
           items.map((item) => (
-            <StatusCard key={item.id} item={item} />
+            <StatusCard key={item.id} item={item} onOpen={onOpen} />
           ))
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center py-8 md:py-12 text-white/60">
@@ -89,13 +111,73 @@ const StatusSection = ({
 };
 
 export default function NotificationsPage() {
-  const supabase = createClient();
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<{
-    notifications: StatusItem[];
-  }>({
-    notifications: [],
-  });
+  const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
+  const { notifications, loading, markAsRead, markAllAsRead, unreadCount } = useNotifications();
+  const [allServiceRequests, setAllServiceRequests] = useState<ServiceRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+
+  const loadServiceRequests = useCallback(async () => {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user) return;
+
+    const { data: requestsData, error } = await supabase
+      .from("service_requests")
+      .select(`
+        id,
+        client_id,
+        address_id,
+        service_type,
+        subject,
+        request_details,
+        appointment_date,
+        status,
+        created_at,
+        measurement_profile_id,
+        users!service_requests_client_id_fkey (
+          first_name,
+          last_name,
+          email
+        ),
+        user_addresses!service_requests_address_id_fkey (
+          full_address,
+          barangay,
+          city,
+          province,
+          zip_code,
+          contact_name,
+          contact_phone
+        )
+      `)
+      .eq("sewist_id", user.id)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Failed to load service requests for notifications:", error);
+      return;
+    }
+
+    const normalizedRequests = (requestsData ?? []).map((request: any) => {
+      const client = Array.isArray(request.users) ? request.users[0] : request.users;
+      const address = Array.isArray(request.user_addresses) ? request.user_addresses[0] : request.user_addresses;
+      return {
+        ...request,
+        users: client || null,
+        user_addresses: address || null,
+      };
+    });
+
+    setAllServiceRequests(normalizedRequests as ServiceRequest[]);
+  }, [supabase]);
+
+  useEffect(() => {
+    void loadServiceRequests();
+  }, [loadServiceRequests]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
@@ -111,55 +193,102 @@ export default function NotificationsPage() {
     return `${dd}/${mm}/${yy} ${hours}:${minutes}${ampm}`;
   };
 
-  useEffect(() => {
-    async function fetchSewistStatus() {
-      try {
-        setLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+  const statusItems: StatusItem[] = notifications.map((notification: NotificationItem) => ({
+    id: notification.id,
+    title: notification.title,
+    description: notification.message,
+    timestamp: formatDate(notification.createdAt),
+    type: notification.type,
+    link: notification.actionLink ?? undefined,
+    isRead: notification.isRead,
+    createdAt: notification.createdAt,
+  }));
 
-        // Fetch all notifications from the single table
-        const { data: notificationsData, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+  const generalNotifs = statusItems.filter((notification) => notification.type === "notification");
+  const orderNotifs = statusItems.filter((notification) => notification.type === "order");
+  const commissionNotifs = statusItems.filter(
+    (notification) =>
+      notification.type === "commission" ||
+      notification.type === "alteration" ||
+      notification.type === "repair"
+  );
+  const appointmentNotifs = statusItems.filter((notification) => notification.type === "appointment");
 
-        if (error) throw error;
-
-        // Format all notifications uniformly
-        const formattedNotifications: StatusItem[] = (notificationsData || []).map(n => ({
-          id: n.id,
-          title: n.title,
-          description: n.message || "",
-          timestamp: formatDate(n.created_at),
-          type: (n.type as "notification" | "order" | "commission") || "notification",
-          link: n.action_link
-        }));
-
-        setData({
-          notifications: formattedNotifications,
-        });
-
-      } catch (error) {
-        console.error("Error fetching status:", error);
-      } finally {
-        setLoading(false);
-      }
+  const getRequestIdFromLink = useCallback((link?: string) => {
+    if (!link) return null;
+    try {
+      const parsed = new URL(link, window.location.origin);
+      return parsed.searchParams.get("requestId");
+    } catch {
+      return null;
     }
+  }, []);
 
-    fetchSewistStatus();
-  }, [supabase]);
+  const handleStatusUpdate = useCallback((id: string, newStatus: string) => {
+    setAllServiceRequests((prev) =>
+      prev.map((request) =>
+        request.id === id ? { ...request, status: newStatus as ServiceRequest["status"] } : request
+      )
+    );
+  }, []);
 
-  const generalNotifs = data.notifications.filter(n => n.type === "notification");
-  const orderNotifs = data.notifications.filter(n => n.type === "order");
-  const commissionNotifs = data.notifications.filter(n => n.type === "commission");
+  const handleOpen = useCallback(
+    (item: StatusItem) => {
+      if (!item.isRead) {
+        void markAsRead(item.id).catch((error) => {
+          console.error("Failed to mark notification as read:", error);
+        });
+      }
+
+      if (item.type === "commission" || item.type === "alteration" || item.type === "repair") {
+        const requestId = getRequestIdFromLink(item.link);
+        const fromId = requestId
+          ? allServiceRequests.find((request) => request.id === requestId)
+          : null;
+        const fallback = allServiceRequests.find((request) => request.service_type === item.type);
+        const requestToOpen = fromId || fallback || null;
+
+        if (requestToOpen) {
+          setSelectedRequest(requestToOpen);
+          setIsRequestModalOpen(true);
+          return;
+        }
+      }
+
+      if (item.link) {
+        router.push(item.link);
+      }
+    },
+    [allServiceRequests, getRequestIdFromLink, markAsRead, router]
+  );
 
   return (
     <div className="p-4 md:p-16 pb-32 md:pb-16 max-w-6xl mx-auto">
-      <StatusSection title="Notifications" items={generalNotifs} loading={loading} />
-      <StatusSection title="Orders" items={orderNotifs} loading={loading} />
-      <StatusSection title="Commissions" items={commissionNotifs} loading={loading} />
+      <div className="mb-6 flex items-center justify-end">
+        <button
+          type="button"
+          onClick={() =>
+            void markAllAsRead().catch((error) => {
+              console.error("Failed to mark all notifications as read:", error);
+            })
+          }
+          disabled={unreadCount === 0}
+          className="rounded-full bg-third px-4 py-2 text-white text-sm font-bold transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Mark all as read
+        </button>
+      </div>
+      <StatusSection title="Notifications" items={generalNotifs} loading={loading} onOpen={handleOpen} />
+      <StatusSection title="Orders" items={orderNotifs} loading={loading} onOpen={handleOpen} />
+      <StatusSection title="Commissions" items={commissionNotifs} loading={loading} onOpen={handleOpen} />
+      <StatusSection title="Appointments" items={appointmentNotifs} loading={loading} onOpen={handleOpen} />
+
+      <ServiceRequestDetailsModal
+        isOpen={isRequestModalOpen}
+        request={selectedRequest}
+        onClose={() => setIsRequestModalOpen(false)}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }
