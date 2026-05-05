@@ -10,6 +10,7 @@ import FlatListDropDown from "@/components/ui/flatlistdropdown";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface HeaderProps {
   variant?: "default" | "sewist";
@@ -269,7 +270,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
                     {cart.map((item: any) => (
                       <div key={item.id} className="flex gap-4 p-4 bg-white rounded-lg shadow">
                         <div className="relative w-20 h-20 flex-shrink-0">
-                          <Image src={item.img_src} alt={item.product_name || item.name} fill sizes="80px" className="object-cover rounded" />
+                          <Image src={getS3PublicUrl(item.img_src)} alt={item.product_name || item.name} fill sizes="80px" className="object-cover rounded" />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium text-heading">{item.product_name || item.name}</h3>

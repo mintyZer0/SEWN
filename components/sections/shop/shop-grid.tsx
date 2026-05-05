@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import ProductCard from "./product-card";
 import ProductFilter from "@/components/ui/product-filter";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface Product {
   id: string;

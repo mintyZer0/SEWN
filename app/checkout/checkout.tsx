@@ -7,6 +7,7 @@ import AddressStep, { AddressFormData } from "@/components/checkout/address-step
 import PaymentStep, { PaymentFormData } from "@/components/checkout/payment-step";
 import ConfirmationStep from "@/components/checkout/confirmation-step";
 import SuccessPage from "@/components/checkout/success-page";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface ProductVariant {
   id: string;
@@ -78,7 +79,7 @@ const sewistName = initialProduct.users
 
 const currentPrice = selectedVariant?.price_override ?? (initialProduct.price || 0);
 
-const productImages = initialProduct.product_images?.map(img => img.image_url) || [initialProduct.img_src || '/placeholder.jpg'];
+const productImages = initialProduct.product_images?.map(img => getS3PublicUrl(img.image_url)) || [getS3PublicUrl(initialProduct.img_src) || '/placeholder.jpg'];
 
   return (
     <div className="min-h-dvw">

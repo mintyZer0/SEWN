@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle } from "react-feather";
 import { supabase } from "@/utils/supabase/client";
 import { getChatRoomId } from "@/lib/utils";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export type Sewist = {
   id: string;
@@ -31,10 +32,7 @@ export default function SewistCard({
 
   const getImageUrl = (path: string | undefined) => {
     if (!path) return "/assets/sewist-photos/1.jpg";
-    if (path.startsWith("http") || path.startsWith("/")) return path;
-    const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-    if (!projectUrl) return path;
-    return `${projectUrl}/storage/v1/object/public/${path}`;
+    return getS3PublicUrl(path);
   };
 
   const openChatWithSewist = async (sewistId: string) => {

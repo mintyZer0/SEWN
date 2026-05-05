@@ -6,6 +6,7 @@ import { AdminFilterBar, PageHeader } from "@/components/admin/admin-filter-bar"
 import { AdminDetailModal } from "@/components/admin/admin-detail-modal";
 import { createClient } from "@/utils/supabase/client";
 import { approveProduct, rejectProduct } from "@/lib/admin-actions";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface ProductData {
   id: string;
@@ -119,8 +120,8 @@ export default function ProductsPage() {
             // Full fields for modal
             description: p.description,
             location: p.location,
-            imageUrl: p.img_src,
-            productImages: sortedImages.map((img: any) => img.image_url),
+            imageUrl: getS3PublicUrl(p.img_src),
+            productImages: sortedImages.map((img: any) => getS3PublicUrl(img.image_url)),
             sewistJoined: (p.users as any)?.created_at ? new Date((p.users as any).created_at).toLocaleDateString() : "Jan 2024",
             variants: p.product_variants || [],
           };

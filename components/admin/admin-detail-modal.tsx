@@ -10,6 +10,7 @@ import {
 } from "@/lib/admin-actions";
 import { useRouter } from "next/navigation";
 import { ProfileButton } from "@/components/user-profile/profile-buttons";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export type AdminItemType = 'order' | 'product' | 'sewist';
 
@@ -338,7 +339,7 @@ export const AdminDetailModal = ({
                 <div className="flex items-start gap-4">
                   <div className="h-44 w-48 rounded-2xl bg-gray-300 overflow-hidden">
                     <img
-                      src={data.avatarUrl || "https://placehold.co/320x280?text=Avatar"}
+                      src={getS3PublicUrl(data.avatarUrl) || "https://placehold.co/320x280?text=Avatar"}
                       alt={data.customerName || "User avatar"}
                       className="h-full w-full object-cover"
                     />

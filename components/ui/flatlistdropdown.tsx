@@ -4,12 +4,13 @@ import { useRealtimeChat } from "@/hooks/use-realtime-chat";
 import { RotateCwSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface Product {
   id: string;
   name: string;
   price: number;
-  imageUrl: string;
+  img_src: string;
   rating?: number;
 }
 
@@ -43,7 +44,7 @@ export default function FlatListDropdown({ data, onSelect }: Props) {
 
           {/*Img*/}
           <img
-            src = {item.imageUrl}
+            src = {getS3PublicUrl(item.img_src)}
             alt = {item.name}
             className="w-12 h-12 object-cover rounded"
           />

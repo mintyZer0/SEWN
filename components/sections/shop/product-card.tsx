@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star, ShoppingCart } from "react-feather";
 import { useCart } from "@/context/CartContext";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 type Product = {
   id: string;
@@ -40,19 +41,12 @@ const handleAddToCart = (e: React.MouseEvent) => {
   useCart().addToCart(cartItem as any);
 };
 
-  const getImageUrl = (path: string) => {
-    if (path.startsWith("http")) return path;
-    const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-    if (!projectUrl) return path;
-    return `${projectUrl}/storage/v1/object/public/${path}`;
-  };
-
   return (
     <div className="relative flex flex-col h-160 w-80 bg-primary-light hover:shadow-lg transition-shadow">
       <Link href={`/checkout?id=${product.id}`} className="flex flex-col h-full">
         <div className="flex-1 relative">
           <Image
-            src={getImageUrl(product.img_src)}
+            src={getS3PublicUrl(product.img_src)}
             alt={product.name}
             fill
             sizes="320px"
