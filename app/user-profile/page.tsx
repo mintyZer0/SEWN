@@ -94,7 +94,7 @@ export default function UserProfilePage() {
             if (avatar?.avatar_url) {
               publicAvatarUrl = getS3PublicUrl(avatar.avatar_url);
             } else {
-              publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
+              publicAvatarUrl = getS3PublicUrl("default.jpg");
             }
             console.log("FETCHED DATA:", data.user_avatars);
             setAvatarUrl(publicAvatarUrl);
@@ -179,7 +179,11 @@ export default function UserProfilePage() {
         .eq("user_id", user.id)
         .single();
 
-        if (existingAvatar?.avatar_url && existingAvatar.avatar_url !== "avatars/default.jpg") {
+        if (
+          existingAvatar?.avatar_url &&
+          existingAvatar.avatar_url !== "default.jpg" &&
+          existingAvatar.avatar_url.toLowerCase() !== "avatars/default.jpg"
+        ) {
           await fetch(`/api/media?filename=${encodeURIComponent(existingAvatar.avatar_url)}`, {
             method: 'DELETE',
           });

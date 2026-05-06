@@ -4,6 +4,7 @@ import React from "react";
 import PromotionCard from "@/components/user-profile/promotion-card";
 import ProfileSection from "@/components/user-profile/profile-section";
 import { useNotifications } from "@/hooks/use-notifications";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export default function PromotionsPage() {
   const { notifications, loading, markAllAsRead } = useNotifications();
@@ -45,7 +46,7 @@ export default function PromotionsPage() {
               title={promo.title}
               description={promo.message || "New update available."}
               date={formatDate(promo.createdAt)}
-              imageSrc="/assets/sewist-photos/1.jpg"
+              imageSrc={getS3PublicUrl("default.jpg")}
             />
           ))
         ) : (

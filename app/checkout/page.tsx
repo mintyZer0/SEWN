@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from "@/utils/supabase/server";
 import CheckoutClient from './checkout';
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +8,7 @@ export default async function CheckoutPage({
   searchParams: Promise<{ id?: string }>;
 }) {
   const { id: productId } = await searchParams;
+  const supabase = await createClient();
   
   const { data: product } = await supabase
     .from('sewist_products')

@@ -9,15 +9,20 @@ import SearchBar from "@/components/ui/search-bar";
 import FlatListDropDown from "@/components/ui/flatlistdropdown";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
+import LoginRequiredModal from "@/components/auth/login-required-modal";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 interface HeaderProps {
   variant?: "default" | "sewist";
 }
 
 export default function Header({ variant = "default" }: HeaderProps) {
+  const supabase = createClient();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showSewistLoginModal, setShowSewistLoginModal] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [searchData, setSearchData] = useState<any[]>([]);
   const [fullData, setFullData] = useState<any[]>([]);
@@ -51,6 +56,28 @@ export default function Header({ variant = "default" }: HeaderProps) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const syncAuthState = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (mounted) {
+        setIsLoggedIn(!!user);
+      }
+    };
+
+    syncAuthState();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
   const handleSearch = (text: string) => {
     setSearchValue(text);
 
@@ -67,10 +94,22 @@ export default function Header({ variant = "default" }: HeaderProps) {
     { name: "Sewists", href: "/browse/sewists" },
     { name: "Contacts", href: "/contacts" },
     { name: "About", href: "/about" },
-    { name: "Sewist Center", href: process.env.NODE_ENV === "production" ? "https://sewist.sewn.com" : "http://sewist.sewn.local:3000" },
   ];
+  const sewistCenterHref =
+    process.env.NODE_ENV === "production" ? "https://sewist.sewn.com" : "http://sewist.sewn.local:3000";
+  const sewistLoginHref =
+    process.env.NODE_ENV === "production" ? "https://sewist.sewn.com/login" : "http://sewist.sewn.local:3000/login";
   
   const router = useRouter();
+
+  const handleSewistCenterClick = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setShowSewistLoginModal(true);
+      return;
+    }
+    window.location.href = sewistCenterHref;
+  };
 
   const iconButtons = [
     {
@@ -111,6 +150,15 @@ export default function Header({ variant = "default" }: HeaderProps) {
               </Link>
             </div>
           ))}
+          <div className="relative group whitespace-nowrap">
+            <button
+              type="button"
+              onClick={handleSewistCenterClick}
+              className="hover:opacity-70 transition-opacity"
+            >
+              Sewist Center
+            </button>
+          </div>
         </nav>
 
         {/* Search Bar: Desktop Row 2 */}
@@ -142,36 +190,47 @@ export default function Header({ variant = "default" }: HeaderProps) {
             )}
           </button>
 
-          {/* Profile Icon */}
-          <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
-            aria-label="Profile"
-          >
-            <User size={32} />
-            <div
-              className={`absolute right-0 mt-2 w-48 bg-secondary rounded-md shadow-lg py-2 z-10 transform transition-all duration-100 ease-out origin-top-right ${
-                isProfileOpen
-                  ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
-                  : "opacity-0 scale-60 pointer-events-none -translate-y-1"
-              }`}
+          {/* Profile / Login */}
+          {isLoggedIn ? (
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
+              aria-label="Profile"
             >
-              <div className="px-2 text-sm text-black">
-                <ul className="text-primary text-lg text-left">
-                  <li>
-                    <Link href="/user-profile" className="block px-4 py-2 hover:bg-gray-50">
-                      User Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/auth/logout" className="block px-4 py-2 hover:bg-gray-50">
-                      Logout
-                    </Link>
-                  </li>
-                </ul>
+              <User size={32} />
+              <div
+                className={`absolute right-0 mt-2 w-48 bg-secondary rounded-md shadow-lg py-2 z-10 transform transition-all duration-100 ease-out origin-top-right ${
+                  isProfileOpen
+                    ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
+                    : "opacity-0 scale-60 pointer-events-none -translate-y-1"
+                }`}
+              >
+                <div className="px-2 text-sm text-black">
+                  <ul className="text-primary text-lg text-left">
+                    <li>
+                      <Link href="/user-profile" className="block px-4 py-2 hover:bg-gray-50">
+                        User Profile
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/auth/logout" className="block px-4 py-2 hover:bg-gray-50">
+                        Logout
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push("/auth/login")}
+              className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative flex items-center gap-2"
+              aria-label="Profile login"
+            >
+              <User size={28} />
+              <span className="text-lg font-semibold">Login</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -220,11 +279,18 @@ export default function Header({ variant = "default" }: HeaderProps) {
                     <Link href={link.href}>{link.name}</Link>
                   </li>
                 ))}
+                <li>
+                  <button type="button" onClick={handleSewistCenterClick}>
+                    Sewist Center
+                  </button>
+                </li>
                 {/* Profile Links for Mobile */}
                 <div className="divider my-2"></div>
-                <li>
-                  <Link href="/user-profile">User Profile</Link>
-                </li>
+                {isLoggedIn && (
+                  <li>
+                    <Link href="/user-profile">User Profile</Link>
+                  </li>
+                )}
                 <li>
                   <button 
                     onClick={() => {
@@ -242,9 +308,15 @@ export default function Header({ variant = "default" }: HeaderProps) {
                     )}
                   </button>
                 </li>
-                <li>
-                  <Link href="/auth/logout">Logout</Link>
-                </li>
+                {isLoggedIn ? (
+                  <li>
+                    <Link href="/auth/logout">Logout</Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link href="/auth/login">Login</Link>
+                  </li>
+                )}
               </ul>
             </div>
           </div>
@@ -269,7 +341,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
                     {cart.map((item: any) => (
                       <div key={item.id} className="flex gap-4 p-4 bg-white rounded-lg shadow">
                         <div className="relative w-20 h-20 flex-shrink-0">
-                          <Image src={item.img_src} alt={item.product_name || item.name} fill sizes="80px" className="object-cover rounded" />
+                          <Image src={resolvePublicMediaUrl(item.img_src)} alt={item.product_name || item.name} fill sizes="80px" className="object-cover rounded" />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium text-heading">{item.product_name || item.name}</h3>
@@ -311,6 +383,12 @@ export default function Header({ variant = "default" }: HeaderProps) {
           </div>
         </div>
       )}
+      <LoginRequiredModal
+        isOpen={showSewistLoginModal}
+        onClose={() => setShowSewistLoginModal(false)}
+        loginHref={sewistLoginHref}
+        description="Please login first before opening Sewist Center."
+      />
     </header>
   );
 }

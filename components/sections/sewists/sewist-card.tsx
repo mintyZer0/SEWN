@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle } from "react-feather";
 import { supabase } from "@/utils/supabase/client";
 import { getChatRoomId } from "@/lib/utils";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 export type Sewist = {
   id: string;
@@ -28,14 +30,12 @@ export default function SewistCard({
   sewist,
 }: SewistCardProps) {
   const router = useRouter();
+  const defaultAvatar = resolvePublicMediaUrl("default.jpg");
+  const [avatarSrc, setAvatarSrc] = useState(resolvePublicMediaUrl(sewist.img_src) || defaultAvatar);
 
-  const getImageUrl = (path: string | undefined) => {
-    if (!path) return "/assets/sewist-photos/1.jpg";
-    if (path.startsWith("http") || path.startsWith("/")) return path;
-    const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-    if (!projectUrl) return path;
-    return `${projectUrl}/storage/v1/object/public/${path}`;
-  };
+  useEffect(() => {
+    setAvatarSrc(resolvePublicMediaUrl(sewist.img_src) || defaultAvatar);
+  }, [sewist.img_src]);
 
   const openChatWithSewist = async (sewistId: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -94,11 +94,12 @@ export default function SewistCard({
       <Link href={`/sewists/${sewist.id}`} className="block h-full">
         <div className="relative w-full aspect-video bg-white rounded-b-3xl mt-6">
           <Image
-            src={getImageUrl(sewist.img_src)}
+            src={avatarSrc}
             alt={sewist.name || "Sewist"}
             fill
             sizes="(max-width: 768px) 100vw, 600px"
             className="object-cover rounded-b-3xl"
+            onError={() => setAvatarSrc(defaultAvatar)}
           />
           <button
             onClick={async (e) => {
@@ -118,11 +119,12 @@ export default function SewistCard({
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-white border-2 border-white">
                 <Image
-                  src={getImageUrl(sewist.img_src)}
+                  src={avatarSrc}
                   alt={sewist.name || "Sewist"}
                   width={48}
                   height={48}
                   className="object-cover"
+                  onError={() => setAvatarSrc(defaultAvatar)}
                 />
               </div>
               <div className="flex items-center gap-2">

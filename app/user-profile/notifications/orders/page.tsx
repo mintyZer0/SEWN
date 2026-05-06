@@ -4,6 +4,7 @@ import React from "react";
 import OrderUpdateCard from "@/components/user-profile/order-update-card";
 import ProfileSection from "@/components/user-profile/profile-section";
 import { useNotifications } from "@/hooks/use-notifications";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export default function OrderUpdatesPage() {
   const { notifications, loading, markAllAsRead } = useNotifications();
@@ -43,7 +44,7 @@ export default function OrderUpdatesPage() {
               productName={update.title}
               statusMessage={update.message || "Order status changed."}
               date={formatDate(update.createdAt)}
-              imageSrc="/assets/sewist-photos/1.jpg"
+              imageSrc={getS3PublicUrl("default.jpg")}
             />
           ))
         ) : (

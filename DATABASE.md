@@ -11,7 +11,7 @@ The central identity table.
 - **Fields:** `id` (UUID), `first_name`, `last_name`, `email` (Unique), `user_type` (USER-DEFINED), `birthday` (Date), `gender` (USER-DEFINED), `created_at`.
 
 ### User Metadata
-- **`user_avatars`**: `id`, `user_id` (Unique), `avatar_url` (Default: 'avatars/Default.jpg'), `uploaded_at`.
+- **`user_avatars`**: `id`, `user_id` (Unique), `avatar_url` (Default: 'default.jpg'), `uploaded_at`.
 - **`user_phones`**: `id`, `user_id`, `phone`, `landline`, `is_primary` (Boolean).
 - **`user_addresses`**: `id`, `user_id`, `full_address`, `barangay`, `city`, `zip_code` (Integer), `is_primary`.
 - **`user_socials`**: `id`, `user_id`, `platform`, `handle`.

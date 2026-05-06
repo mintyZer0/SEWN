@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 interface OrderUpdateProps {
   productName: string;
@@ -18,7 +19,7 @@ export default function OrderUpdateCard({
   date,
   imageSrc,
 }: OrderUpdateProps) {
-  const imageSource = imageSrc || "/assets/sewist-photos/1.jpg";
+  const imageSource = resolvePublicMediaUrl(imageSrc || "default.jpg");
   const heading = sewistName ? `${productName}, ${sewistName}` : productName;
 
   return (

@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import LoginRequiredModal from "@/components/auth/login-required-modal";
 
 export interface ServiceCardProps {
   imgSrc: string;
@@ -19,10 +23,29 @@ export default function ServiceCard({
   className,
   isDisabled,
 }: ServiceCardProps) {
+  const router = useRouter();
+  const supabase = createClient();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  const handleProtectedNavigation = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+
+    if (isDisabled) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    router.push(href);
+  };
+
   return (
+    <>
     <Link
       href={isDisabled ? "#" : href}
-      onClick={isDisabled ? (e) => e.preventDefault() : undefined}
+      onClick={handleProtectedNavigation}
       className={`relative block w-full h-100 ${className} ${colSpan === 2 ? "md:col-span-2 col-span-1" : "col-span-1"} ${isDisabled ? "grayscale opacity-50 cursor-not-allowed" : ""}`}
     >
       <Image
@@ -44,5 +67,12 @@ export default function ServiceCard({
         </div>
       )}
     </Link>
+    <LoginRequiredModal
+      isOpen={showLoginModal}
+      onClose={() => setShowLoginModal(false)}
+      loginHref={`/auth/login?redirect=${encodeURIComponent(href)}`}
+      description="Please login first before requesting this service."
+    />
+    </>
   );
 }

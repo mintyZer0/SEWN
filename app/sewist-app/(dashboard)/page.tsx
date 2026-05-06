@@ -209,7 +209,7 @@ export default function SewistCenterPage() {
         publicAvatarUrl = getS3PublicUrl(avatarObj.avatar_url);
       } 
       else {
-        publicAvatarUrl = getS3PublicUrl("avatars/default.jpg");
+        publicAvatarUrl = getS3PublicUrl("default.jpg");
       }
       console.log("FETCHED DATA:", profileData.user_avatars);
       setAvatarUrl(publicAvatarUrl);
@@ -328,7 +328,8 @@ export default function SewistCenterPage() {
           // Delete old avatar 
           if (
             existingAvatar?.avatar_url &&
-            existingAvatar.avatar_url !== "avatars/default.jpg" &&
+            existingAvatar.avatar_url !== "default.jpg" &&
+            existingAvatar.avatar_url.toLowerCase() !== "avatars/default.jpg" &&
             existingAvatar.avatar_url !== filePath
           ) {
             await fetch(`/api/media?filename=${encodeURIComponent(existingAvatar.avatar_url)}`, {
