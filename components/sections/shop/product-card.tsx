@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Star, ShoppingCart } from "react-feather";
 import { useCart } from "@/context/CartContext";
 import { getS3PublicUrl } from "@/lib/s3-client";
-import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type Product = {
   id: string;
@@ -37,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       id: product.id,
       name: product.name,
       price: product.price,
-      img_src: resolvePublicMediaUrl(product.img_src),
+      img_src: getS3PublicUrl(product.img_src),
     };
 
     useCart().addToCart(cartItem as any);
@@ -47,8 +46,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="relative flex flex-col h-160 w-80 bg-primary-light hover:shadow-lg transition-shadow">
       <Link href={checkoutHref} className="flex flex-col h-full">
         <div className="flex-1 relative">
-          <Image
-            src={resolvePublicMediaUrl(product.img_src)}
+            <Image
+            src={getS3PublicUrl(product.img_src)}
             alt={product.name}
             fill
             sizes="320px"

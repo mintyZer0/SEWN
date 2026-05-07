@@ -9,7 +9,6 @@ import SuccessPage from "@/components/checkout/success-page";
 import { getS3PublicUrl } from "@/lib/s3-client";
 import LoginRequiredModal from "@/components/auth/login-required-modal";
 import { createClient } from "@/utils/supabase/client";
-import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 interface ProductVariant {
   id: string;
@@ -93,11 +92,11 @@ const sewistName = initialProduct.users
 const currentPrice = selectedVariant?.price_override ?? (initialProduct.price || 0);
 
 const productImages = (
-  initialProduct.product_images?.map((img) => resolvePublicMediaUrl(img.image_url)) ?? []
+  initialProduct.product_images?.map((img) => getS3PublicUrl(img.image_url)) ?? []
 ).filter(Boolean);
 
 if (productImages.length === 0) {
-  const fallbackImage = resolvePublicMediaUrl(initialProduct.img_src);
+  const fallbackImage = getS3PublicUrl(initialProduct.img_src);
   if (fallbackImage) {
     productImages.push(fallbackImage);
   } else {

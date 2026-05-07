@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getS3PublicUrl } from "@/lib/s3-client";
-import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type NewProductProps = {
   id: string;
@@ -31,7 +30,7 @@ export default function NewProductCard({
     >
       <figure className="relative w-full aspect-3/4">
         <Image
-          src={resolvePublicMediaUrl(img_src)}
+          src={getS3PublicUrl(img_src)}
           alt={name}
           fill
           sizes="320px"

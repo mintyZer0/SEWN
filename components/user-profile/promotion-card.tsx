@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { resolvePublicMediaUrl } from "@/lib/media-url";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 interface PromotionProps {
   title: string;
@@ -19,7 +19,7 @@ export default function PromotionCard({
   date,
   imageSrc,
 }: PromotionProps) {
-  const imageSource = resolvePublicMediaUrl(imageSrc || "default.jpg");
+  const imageSource = getS3PublicUrl(imageSrc || "default.jpg");
 
   return (
     <div className="bg-white rounded-[30px] p-6 flex gap-4 shadow-lg border border-white/20 transition-all hover:shadow-white/5 relative overflow-hidden">

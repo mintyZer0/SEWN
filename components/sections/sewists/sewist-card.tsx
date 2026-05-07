@@ -8,7 +8,6 @@ import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle 
 import { supabase } from "@/utils/supabase/client";
 import { getChatRoomId } from "@/lib/utils";
 import { getS3PublicUrl } from "@/lib/s3-client";
-import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 export type Sewist = {
   id: string;
@@ -31,11 +30,11 @@ export default function SewistCard({
   sewist,
 }: SewistCardProps) {
   const router = useRouter();
-  const defaultAvatar = resolvePublicMediaUrl("default.jpg");
-  const [avatarSrc, setAvatarSrc] = useState(resolvePublicMediaUrl(sewist.img_src) || defaultAvatar);
+  const defaultAvatar = getS3PublicUrl("default.jpg");
+  const [avatarSrc, setAvatarSrc] = useState(getS3PublicUrl(sewist.img_src) || defaultAvatar);
 
   useEffect(() => {
-    setAvatarSrc(resolvePublicMediaUrl(sewist.img_src) || defaultAvatar);
+    setAvatarSrc(getS3PublicUrl(sewist.img_src) || defaultAvatar);
   }, [sewist.img_src]);
 
   const openChatWithSewist = async (sewistId: string) => {

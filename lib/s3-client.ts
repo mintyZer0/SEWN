@@ -1,22 +1,44 @@
 export function getS3PublicUrl(filePath: string | null | undefined): string {
   if (!filePath) return "";
-  
+
   const bucket = process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_BUCKET;
   const region = process.env.NEXT_PUBLIC_AWS_REGION || "ap-southeast-2";
-  
-  // If it's already an HTTP URL or a local path (starts with /), return it
-  if (filePath.startsWith("http://") || filePath.startsWith("https://") || filePath.startsWith("/")) {
+
+  if (
+    filePath.startsWith("http://") ||
+    filePath.startsWith("https://") ||
+    filePath.startsWith("/") ||
+    filePath.startsWith("blob:") ||
+    filePath.startsWith("data:")
+  ) {
     return filePath;
   }
 
-  // Normalize legacy default avatar keys to root default.jpg.
-  const lowerPath = filePath.toLowerCase();
+  const normalizedInputPath = filePath.replace(/^\/+/, "");
+  if (!normalizedInputPath) return "";
+
+  const lowerPath = normalizedInputPath.toLowerCase();
   const normalizedPath =
     lowerPath === "avatars/default.jpg" || lowerPath === "default.jpg"
       ? "default.jpg"
-      : filePath;
+      : normalizedInputPath;
 
-  return `https://${bucket}.s3.${region}.amazonaws.com/${normalizedPath}`;
+  if (
+    bucket &&
+    (normalizedPath === "default.jpg" ||
+      normalizedPath.startsWith("products/") ||
+      normalizedPath.startsWith("product-images/") ||
+      normalizedPath.startsWith("avatars/"))
+  ) {
+    return `https://${bucket}.s3.${region}.amazonaws.com/${normalizedPath}`;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+  if (supabaseUrl) {
+    return `${supabaseUrl}/storage/v1/object/public/${normalizedPath}`;
+  }
+
+  return `/${normalizedPath}`;
 }
 
 interface CacheEntry {
