@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import CategoriesCarousel from "../../ui/categories-carousel";
 import { getS3PublicUrl } from "@/lib/s3-client";
 
@@ -13,6 +13,7 @@ type CategoryCarouselItem = {
 };
 
 export default function Categories() {
+  const supabase = createClient();
   const [loading, setLoading] = useState(true);
   const [itemsList, setItemsList] = useState<CategoryCarouselItem[]>([]);
   

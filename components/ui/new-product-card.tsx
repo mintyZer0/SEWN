@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { getS3PublicUrl } from "@/lib/s3-client";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type NewProductProps = {
   id: string;
@@ -19,14 +22,16 @@ export default function NewProductCard({
   price,
   className,
 }: NewProductProps) {
+  const checkoutHref = `/checkout?id=${id}`;
+
   return (
     <Link
-      href={`/checkout?id=${id}`}
+      href={checkoutHref}
       className={`${className} card group overflow-hidden border border-transparent hover:border-primary transition-all duration-300`}
     >
       <figure className="relative w-full aspect-3/4">
         <Image
-          src={getS3PublicUrl(img_src)}
+          src={resolvePublicMediaUrl(img_src)}
           alt={name}
           fill
           sizes="320px"

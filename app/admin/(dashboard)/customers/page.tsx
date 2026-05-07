@@ -184,7 +184,7 @@ export default function CustomersPage() {
         const avatarPath = avatar?.avatar_url as string | undefined;
         const avatarUrl = avatarPath
           ? getS3PublicUrl(avatarPath)
-          : getS3PublicUrl("avatars/default.jpg");
+          : getS3PublicUrl("default.jpg");
         const customerRegistrationFields = [
           survey?.educational_attainment,
           survey?.monthly_income,

@@ -119,9 +119,10 @@ export async function updateSession(request: NextRequest) {
 
   const publicRoutes = ["/auth", "/error", "/login", "/signup", "/data", "/api"];
   const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
+  const requiresAuth = isSewistApp || isAdminApp;
 
   // Redirect unauthenticated users
-  if (!isPublicRoute && !user) {
+  if (requiresAuth && !isPublicRoute && !user) {
     const loginUrl = new URL(isAdminApp ? "/login" : isSewistApp ? "/login" : "/auth/login", request.url);
     // Preserving query params can be dangerous during OAuth, but we'll keep it for now
     // except if it looks like a dead OAuth code

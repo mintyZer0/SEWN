@@ -64,7 +64,7 @@ export function ChatContainer({
           setTargetName(`${otherUser.first_name || ''} ${otherUser.last_name || ''}`.trim() || `User ${otherId.substring(0,8)}`);
           const avatarData = otherUser.user_avatars;
           const avatarUrl = Array.isArray(avatarData) ? (avatarData as any[])[0]?.avatar_url : (avatarData as any)?.avatar_url;
-          setTargetAvatar(getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg"));
+          setTargetAvatar(getS3PublicUrl(avatarUrl || "default.jpg"));
         }
       }
     }

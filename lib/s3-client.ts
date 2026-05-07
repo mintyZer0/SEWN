@@ -9,7 +9,14 @@ export function getS3PublicUrl(filePath: string | null | undefined): string {
     return filePath;
   }
 
-  return `https://${bucket}.s3.${region}.amazonaws.com/${filePath}`;
+  // Normalize legacy default avatar keys to root default.jpg.
+  const lowerPath = filePath.toLowerCase();
+  const normalizedPath =
+    lowerPath === "avatars/default.jpg" || lowerPath === "default.jpg"
+      ? "default.jpg"
+      : filePath;
+
+  return `https://${bucket}.s3.${region}.amazonaws.com/${normalizedPath}`;
 }
 
 interface CacheEntry {

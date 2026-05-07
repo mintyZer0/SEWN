@@ -88,7 +88,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
           const avatarArray = user.user_avatars;
             const avatarObj = Array.isArray(avatarArray) ? avatarArray[0] : avatarArray;
 
-            let avatarUrl = "/assets/sewist-photos/1.jpg";
+            let avatarUrl = getS3PublicUrl("default.jpg");
 
             if (avatarObj?.avatar_url) {
               avatarUrl = getS3PublicUrl(avatarObj.avatar_url);
@@ -107,7 +107,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
             id: user.id,
             name: `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist",
             location,
-            img_src: avatarUrl || "/assets/sewist-photos/1.jpg",
+            img_src: avatarUrl || getS3PublicUrl("default.jpg"),
             rating: stats?.rating_avg || 0,
             completed_orders: stats?.total_orders_completed || 0,
             services,

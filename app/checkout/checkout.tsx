@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import CheckoutStepper from "@/components/checkout/checkout-stepper";
 import ProductDetailsStep from "@/components/checkout/product-details-step";
 import AddressStep, { AddressFormData } from "@/components/checkout/address-step";
@@ -8,6 +7,9 @@ import PaymentStep, { PaymentFormData } from "@/components/checkout/payment-step
 import ConfirmationStep from "@/components/checkout/confirmation-step";
 import SuccessPage from "@/components/checkout/success-page";
 import { getS3PublicUrl } from "@/lib/s3-client";
+import LoginRequiredModal from "@/components/auth/login-required-modal";
+import { createClient } from "@/utils/supabase/client";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 interface ProductVariant {
   id: string;
@@ -47,11 +49,13 @@ export default function CheckoutClient({
 }: { 
   initialProduct: Product 
 }) {
+  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [addressData, setAddressData] = useState<AddressFormData | null>(null);
   const [paymentData, setPaymentData] = useState<PaymentFormData | null>(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -71,6 +75,15 @@ export default function CheckoutClient({
     setOrderPlaced(true);
   };
 
+  const handleStartCheckout = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+    setCurrentStep(2);
+  };
+
   if (orderPlaced) return <SuccessPage />;
 
 const sewistName = initialProduct.users 
@@ -79,7 +92,18 @@ const sewistName = initialProduct.users
 
 const currentPrice = selectedVariant?.price_override ?? (initialProduct.price || 0);
 
-const productImages = initialProduct.product_images?.map(img => getS3PublicUrl(img.image_url)) || [getS3PublicUrl(initialProduct.img_src) || '/placeholder.jpg'];
+const productImages = (
+  initialProduct.product_images?.map((img) => resolvePublicMediaUrl(img.image_url)) ?? []
+).filter(Boolean);
+
+if (productImages.length === 0) {
+  const fallbackImage = resolvePublicMediaUrl(initialProduct.img_src);
+  if (fallbackImage) {
+    productImages.push(fallbackImage);
+  } else {
+    productImages.push("/assets/placeholder-600x400.svg");
+  }
+}
 
   return (
     <div className="min-h-dvw">
@@ -96,7 +120,7 @@ const productImages = initialProduct.product_images?.map(img => getS3PublicUrl(i
             variants={initialProduct.product_variants || []}
             selectedVariant={selectedVariant}
             onVariantSelect={setSelectedVariant}
-            onNext={() => setCurrentStep(2)}
+            onNext={handleStartCheckout}
           />
         )}
 
@@ -119,6 +143,12 @@ const productImages = initialProduct.product_images?.map(img => getS3PublicUrl(i
           />
         )}
       </div>
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        loginHref={`/auth/login?redirect=${encodeURIComponent(`/checkout?id=${initialProduct.id}`)}`}
+        description="Please login first before placing an order."
+      />
     </div>
   );
 }

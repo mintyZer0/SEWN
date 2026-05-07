@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star, ShoppingCart } from "react-feather";
 import { useCart } from "@/context/CartContext";
 import { getS3PublicUrl } from "@/lib/s3-client";
+import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type Product = {
   id: string;
@@ -26,27 +27,28 @@ export interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-const handleAddToCart = (e: React.MouseEvent) => {
-  e.preventDefault();
-  e.stopPropagation();
-  
-  // Map ONLY needed fields for cart (no type assertion needed)
-  const cartItem = {
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    img_src: product.img_src,
+  const checkoutHref = `/checkout?id=${product.id}`;
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Map ONLY needed fields for cart (no type assertion needed)
+    const cartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      img_src: resolvePublicMediaUrl(product.img_src),
+    };
+
+    useCart().addToCart(cartItem as any);
   };
-  
-  useCart().addToCart(cartItem as any);
-};
 
   return (
     <div className="relative flex flex-col h-160 w-80 bg-primary-light hover:shadow-lg transition-shadow">
-      <Link href={`/checkout?id=${product.id}`} className="flex flex-col h-full">
+      <Link href={checkoutHref} className="flex flex-col h-full">
         <div className="flex-1 relative">
           <Image
-            src={getS3PublicUrl(product.img_src)}
+            src={resolvePublicMediaUrl(product.img_src)}
             alt={product.name}
             fill
             sizes="320px"

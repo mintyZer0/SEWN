@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 import ProductCard from "./product-card";
 import ProductFilter from "@/components/ui/product-filter";
 import { getS3PublicUrl } from "@/lib/s3-client";
@@ -42,6 +42,7 @@ interface Props {
 
 
 export default function ShopGrid({ filters, type }: Props) {
+  const supabase = createClient();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);

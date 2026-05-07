@@ -60,7 +60,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
   const name = `${user.first_name || ""} ${user.last_name || ""}`.trim() || "Anonymous Sewist";
   const avatarData = user.user_avatars;
   const avatarUrl = Array.isArray(avatarData) ? (avatarData as any[])[0]?.avatar_url : (avatarData as any)?.avatar_url;
-  const avatar = getS3PublicUrl(avatarUrl || "/assets/sewist-photos/1.jpg");
+  const avatar = getS3PublicUrl(avatarUrl || "default.jpg");
 
   const renderServiceContent = () => {
     switch (normalizedService) {

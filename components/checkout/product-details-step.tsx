@@ -30,7 +30,7 @@ const ProductDetailsStep = memo(({
   onVariantSelect,
   onNext,
 }: ProductDetailsStepProps) => {
-  const [mainImage, setMainImage] = React.useState(productImages[0] || "/placeholder.jpg");
+  const [mainImage, setMainImage] = React.useState(productImages[0] || "/assets/placeholder-600x400.svg");
   const [quantity, setQuantity] = React.useState(1);
 
   // Sync main image if productImages change
