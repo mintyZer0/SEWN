@@ -391,7 +391,7 @@ export default function ProductsPage() {
             });
 
             if (!uploadRes.ok) throw new Error('Failed to upload image to S3');
-            imageUrl = publicUrl;
+            imageUrl = filePath;
           }
 
           if (imageUrl) {

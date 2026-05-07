@@ -9,6 +9,8 @@ import SearchBar from "@/components/ui/search-bar";
 import FlatListDropDown from "@/components/ui/flatlistdropdown";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import { createClient } from "@/utils/supabase/client";
 import LoginRequiredModal from "@/components/auth/login-required-modal";
 import { resolvePublicMediaUrl } from "@/lib/media-url";

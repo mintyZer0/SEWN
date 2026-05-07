@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Star, MessageCircle, MapPin, Award, Briefcase, TrendingUp, CheckCircle } from "react-feather";
 import { supabase } from "@/utils/supabase/client";
 import { getChatRoomId } from "@/lib/utils";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 export type Sewist = {

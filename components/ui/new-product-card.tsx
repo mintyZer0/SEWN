@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import { resolvePublicMediaUrl } from "@/lib/media-url";
 
 type NewProductProps = {

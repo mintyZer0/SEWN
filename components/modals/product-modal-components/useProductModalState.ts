@@ -4,6 +4,7 @@ import { VariationGroup, ProductVariant } from "./types";
 import { CATEGORY_OPTIONS } from "./constants";
 import { toAttributeTypeLabel } from "./utils";
 import { SectionItem } from "@/components/sewist-center/collapsible-product-section";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 export const useProductModalState = (
   isOpen: boolean,
@@ -161,7 +162,7 @@ export const useProductModalState = (
             const sortedImages = [...data.product_images].sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
             const initialPhotos = Array(7).fill({ file: null, url: null });
             sortedImages.slice(0, 7).forEach((img: any, idx: number) => {
-              initialPhotos[idx] = { file: null, url: img.image_url };
+              initialPhotos[idx] = { file: null, url: getS3PublicUrl(img.image_url) };
             });
             setPhotos(initialPhotos);
           } else {

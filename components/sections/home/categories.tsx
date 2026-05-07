@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import CategoriesCarousel from "../../ui/categories-carousel";
+import { getS3PublicUrl } from "@/lib/s3-client";
 
 type CategoryCarouselItem = {
   imageSrc: string;
@@ -30,7 +31,7 @@ export default function Categories() {
         
         const itemsList: CategoryCarouselItem[] =
         categoryRows?.map((row: any) => ({
-          imageSrc: row.image_url ?? '/assets/categories-images/def_Clothes.png',
+          imageSrc: getS3PublicUrl(row.image_url) || '/assets/categories-images/def_Clothes.png',
           alt: `Products in ${row.category}`,
           category: row.category,
           id: row.category.toLowerCase().replace(/\s/g, '-'),

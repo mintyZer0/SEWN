@@ -6,6 +6,7 @@ import AddressStep, { AddressFormData } from "@/components/checkout/address-step
 import PaymentStep, { PaymentFormData } from "@/components/checkout/payment-step";
 import ConfirmationStep from "@/components/checkout/confirmation-step";
 import SuccessPage from "@/components/checkout/success-page";
+import { getS3PublicUrl } from "@/lib/s3-client";
 import LoginRequiredModal from "@/components/auth/login-required-modal";
 import { createClient } from "@/utils/supabase/client";
 import { resolvePublicMediaUrl } from "@/lib/media-url";
