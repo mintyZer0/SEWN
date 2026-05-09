@@ -1,6 +1,6 @@
 'use client'
 
-import { SendHorizontal, Smile, Image as ImageIcon, Play, FileText, Mail, Copy, Loader2 } from 'lucide-react'
+import { SendHorizontal, Smile, Image as ImageIcon, Play, FileText, Mail, Copy, Loader2, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -47,10 +47,11 @@ export const RealtimeChat = ({
   })
   const textareaRef = useRef<HTMLTextAreaElement>(null);  
   const mediaInputRef = useRef<HTMLInputElement>(null);
+  const dragCounter = useRef(0);
   const [newMessage, setNewMessage] = useState('')
   const [isUploading, setIsUploading] = useState(false)
-  const [stagedMedia, setStagedMedia] = useState<{ file: File; preview: string; type: 'image' | 'video' } | null>(null)
-
+  const [stagedMedia, setStagedMedia] = useState<{ id: string; file: File; preview: string; type: 'image' | 'video' } | null>(null)
+  const [isDragging, setIsDragging] = useState(false);
   const [previewData, setPreviewData] = useState<{ url: string; type: 'image' | 'video' } | null>(null)
 
   const allMessages = useMemo(() => {
@@ -86,10 +87,8 @@ export const RealtimeChat = ({
     [newMessage, isConnected, sendMessage]
   )
 
-  const handleMediaSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const processFile = useCallback((file: File) => {
     if (!file || !isConnected) return;
-
     const isVideo = file.type.startsWith('video/');
     const isImage = file.type.startsWith('image/');
 
@@ -120,13 +119,54 @@ export const RealtimeChat = ({
     const reader = new FileReader();
     reader.onloadend = () => {
       setStagedMedia({
+        id: Math.random().toString(36).substring(7),
         file,
         preview: reader.result as string,
         type: isImage ? 'image' : 'video'
       });
     };
     reader.readAsDataURL(file);
+  }, [isConnected]);
+
+  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (isConnected && !isUploading) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  };
+
+  
 
   const handleSendStagedMedia = async () => {
     if (!stagedMedia || !isConnected) return;
@@ -172,9 +212,24 @@ export const RealtimeChat = ({
       if (mediaInputRef.current) mediaInputRef.current.value = '';
     }
   };
+  
 
   return (
-    <div className="flex flex-col flex-1 w-full bg-transparent md:bg-background antialiased min-h-0 h-full">
+    <div className={cn("flex flex-col flex-1 w-full bg-transparent md:bg-background antialiased min-h-0 h-full", isDragging? "bg-black/10 brightness-75" : "")}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Visual Overlay */}
+        {isDragging && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div className="bg-primary/90 text-white px-8 py-4 rounded-3xl shadow-2xl animate-bounce flex items-center gap-3">
+              <ImageIcon className="size-8" />
+              <span className="text-xl font-bold">Drop to send media</span>
+            </div>
+          </div>
+        )}
       {/* Header */}
       {!isCompact ? (
         <div className="hidden md:block shrink-0">
