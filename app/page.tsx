@@ -10,15 +10,17 @@ import FollowUs from "@/components/sections/home/follow-us";
 import ParterTestimonials from "@/components/sections/home/partner-testimonials";
 import Header from "@/global/Header";
 import Footer from "@/global/Footer";
+import OurPurpose from "@/components/sections/home/our-purpose";
 export default function Home() {
   return (
     <>
       <Header />
       <HomeHero />
+      <MeetOurSewists />
       <NewProducts />
       <Categories />
       <Browse />
-      <MeetOurSewists />
+      <OurPurpose/>
       <TodaysFeaturedSewist />
       <Mission className="bg-light-pink" />
       <OurPartners />
