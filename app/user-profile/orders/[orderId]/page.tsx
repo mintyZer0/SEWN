@@ -75,38 +75,38 @@ export default function OrderDetailsPage() {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto p-4 space-y-8 bg-white/50 rounded-4xl">
-      <div className="flex justify-end items-center gap-2 text-gray-500 text-sm mt-4">
+    <div className="max-w-[1400px] mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8 bg-white/50 rounded-4xl">
+      <div className="flex flex-col sm:flex-row sm:justify-end sm:items-center gap-2 text-gray-500 text-xs sm:text-sm mt-4">
         <span className="uppercase tracking-wider">
           ORDER ID. {orderData.id}
         </span>
-        <span className="border-l border-gray-400 h-6 mx-4"></span>
-        <span className="text-gray-400 italic text-lg">
+        <span className="hidden sm:inline-block border-l border-gray-400 h-6 mx-4"></span>
+        <span className="text-gray-400 italic text-sm sm:text-lg">
           {orderData.order_status_description}
         </span>
       </div>
 
-      <div className="bg-white rounded-[35px] p-8 shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-[35px] p-5 sm:p-6 md:p-8 shadow-sm border border-gray-100 overflow-hidden">
         {/* Sewist Header */}
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-orange-200/50">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-4 border-b border-orange-200/50">
           <div className="flex items-center gap-3">
             <div className="text-third">
               <ShoppingBag className="w-8 h-8" />
             </div>
-            <h3 className="text-2xl font-bold text-third">
+            <h3 className="text-xl sm:text-2xl font-bold text-third">
               {orderData.sewistName}
             </h3>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <ChatWithSewistButton />
             <ViewSewistButton sewistId={orderData.sewistId} />
           </div>
         </div>
 
         {/* Product & Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
           <div className="flex gap-6 items-center">
-            <div className="relative w-40 h-40 shrink-0 rounded-[30px] overflow-hidden bg-gray-50">
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 shrink-0 rounded-[30px] overflow-hidden bg-gray-50">
               <Image
                 src={orderData.imageSrc}
                 alt={orderData.productName}
@@ -116,14 +116,14 @@ export default function OrderDetailsPage() {
               />
             </div>
             <div className="flex flex-col">
-              <h4 className="text-5xl font-bold text-third mb-2 leading-tight">
+              <h4 className="text-3xl sm:text-4xl md:text-5xl font-bold text-third mb-2 leading-tight">
                 {orderData.productName.split(" ")[0]}
                 <br />
                 {orderData.productName.split(" ")[1]}
               </h4>
               <a
                 href="#"
-                className="text-blue-600 text-lg hover:underline font-medium"
+                className="text-blue-600 text-base sm:text-lg hover:underline font-medium"
               >
                 {orderData.variant}
               </a>
@@ -131,19 +131,19 @@ export default function OrderDetailsPage() {
           </div>
 
           <div className="flex flex-col justify-center md:border-l md:border-orange-200/50 md:pl-12">
-            <h5 className="text-2xl text-third font-medium mb-1">
+            <h5 className="text-lg sm:text-xl md:text-2xl text-third font-medium mb-1">
               Order Update:{" "}
               <span className="font-bold">{orderData.status}</span>
             </h5>
-            <p className="text-gray-600 text-xl">{orderData.statusMessage}</p>
+            <p className="text-gray-600 text-base sm:text-lg md:text-xl">{orderData.statusMessage}</p>
           </div>
         </div>
 
         {/* Confirm Action & Total */}
-        <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-6 pt-6 border-t border-orange-100">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pt-6 border-t border-orange-100">
           <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium text-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <span className="text-gray-700 font-medium text-lg sm:text-xl md:text-2xl">
                 Confirm Receipt:
               </span>
               <ConfirmDeliveryButton>Confirm Delivery</ConfirmDeliveryButton>
@@ -152,7 +152,7 @@ export default function OrderDetailsPage() {
               Please check your product(s) before confirming delivery
             </p>
           </div>
-          <div className="text-3xl font-medium">
+          <div className="text-xl sm:text-2xl md:text-3xl font-medium">
             Order total:{" "}
             <span className="text-black font-bold ml-4">
               P{orderData.totalPrice}
@@ -164,15 +164,15 @@ export default function OrderDetailsPage() {
       <hr className="border-gray-300 my-4" />
 
       {/* Footer Info Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 pt-4">
         {/* Left: Delivery Address */}
         <div className="space-y-4">
-          <h6 className="text-2xl text-gray-500">Delivery Address</h6>
+          <h6 className="text-lg sm:text-xl md:text-2xl text-gray-500">Delivery Address</h6>
           <div className="space-y-2">
-            <p className="text-2xl font-medium text-gray-800">
+            <p className="text-base sm:text-lg md:text-2xl font-medium text-gray-800">
               {orderData.address.name} | {orderData.address.phone}
             </p>
-            <p className="text-2xl text-gray-700 leading-relaxed max-w-md">
+            <p className="text-base sm:text-lg md:text-2xl text-gray-700 leading-relaxed max-w-md">
               {orderData.address.line1}
             </p>
           </div>
@@ -180,26 +180,26 @@ export default function OrderDetailsPage() {
 
         {/* Right: Payment & Tracking */}
         <div className="space-y-4">
-          <h6 className="text-2xl text-gray-500">{orderData.paymentMethod}</h6>
+          <h6 className="text-lg sm:text-xl md:text-2xl text-gray-500">{orderData.paymentMethod}</h6>
 
           {/* Tracking History */}
           <div className="space-y-8 mt-4">
             {orderData.tracking.map((item, index) => (
-              <div key={index} className="flex gap-8">
-                <div className="flex flex-col text-gray-500 text-xl shrink-0">
+              <div key={index} className="flex gap-4 sm:gap-6 md:gap-8">
+                <div className="flex flex-col text-gray-500 text-sm sm:text-base md:text-xl shrink-0">
                   <span>{item.date}</span>
                   <span>{item.time}</span>
                 </div>
                 <div className="flex flex-col space-y-1">
                   {item.status && (
                     <span
-                      className={`text-xl font-bold ${item.highlight ? "text-primary" : "text-gray-800"}`}
+                      className={`text-sm sm:text-base md:text-xl font-bold ${item.highlight ? "text-primary" : "text-gray-800"}`}
                     >
                       {item.status}
                     </span>
                   )}
                   <span
-                    className={`text-xl ${item.highlight ? "text-gray-800 font-medium" : "text-gray-600"}`}
+                    className={`text-sm sm:text-base md:text-xl ${item.highlight ? "text-gray-800 font-medium" : "text-gray-600"}`}
                   >
                     {item.status_description}
                   </span>

@@ -1,3 +1,9 @@
 export default function ErrorPage() {
-  return <p>Sorry, something went wrong</p>;
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+      <p className="text-base sm:text-lg text-gray-700">
+        Sorry, something went wrong
+      </p>
+    </div>
+  );
 }

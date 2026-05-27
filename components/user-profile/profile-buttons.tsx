@@ -31,7 +31,7 @@ export const ProfileButton = ({
     green: "bg-[#69CD6D] text-white hover:opacity-90 shadow-md",
     ghost: "text-third hover:underline font-semibold px-0 py-0 shadow-none active:scale-100",
     tab: cn(
-      "rounded-full font-bold text-2xl transition-all shadow-none active:scale-95",
+      "rounded-full font-bold text-base sm:text-lg md:text-2xl transition-all shadow-none active:scale-95",
       isActive ? "bg-white text-third shadow-sm" : "text-white hover:bg-white/10"
     ),
   };

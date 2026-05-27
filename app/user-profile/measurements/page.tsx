@@ -89,7 +89,7 @@ export default function MeasurementsPage() {
         <ProfileButton
           variant="white"
           size="xl"
-          className="px-10"
+          className="px-6 sm:px-10 w-full sm:w-auto"
           onClick={handleAddMeasures}
         >
           Add Measurements

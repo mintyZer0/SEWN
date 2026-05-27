@@ -35,7 +35,7 @@ export default function VariantImageCarousel({
   if (images.length === 0) return null;
 
   return (
-    <div className={cn("relative group w-full my-8 px-10 mx-30", className)}>
+    <div className={cn("relative group w-full my-8 px-4 sm:px-6 md:px-10 mx-4 sm:mx-8 md:mx-30", className)}>
       {/* Scrollable Container */}
       <div
         ref={scrollRef}
@@ -47,7 +47,7 @@ export default function VariantImageCarousel({
             key={idx}
             onClick={() => onImageSelect(img)}
             className={cn(
-              "shrink-0 w-80 h-80 rounded-[40px] overflow-hidden cursor-pointer transition-all border-4 shadow-sm",
+              "shrink-0 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 rounded-[40px] overflow-hidden cursor-pointer transition-all border-4 shadow-sm",
               selectedImage === img 
                 ? "border-primary scale-105 shadow-primary/20" 
                 : "border-transparent opacity-80 hover:opacity-100 bg-orchid/20"

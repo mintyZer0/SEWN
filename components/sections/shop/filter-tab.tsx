@@ -88,9 +88,9 @@ export default function FilterTab({ setFilters, type, currentFilters = {} }: Fil
   };
 
   return (
-    <div className="flex flex-col h-auto w-60 bg-orchid-vertical-b mx-10 rounded-2xl">
+    <div className="flex flex-col h-auto w-full md:w-60 bg-orchid-vertical-b mx-4 md:mx-10 rounded-2xl">
 
-      <h2 className="text-3xl text-center mt-4 font-semibold text-secondary">
+      <h2 className="text-2xl sm:text-3xl text-center mt-4 font-semibold text-secondary">
         Filter
       </h2>
 

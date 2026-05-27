@@ -20,9 +20,9 @@ export default function ConfirmationStep({
 }: ConfirmationStepProps) {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-white">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-light text-heading">Order Confirmation</h2>
-        <p className="text-xl text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-heading">Order Confirmation</h2>
+        <p className="text-base sm:text-lg md:text-xl text-gray-700">
           Order total:{" "}
           <span className="text-heading font-medium">₱{orderTotal}</span>
         </p>
@@ -75,11 +75,11 @@ export default function ConfirmationStep({
         </div>
       </div>
 
-      <div className="flex justify-between items-center p-6 rounded-lg border border-gray-200 mb-6">
-        <p className="text-xl font-medium text-heading">Total: ₱{orderTotal}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 rounded-lg border border-gray-200 mb-6">
+        <p className="text-lg sm:text-xl font-medium text-heading">Total: ₱{orderTotal}</p>
         <button
           onClick={onPlaceOrder}
-          className="bg-orchid text-white px-8 py-3 rounded-full font-medium hover:opacity-90 transition-opacity"
+          className="bg-orchid text-white px-8 py-3 rounded-full font-medium hover:opacity-90 transition-opacity w-full sm:w-auto"
         >
           Place Order
         </button>

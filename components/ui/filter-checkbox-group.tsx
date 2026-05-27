@@ -40,7 +40,7 @@ export default function FilterCheckBoxGroup({
             onChange={(e) => handleChange(option, e.target.checked)}
           />
 
-          <span className="text-2xl text-secondary">{option}</span>
+          <span className="text-base sm:text-lg text-secondary">{option}</span>
 
         </label>
       ))}

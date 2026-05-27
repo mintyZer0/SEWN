@@ -188,17 +188,19 @@ export default function ShopGrid({ filters, type }: Props) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <span className="text-2xl mx-5 font-bold text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        <span className="text-lg sm:text-2xl mx-2 sm:mx-5 font-bold text-gray-700">
           {filteredProducts.length} Products
         </span>
-        <ProductFilter 
-          onSortChange={setSortBy} 
-          type="products" 
-        />
+        <div className="w-full sm:w-auto">
+          <ProductFilter 
+            onSortChange={setSortBy} 
+            type="products" 
+          />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 p-4 justify-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 p-2 sm:p-4 justify-items-center">
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

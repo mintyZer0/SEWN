@@ -90,7 +90,7 @@ export default function SewistCard({
   };
 
   return (
-    <div className="bg-orchid-vertical-b rounded-3xl overflow-hidden px-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full max-w-xl h-150">
+    <div className="bg-orchid-vertical-b rounded-3xl overflow-hidden px-5 sm:px-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 w-full max-w-xl h-auto">
       <Link href={`/sewists/${sewist.id}`} className="block h-full">
         <div className="relative w-full aspect-video bg-white rounded-b-3xl mt-6">
           <Image
@@ -114,7 +114,7 @@ export default function SewistCard({
           </button>
         </div>
 
-        <div className="p-6 text-white">
+        <div className="p-4 sm:p-6 text-white">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-white border-2 border-white">
@@ -128,20 +128,20 @@ export default function SewistCard({
                 />
               </div>
               <div className="flex items-center gap-2">
-                <h3 className="text-xl font-semibold">{sewist.name}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold">{sewist.name}</h3>
                 {sewist.is_verified && (
                   <CheckCircle size={18} className="text-blue-200 fill-current" />
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-1 bg-white text-heading px-3 py-1 rounded-full">
+            <div className="flex items-center gap-1 bg-white text-heading px-3 py-1 rounded-full text-sm sm:text-base">
               <Star size={16} fill="currentColor" />
               <span className="font-semibold">{sewist.rating > 0 ? sewist.rating.toFixed(1) : "N/A"}</span>
             </div>
           </div>
 
-          <div className="space-y-3 text-sm">
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
             <div className="flex items-start gap-2">
               <MapPin size={20} className="shrink-0 mt-0.5" />
               <span>{sewist.location}</span>

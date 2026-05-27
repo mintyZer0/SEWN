@@ -26,7 +26,7 @@ export default function AddressStep({ onSubmit }: AddressStepProps) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h2 className="text-4xl  text-heading mb-8">Address</h2>
+      <h2 className="text-2xl sm:text-3xl md:text-4xl text-heading mb-8">Address</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>

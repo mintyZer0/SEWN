@@ -25,7 +25,7 @@ export default function FilterCollapsibleSection({
     <div className="p-4">
 
       <button
-        className="font-light text-secondary text-3xl h-auto w-auto hover:cursor-pointer"
+        className="font-light text-secondary text-lg sm:text-2xl h-auto w-auto hover:cursor-pointer"
         onClick={() => setOpen(!open)}
       >
         {section.label}

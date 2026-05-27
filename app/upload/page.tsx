@@ -25,18 +25,18 @@ const ImageUploadPage: React.FC = () => {
   }, [addImages]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-8">
-      <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-4xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center p-4 sm:p-8">
+      <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12 max-w-4xl w-full">
         <div
-          className="border-4 border-dashed border-gray-300 rounded-2xl p-16 text-center hover:border-indigo-500 cursor-pointer mb-8 transition-colors"
+          className="border-4 border-dashed border-gray-300 rounded-2xl p-8 sm:p-12 md:p-16 text-center hover:border-indigo-500 cursor-pointer mb-6 sm:mb-8 transition-colors"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => (document.querySelector('.file-input') as HTMLInputElement)?.click()}
         >
           <div>
-            <div className="text-6xl mb-4">📁</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Drop images here or click</h2>
-            <p className="text-gray-500">JPG, PNG, GIF (Max 5MB each)</p>
+            <div className="text-4xl sm:text-6xl mb-4">📁</div>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-800 mb-2">Drop images here or click</h2>
+            <p className="text-sm sm:text-base text-gray-500">JPG, PNG, GIF (Max 5MB each)</p>
           </div>
           <input
             type="file"
@@ -50,16 +50,16 @@ const ImageUploadPage: React.FC = () => {
 
         {images.length > 0 && (
           <>
-            <h3 className="text-xl font-semibold text-gray-800 mb-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-6">
               Selected Images ({images.length})
             </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
               {images.map((image) => (
                 <div key={image.id} className="relative rounded-2xl overflow-hidden shadow-lg hover:-translate-y-2 transition-all">
                   <img 
                     src={image.status === 'complete' ? image.publicUrl! : image.preview} 
                     alt={image.name}
-                    className="w-full h-40 object-cover"
+                    className="w-full h-32 sm:h-40 object-cover"
                   />
                   <div className="absolute top-3 right-3 bg-black/70 text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
                     <span className="max-w-[120px] truncate">{image.name}</span>

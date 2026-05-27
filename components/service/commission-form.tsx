@@ -266,8 +266,8 @@ export default function CommissionForm({
     : [];
 
   return (
-    <div className="max-w-dvw mx-30 rounded-lg p-10 my-10">
-      <h2 className="text-6xl font-regular text-heading mb-4">
+    <div className="max-w-dvw mx-4 sm:mx-8 md:mx-30 rounded-lg p-6 sm:p-8 md:p-10 my-8 md:my-10">
+      <h2 className="text-3xl sm:text-4xl md:text-6xl font-regular text-heading mb-4">
         <span className="text-black">Commission</span> {sewistName}
       </h2>
 

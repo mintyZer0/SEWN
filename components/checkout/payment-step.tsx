@@ -40,21 +40,21 @@ export default function PaymentStep({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-4xl font-light text-heading">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-light text-heading">
           Select Payment Method
         </h2>
-        <p className="text-xl text-gray-700">
+        <p className="text-base sm:text-lg md:text-xl text-gray-700">
           Order total:{" "}
           <span className="text-heading font-medium">₱{orderTotal}</span>
         </p>
       </div>
 
-      <div className="flex gap-4 mb-8 border-b border-gray-300 pb-4">
+      <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-300 pb-4">
         <button
           type="button"
           onClick={() => setPaymentMethod("credit")}
-          className={`px-6 py-2 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-colors ${
             paymentMethod === "credit"
               ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
@@ -65,7 +65,7 @@ export default function PaymentStep({
         <button
           type="button"
           onClick={() => setPaymentMethod("paymaya")}
-          className={`px-6 py-2 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-colors ${
             paymentMethod === "paymaya"
               ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
@@ -76,7 +76,7 @@ export default function PaymentStep({
         <button
           type="button"
           onClick={() => setPaymentMethod("gcash")}
-          className={`px-6 py-2 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-colors ${
             paymentMethod === "gcash"
               ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
@@ -87,7 +87,7 @@ export default function PaymentStep({
         <button
           type="button"
           onClick={() => setPaymentMethod("other")}
-          className={`px-6 py-2 font-medium transition-colors ${
+          className={`px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-colors ${
             paymentMethod === "other"
               ? "text-heading border-b-2 border-primary"
               : "text-gray-500"
@@ -191,8 +191,8 @@ export default function PaymentStep({
             Proceed
           </button>
 
-          <div className="bg-secondary p-8 rounded-lg mt-8">
-            <div className="flex justify-between items-start">
+          <div className="bg-secondary p-6 sm:p-8 rounded-lg mt-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
               <div>
                 <h3 className="text-2xl font-light text-gray-800 mb-4 border-b border-gray-400 pb-2 inline-block">
                   Order Summary
@@ -201,9 +201,9 @@ export default function PaymentStep({
                   1x Walk Rhythm by Ysabelle Santiago - P{orderTotal}
                 </p>
               </div>
-              <div className="text-right border-l border-gray-400 pl-8 ml-8">
+              <div className="text-right sm:text-left sm:border-l sm:border-gray-400 sm:pl-8 sm:ml-8">
                 <p className="text-lg text-heading mb-2">Order total:</p>
-                <p className="text-5xl text-heading font-light">
+                <p className="text-3xl sm:text-4xl md:text-5xl text-heading font-light">
                   ₱{orderTotal}
                 </p>
               </div>

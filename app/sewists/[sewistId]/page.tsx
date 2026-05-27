@@ -98,7 +98,7 @@ export default async function SewistPage({ params }: PageProps) {
   const mobileNumber = user.user_phones?.[0]?.phone || "Phone not listed";
 
   return (
-    <div className="py-12">
+    <div className="py-8 sm:py-12 px-4 sm:px-8">
       <SewistHeader
         name={name}
         image={avatar}

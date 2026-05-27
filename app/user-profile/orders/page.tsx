@@ -46,8 +46,8 @@ export default function OrdersPage() {
   const orders = MOCK_ORDERS;
 
   return (
-    <div className="flex flex-col max-w-[75svw] mx-auto space-y-10">
-      <div className="flex flex-wrap justify-between bg-orchid gap-2 pr-10 p-4 rounded-4xl w-full">
+    <div className="flex flex-col w-full max-w-6xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10">
+      <div className="flex flex-wrap justify-between bg-orchid gap-2 sm:gap-3 pr-4 sm:pr-10 p-3 sm:p-4 rounded-4xl w-full">
         {TABS.map((tab) => (
           <OrderTabButton
             key={tab}

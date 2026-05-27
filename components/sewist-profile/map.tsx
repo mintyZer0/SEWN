@@ -21,7 +21,7 @@ export default function Map({ position = { lat: 15.4753, lng: 120.596 } }: Sewis
   );
 
   return (
-    <div className="h-200 w-[70vw] max-w-full mx-auto">
+    <div className="h-80 sm:h-120 md:h-200 w-full md:w-[70vw] max-w-full mx-auto">
       <MapComponent position={position} />
     </div>
   );

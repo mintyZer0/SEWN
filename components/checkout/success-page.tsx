@@ -7,7 +7,7 @@ export default function SuccessPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-        <div className="w-100 h-100 bg-white rounded-full flex items-center justify-center mb-8 shadow-lg">
+        <div className="w-40 h-40 sm:w-60 sm:h-60 md:w-100 md:h-100 bg-white rounded-full flex items-center justify-center mb-8 shadow-lg">
           <Image
             src="/assets/logo.png"
             alt="SEWN Logo"
@@ -16,8 +16,8 @@ export default function SuccessPage() {
           />
         </div>
 
-        <p className="text-heading text-2xl mb-2">Success!</p>
-        <h1 className="text-5xl md:text-6xl font-light text-heading text-center mb-8">
+        <p className="text-heading text-lg sm:text-xl md:text-2xl mb-2">Success!</p>
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-light text-heading text-center mb-8">
           Product is on the way!
         </h1>
 

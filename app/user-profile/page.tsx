@@ -256,7 +256,7 @@ export default function UserProfilePage() {
       title="My Profile"
       description="Manage and protect your account"
     >
-      <div className="bg-white rounded-[30px] p-10 flex flex-col lg:flex-row gap-16 shadow-lg border border-white/20">
+      <div className="bg-white rounded-[30px] p-6 sm:p-8 md:p-10 flex flex-col lg:flex-row gap-8 md:gap-12 lg:gap-16 shadow-lg border border-white/20">
         <div className="flex-1 space-y-8">
           <div className="flex justify-between items-center">
             <h2 className="text-third text-2xl font-bold tracking-tight">
@@ -269,7 +269,7 @@ export default function UserProfilePage() {
             )}
           </div>
 
-          <div className="grid grid-cols-[140px_1fr] items-center gap-y-6 gap-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] items-center gap-y-6 gap-x-4">
             <label className="text-xl font-medium text-gray-800">
               Username:
             </label>
@@ -312,7 +312,7 @@ export default function UserProfilePage() {
             />
 
             <label className="text-xl font-medium text-gray-800">Gender:</label>
-            <div className="flex gap-8 text-third">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-8 text-third">
               {["Male", "Female", "Other"].map((option) => (
                 <label
                   key={option}
@@ -366,8 +366,8 @@ export default function UserProfilePage() {
         </div>
 
         <div className="hidden lg:block w-px bg-gray-200 self-stretch"></div>
-        <div className="flex flex-col items-center justify-center gap-8 lg:px-12">
-          <div className="w-56 h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner relative">
+        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 lg:px-12">
+          <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner relative">
             {currentPreview ? (
             <>
             <img
@@ -409,7 +409,7 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      <div className="flex justify-end mt-6 pr-4">
+      <div className="flex justify-center sm:justify-end mt-6 pr-0 sm:pr-4">
         <ProfileButton
           variant="white"
           size="xl"

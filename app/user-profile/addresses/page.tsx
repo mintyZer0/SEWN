@@ -155,6 +155,7 @@ export default function MyAddressesPage() {
       headerAction={
         <ProfileButton 
           variant="white"
+          className="w-full sm:w-auto"
           onClick={openAddModal}
         >
           Add Address

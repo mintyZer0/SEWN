@@ -71,10 +71,10 @@ export default function VariantSelector({
   if (attributeTypes.length === 0) return null;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-10">
       {attributeTypes.map((type) => (
         <div key={type} className="space-y-3">
-          <h4 className="text-2xl font-bold text-heading">
+          <h4 className="text-lg sm:text-2xl font-bold text-heading">
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </h4>
           <div className="flex flex-wrap gap-4">
@@ -85,7 +85,7 @@ export default function VariantSelector({
                   key={value}
                   onClick={() => handleAttributeSelect(type, value)}
                   className={cn(
-                    "min-w-[100px] py-2 rounded-full text-lg font-medium transition-all border-2",
+                    "min-w-20 sm:min-w-[100px] py-2 rounded-full text-sm sm:text-lg font-medium transition-all border-2",
                     isSelected 
                       ? "bg-primary border-primary text-white" 
                       : "bg-white border-gray-300 text-gray-700 hover:border-gray-400"

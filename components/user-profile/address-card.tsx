@@ -32,14 +32,14 @@ export const AddressCard = ({
   onDelete 
 }: AddressCardProps) => {
   return (
-    <div className={`bg-white rounded-3xl p-10 flex justify-between items-start shadow-lg border ${address.is_primary ? 'border-third' : 'border-white/20'}`}>
+    <div className={`bg-white rounded-3xl p-6 sm:p-8 md:p-10 flex flex-col md:flex-row gap-6 md:gap-8 justify-between items-start shadow-lg border ${address.is_primary ? 'border-third' : 'border-white/20'}`}>
       <div className="space-y-4">
-        <h2 className="text-third text-2xl font-bold tracking-tight">
+        <h2 className="text-third text-xl sm:text-2xl font-bold tracking-tight">
           Address #{index + 1} {address.is_primary && "(Primary)"}
         </h2>
-        <div className="text-gray-500 text-lg space-y-1">
-          <div className="flex items-center gap-2 text-xl">
-            <span className="text-xl text-black">{address.contact_name}</span>
+        <div className="text-gray-500 text-base sm:text-lg space-y-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-base sm:text-lg md:text-xl">
+            <span className="text-base sm:text-lg md:text-xl text-black">{address.contact_name}</span>
             <span className="text-gray-400 font-normal">|</span>
             <span>{address.contact_phone}</span>
           </div>
@@ -48,10 +48,11 @@ export const AddressCard = ({
           <p className="">{address.province} {address.zip_code}</p>
         </div>
       </div>
-      <div className="flex flex-col gap-3 min-w-36">
+      <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:min-w-36">
         <ProfileButton 
           variant="orange" 
           size="md" 
+          className="w-full sm:w-auto md:w-full"
           onClick={() => onEdit(address)}
         >
           Edit
@@ -60,6 +61,7 @@ export const AddressCard = ({
           <ProfileButton 
             variant="orange" 
             size="md" 
+            className="w-full sm:w-auto md:w-full"
             onClick={() => onSetPrimary(address.id)}
           >
             Set Primary
@@ -68,6 +70,7 @@ export const AddressCard = ({
         <ProfileButton 
           variant="orange" 
           size="md" 
+          className="w-full sm:w-auto md:w-full"
           onClick={() => onDelete(address.id)}
         >
           Delete

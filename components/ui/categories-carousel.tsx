@@ -72,7 +72,7 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
           </Link>
         ))}
       </div>
-      <div className="absolute inset-0 z-20 flex items-center justify-between px-4 pointer-events-none">
+      <div className="absolute inset-0 z-20 hidden md:flex items-center justify-between px-4 pointer-events-none">
         <button
           onClick={() => scroll("left")}
           className="hover:cursor-pointer p-1 rounded-full bg-white opacity-70 text-gray-800 hover:opacity-100 transition-opacity pointer-events-auto"

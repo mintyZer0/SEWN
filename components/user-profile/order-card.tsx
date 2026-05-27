@@ -31,9 +31,9 @@ export default function OrderCard({ order }: OrderCardProps) {
           <div className="text-third">
             <ShoppingBag className="w-8 h-8" />
           </div>
-          <h3 className="text-2xl font-bold text-third">{order.sewistName}</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-third">{order.sewistName}</h3>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <ChatWithSewistButton className="flex-1 md:flex-none" />
           <ViewSewistButton
             sewistId={order.sewistId}
@@ -42,7 +42,7 @@ export default function OrderCard({ order }: OrderCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 mb-6">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-8 mb-6">
         <div className="flex flex-1 gap-6">
           <div className="relative w-32 h-32 md:w-40 md:h-40 shrink-0 rounded-[25px] overflow-hidden bg-gray-100">
             <Image
@@ -54,26 +54,26 @@ export default function OrderCard({ order }: OrderCardProps) {
             />
           </div>
           <div className="flex flex-col justify-center">
-            <h4 className="text-3xl md:text-4xl font-bold text-third mb-2">
+            <h4 className="text-2xl sm:text-3xl md:text-4xl font-bold text-third mb-2">
               {order.productName}
             </h4>
-            <p className="text-gray-600 text-lg">{order.variant}</p>
+            <p className="text-gray-600 text-base sm:text-lg">{order.variant}</p>
           </div>
         </div>
 
-        <div className="flex flex-col justify-center border-l border-third/30 md:pl-8">
-          <h5 className="text-xl md:text-2xl text-third font-medium mb-1">
+        <div className="flex flex-col justify-center border-t border-third/30 pt-4 md:pt-0 md:border-t-0 md:border-l md:pl-8">
+          <h5 className="text-lg sm:text-xl md:text-2xl text-third font-medium mb-1">
             Order Update: <span className="font-bold">{order.status}</span>
           </h5>
-          <p className="text-gray-600 text-lg">{order.statusMessage}</p>
+          <p className="text-gray-600 text-base sm:text-lg">{order.statusMessage}</p>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 pt-4 border-t border-third/10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-4 border-t border-third/10">
         <div className="w-full md:w-auto">
           {order.canConfirmReceipt ? (
             <div className="flex items-center gap-4">
-              <span className="text-gray-700 font-medium text-lg">
+              <span className="text-gray-700 font-medium text-base sm:text-lg">
                 Confirm Receipt:
               </span>
               <ConfirmDeliveryButton asChild>
@@ -92,7 +92,7 @@ export default function OrderCard({ order }: OrderCardProps) {
             </p>
           )}
         </div>
-        <div className="text-2xl md:text-3xl">
+        <div className="text-xl sm:text-2xl md:text-3xl">
           Order total: <span className="text-black">P{order.totalPrice}</span>
         </div>
       </div>

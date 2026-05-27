@@ -43,9 +43,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="relative flex flex-col h-160 w-80 bg-primary-light hover:shadow-lg transition-shadow">
+    <div className="relative flex flex-col w-full sm:w-80 bg-primary-light hover:shadow-lg transition-shadow">
       <Link href={checkoutHref} className="flex flex-col h-full">
-        <div className="flex-1 relative">
+        <div className="relative w-full aspect-[3/4]">
             <Image
             src={getS3PublicUrl(product.img_src)}
             alt={product.name}
@@ -61,17 +61,17 @@ export default function ProductCard({ product }: ProductCardProps) {
             <ShoppingCart size={20} />
           </button>
         </div>
-        <div className="flex flex-col h-40">
+        <div className="flex flex-col py-4">
           <div className="text-center">
-            <h4 className="text-2xl font-medium">{product.name}</h4>
-            <h5 className="text-lg">{product.location || product.type}</h5>
-            <h6 className="text-md italic text-gray-400">
+            <h4 className="text-lg sm:text-2xl font-medium">{product.name}</h4>
+            <h5 className="text-sm sm:text-lg">{product.location || product.type}</h5>
+            <h6 className="text-xs sm:text-md italic text-gray-400">
               ₱{typeof product.price === "number" ? product.price.toFixed(2) : product.price}
             </h6>
           </div>
-          <div className="flex flex-1 p-4 gap-2 align-bottom items-end justify-between">
-            <div className="flex gap-2">
-              <Star fill="fill-primary" stroke="#7b3b7b" />
+          <div className="flex flex-1 px-4 pt-3 gap-2 items-end justify-between text-xs sm:text-sm">
+            <div className="flex gap-2 items-center">
+              <Star size={16} fill="#7b3b7b" stroke="#7b3b7b" />
               <span>{product.rating ? product.rating.toFixed(1) : 'N/A'}</span>  
             </div>
             <div>

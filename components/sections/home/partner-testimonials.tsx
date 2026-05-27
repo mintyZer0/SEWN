@@ -1,8 +1,8 @@
 export default function ParterTestimonials() {
   return (
-    <div className="flex flex-col justify-center items-center bg-gradient-to-br from-transparent from-0% to-[#CBA0CB] w-11/12 md:w-full max-w-400 h-auto md:h-120 mx-auto rounded-2xl px-6 md:px-16 py-10 md:py-12 my-12 md:mb-20">
+    <div className="flex flex-col justify-center items-center bg-gradient-to-br from-transparent from-0% to-[#CBA0CB] w-11/12 md:w-full max-w-400 h-auto md:h-120 mx-auto rounded-2xl px-4 sm:px-6 md:px-16 py-10 md:py-12 my-12 md:mb-20">
       
-      <h2 className="text-4xl md:text-6xl text-primary-dark mb-8 md:mb-20 text-center">
+      <h2 className="text-3xl sm:text-4xl md:text-6xl text-primary-dark mb-8 md:mb-20 text-center">
         Partner Testimonials
       </h2>
       

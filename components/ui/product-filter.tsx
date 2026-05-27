@@ -38,9 +38,9 @@ export default function ProductFilter({ onSortChange, type }: ProductFilterProps
   };
 
   return (
-    <div className="mb-4 mx-4">
+    <div className="mb-4 mx-2 sm:mx-4 w-full sm:w-auto">
       <Select variant="purple" value={sortBy} onValueChange={handleSortChange}>
-        <SelectTrigger className="px-8 py-2 bg-primary-light rounded-lg border-none text-lg w-auto min-w-[240px]">
+        <SelectTrigger className="w-full sm:w-auto px-6 sm:px-8 py-2 bg-primary-light rounded-lg border-none text-base sm:text-lg sm:min-w-[240px]">
           <SelectValue placeholder="Filter by" />
         </SelectTrigger>
         <SelectContent>

@@ -25,7 +25,7 @@ export default function PromotionsPage() {
 
   return (
     <ProfileSection title="Promotions">
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex justify-center sm:justify-end">
         <button
           type="button"
           onClick={() =>
@@ -33,7 +33,7 @@ export default function PromotionsPage() {
               console.error("Failed to mark promotions as read:", error);
             })
           }
-          className="rounded-full bg-third px-4 py-2 text-xs md:text-sm text-white font-bold transition-all active:scale-95"
+          className="rounded-full bg-third px-4 py-2 text-xs md:text-sm text-white font-bold transition-all active:scale-95 w-full sm:w-auto"
         >
           Mark promotions as read
         </button>

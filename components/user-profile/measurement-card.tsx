@@ -26,7 +26,7 @@ export default function MeasurementCard({
 
   return (
     <div className="bg-white rounded-[40px] p-8 md:p-10 shadow-lg min-h-[220px] flex flex-col justify-center border border-white/20">
-      <h3 className="text-third text-2xl md:text-3xl font-bold mb-4 tracking-tight">
+      <h3 className="text-third text-xl sm:text-2xl md:text-3xl font-bold mb-4 tracking-tight">
         {profile.profile_name}
       </h3>
 
@@ -35,13 +35,13 @@ export default function MeasurementCard({
           {displayFields.map((field) => (
             <p
               key={field.label}
-              className="text-xl md:text-2xl text-gray-800 font-medium flex items-center gap-2"
+              className="text-base sm:text-lg md:text-2xl text-gray-800 font-medium flex items-center gap-2"
             >
               <span>{field.label}:</span>
               <span>{field.value !== null ? `${field.value} ${unit}` : "N/A"}</span>
             </p>
           ))}
-          <p className="text-2xl text-gray-800 font-bold tracking-widest leading-none">
+          <p className="text-xl sm:text-2xl text-gray-800 font-bold tracking-widest leading-none">
             ...
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function MeasurementCard({
           <ProfileButton
             variant="orange"
             size="lg"
-            className="px-12"
+            className="px-12 w-full sm:w-auto"
             onClick={onEdit}
           >
             Edit
@@ -58,7 +58,7 @@ export default function MeasurementCard({
           <ProfileButton
             variant="orange"
             size="lg"
-            className="px-12"
+            className="px-12 w-full sm:w-auto"
             onClick={onDelete}
           >
             Delete

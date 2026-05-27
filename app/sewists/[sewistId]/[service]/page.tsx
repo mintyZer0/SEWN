@@ -98,7 +98,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
         return (
           <div className="min-h-screen ">
-            <div className="relative h-100 w-full">
+            <div className="relative h-64 sm:h-80 md:h-100 w-full">
               <Image
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
@@ -108,17 +108,17 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 priority
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <h1 className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-light text-white drop-shadow-lg">
                   Commission a Sewist
                 </h1>
               </div>
             </div>
 
-            <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-heading mb-3">
+            <div className="max-w-300 mx-auto text-center py-8 sm:py-10 md:py-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
-              <p className="text-2xl">
+              <p className="text-base sm:text-lg md:text-2xl">
                 we value efficiency above all,
                 <br />
                 commissioning a sewist is so easy!
@@ -157,7 +157,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
         return (
           <div className="min-h-screen ">
-            <div className="relative h-100 w-full">
+            <div className="relative h-64 sm:h-80 md:h-100 w-full">
               <Image
                 src="/assets/repair-steps/repair-hero.jpg"
                 alt="Commission a Sewist"
@@ -167,17 +167,17 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 priority
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <h1 className="text-5xl md:text-6xl font-medium text-black  drop-shadow-lg">
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-medium text-black  drop-shadow-lg">
                   Repair
                 </h1>
               </div>
             </div>
 
-            <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-heading mb-3">
+            <div className="max-w-300 mx-auto text-center py-8 sm:py-10 md:py-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
-              <p className="text-2xl">
+              <p className="text-base sm:text-lg md:text-2xl">
                 we value efficiency above all,
                 <br />
                 commissioning a sewist is so easy!
@@ -224,7 +224,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
         return (
           <div className="min-h-screen ">
-            <div className="relative h-100 w-full">
+            <div className="relative h-64 sm:h-80 md:h-100 w-full">
               <Image
                 src="/assets/services-bento-bg/bento-commision.jpg"
                 alt="Commission a Sewist"
@@ -234,17 +234,17 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 priority
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <h1 className="text-5xl md:text-6xl font-light text-white drop-shadow-lg">
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-light text-white drop-shadow-lg">
                   Commission a Sewist
                 </h1>
               </div>
             </div>
 
-            <div className="max-w-300 mx-auto text-center py-12 px-4">
-              <h2 className="text-6xl font-semibold text-heading mb-3">
+            <div className="max-w-300 mx-auto text-center py-8 sm:py-10 md:py-12 px-4">
+              <h2 className="text-3xl sm:text-4xl md:text-6xl font-semibold text-heading mb-3">
                 Here at SEWN
               </h2>
-              <p className="text-2xl">
+              <p className="text-base sm:text-lg md:text-2xl">
                 we value efficiency above all,
                 <br />
                 commissioning a sewist is so easy!

@@ -192,11 +192,11 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
 
   return (
     <div className="w-full p-2">
-      <div className="flex justify-between items-center mb-8">
-        <span className="text-2xl mx-5 font-bold text-gray-700">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        <span className="text-lg sm:text-2xl mx-2 sm:mx-5 font-bold text-gray-700">
           {filteredSewists.length} Sewists
         </span>
-        <div className="mb-4 mx-4">
+        <div className="mb-2 sm:mb-4 mx-2 sm:mx-4 w-full sm:w-auto">
           <Select
             variant="purple"
             value={sortBy}
@@ -204,7 +204,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
               setSortBy(val as "most-sold" | "highest-rated" | "most-experienced")
             }
           >
-            <SelectTrigger className="px-4 py-2 bg-primary-light rounded-lg border-none text-lg min-w-[200px]">
+            <SelectTrigger className="w-full sm:min-w-[200px] px-4 py-2 bg-primary-light rounded-lg border-none text-lg">
               <SelectValue placeholder="Filter by" />
             </SelectTrigger>
             <SelectContent>
@@ -216,7 +216,7 @@ export default function SewistsGrid({filters, type}: SewistsGridProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto justify-items-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-7xl mx-auto justify-items-center">
         {filteredSewists.map((sewist) => (
           <SewistCard
             key={sewist.id}

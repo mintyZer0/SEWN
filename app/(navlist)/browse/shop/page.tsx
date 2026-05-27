@@ -17,14 +17,14 @@ export default function Shop() {
 
   return (
     <>
-      <h1 className="flex justify-center mx-20 text-9xl text-heading p-4">
+      <h1 className="flex justify-center mx-4 sm:mx-8 md:mx-20 text-4xl sm:text-5xl md:text-7xl lg:text-9xl text-heading p-4">
         Order
       </h1>
 
-      <div className="flex flex-row my-20">
+      <div className="flex flex-col md:flex-row gap-6 md:gap-0 my-10 md:my-20">
         <FilterTab setFilters={setFilters} type="products" />
 
-        <div className="flex flex-1 flex-col m-4 gap-4">
+        <div className="flex flex-1 flex-col mx-4 md:m-4 gap-4">
           <SearchBar value={filters.search?.[0] || ""} onChange={handleSearchChange} />
           <ShopGrid filters={filters} type="products" />
         </div>
