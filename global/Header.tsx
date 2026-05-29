@@ -7,7 +7,7 @@ import { useRef, useState, useEffect, use } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
 import FlatListDropDown from "@/components/ui/flatlistdropdown";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 import { getS3PublicUrl } from "@/lib/s3-client";
@@ -29,7 +29,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
   const [fullData, setFullData] = useState<any[]>([]);
 
   const bgStyles = {
-    default: "bg-orchid-light",
+    default: "md:bg-orchid-light bg-[#B87CB8]",
     sewist: "third-gradient",
   };
 
@@ -102,6 +102,8 @@ export default function Header({ variant = "default" }: HeaderProps) {
     process.env.NODE_ENV === "production" ? "https://sewist.sewn.com/login" : "http://sewist.sewn.local:3000/login";
   
   const router = useRouter();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
 
   const handleSewistCenterClick = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -236,7 +238,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
       </div>
 
       {/* Mobile Layout: Flex Row */}
-      <div className="md:hidden flex items-center justify-between py-4 px-4 w-full gap-3">
+      <div className="md:hidden flex items-center justify-between py-3 px-4 w-full gap-3">
         {/* Logo */}
         <div className="flex-none">
           <Link href="/">
@@ -245,25 +247,26 @@ export default function Header({ variant = "default" }: HeaderProps) {
               alt="SEWN Logo"
               height={200}
               width={200}
-              className="w-24 h-auto object-contain"
+              className="w-16 h-auto object-contain brightness-0"
+              style={{ filter: "brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(700%) hue-rotate(250deg) brightness(80%) contrast(90%)" }}
             />
           </Link>
         </div>
 
         {/* Search Bar - Grows to fill space between Logo and Menu */}
-        <div className="flex-1 pr-10">
-          <div className="relative flex items-center bg-white rounded-full px-3 py-1.5 shadow-inner w-full">
-            <Search size={16} className="text-gray-400 mr-2 shrink-0" />
+        <div className={cn("flex-1", isHome ? "pr-0" : "pr-4")}>
+          <div className="relative flex items-center bg-white rounded-full px-3 py-1.5 shadow-inner w-full border border-primary/20">
+            <Search size={16} className="text-primary/70 mr-2 shrink-0" />
             <input
               type="search"
-              placeholder="Search..."
+              placeholder=""
               className="bg-transparent border-none outline-none text-sm w-full text-black placeholder:text-gray-400"
             />
           </div>
         </div>
 
         {/* Menu */}
-        <div className="flex-none">
+        {!isHome && <div className="flex-none">
           {/* Hamburger Menu */}
           <div className="drawer drawer-end w-fit">
             <input id="mobile-drawer" type="checkbox" className="drawer-toggle" />
@@ -321,7 +324,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
               </ul>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
       {isCartOpen && (
         <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setIsCartOpen(false)}>

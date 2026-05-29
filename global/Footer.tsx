@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ChevronDown } from "react-feather";
 import { cn } from "@/lib/utils";
 
 interface FooterProps {
@@ -46,7 +47,45 @@ export default function Footer({ variant = "primary" }: FooterProps) {
 
   return (
     <footer className={cn("w-full overflow-hidden", bgStyles[variant])}>
-      <div className="flex flex-col md:grid md:grid-cols-12 h-auto md:h-120 place-items-center md:items-center p-8 md:px-16 md:py-16">
+      <div className="md:hidden px-6 py-10">
+        <div className="relative h-32 w-40 mx-auto">
+          <Image
+            src={logoSrc}
+            fill
+            sizes="160px"
+            alt="logo"
+            className="object-contain"
+          />
+        </div>
+        <div className="mt-8 space-y-4">
+          {footerSections.map((section) => (
+            <details key={section.title} className="group">
+              <summary
+                className={cn(
+                  "flex items-center justify-between cursor-pointer text-lg font-semibold",
+                  textColors
+                )}
+              >
+                {section.title}
+                <ChevronDown className="transition-transform group-open:rotate-180" size={18} />
+              </summary>
+              <div className="mt-3 flex flex-col gap-2">
+                {section.links.map((link) => (
+                  <Link
+                    className={cn("text-sm hover:opacity-80 transition-opacity", textColors)}
+                    key={link.name}
+                    href={link.href}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
+
+      <div className="hidden md:grid md:grid-cols-12 h-auto md:h-120 place-items-center md:items-center p-8 md:px-16 md:py-16">
         <div className="relative h-64 w-full md:h-120 md:w-120 md:col-span-5 flex justify-center items-center md:justify-start">
           <Image
             src={logoSrc}
@@ -78,7 +117,7 @@ export default function Footer({ variant = "primary" }: FooterProps) {
         </div>
       </div>
       
-      <div className="w-full px-8 md:px-16 pb-8 text-center">
+      <div className="w-full px-6 md:px-16 pb-8 text-center">
         <div className={cn("w-full h-px mb-8", separatorColor)}></div>
         <p className={cn("text-base md:text-lg opacity-80 uppercase tracking-widest", textColors)}>
           © 2025, SEWNTUKAN

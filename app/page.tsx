@@ -17,12 +17,12 @@ export default function Home() {
       <Header />
       <HomeHero />
       <MeetOurSewists />
-      <NewProducts />
-      <Categories />
-      <Browse />
-      <OurPurpose/>
       <TodaysFeaturedSewist />
       <Mission className="bg-light-pink" />
+      <Browse />
+      <OurPurpose/>
+      <NewProducts />
+      <Categories />
       <OurPartners />
       <ParterTestimonials />
       <FollowUs />

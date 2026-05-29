@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function HomeHero() {
   return (
     <>
-      <div className="relative flex flex-col justify-center items-center w-full h-[60vh] md:h-230 overflow-hidden">
+      <div className="relative flex flex-col w-full h-[60vh] md:h-230 overflow-hidden">
         <Image
           className="absolute z-0 object-cover"
           src="/assets/home-image.png"
@@ -11,14 +11,22 @@ export default function HomeHero() {
           fill={true}
           sizes="100vw"
         ></Image>
-        <div className="flex items-center justify-center h-auto z-1 px-4 text-center">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl text-white text-shadow-2xs italic">
-            SEWNulid ng Pilipino, <br /> Dangal ng Kababaihan
-          </h1>
+        <div className="absolute inset-0 z-0 bg-black/35 md:bg-black/20"></div>
+        <div className="relative z-10 flex-1 flex items-center">
+          <div className="px-4 md:px-6 text-center w-full flex flex-col items-center">
+            <h1 className="text-[26px] sm:text-3xl md:text-5xl lg:text-7xl text-white text-shadow-2xs font-normal md:italic max-w-[280px] md:max-w-none leading-snug">
+              SEWN-ulid ng Pilipino, <br /> Dangal ng Kababaihan.
+            </h1>
+          </div>
         </div>
-        <button className="btn btn-outline border-white text-white border-2 hover:bg-white hover:text-heading absolute bottom-6 sm:bottom-10 md:bottom-20 rounded-2xl z-1 px-8 sm:px-12 md:px-16 py-3 md:py-4 text-lg sm:text-xl md:text-2xl lg:text-4xl h-auto font-normal">
-          <Link href="/browse/shop">BROWSE</Link>
-        </button>
+        <div className="relative z-10 flex justify-center pb-12 md:pb-20 -mt-10 sm:-mt-6">
+          <Link
+            href="/browse/shop"
+            className="border-[1.5px] border-white text-white hover:bg-white hover:text-heading rounded-[12px] px-16 py-2.5 text-[15px] sm:text-lg md:text-2xl font-light tracking-wider transition-colors active:scale-95"
+          >
+            SHOP
+          </Link>
+        </div>
       </div>
     </>
   );

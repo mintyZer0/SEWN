@@ -46,7 +46,7 @@ export default function ServiceCard({
     <Link
       href={isDisabled ? "#" : href}
       onClick={handleProtectedNavigation}
-      className={`relative block w-full h-100 ${className} ${colSpan === 2 ? "md:col-span-2 col-span-1" : "col-span-1"} ${isDisabled ? "grayscale opacity-50 cursor-not-allowed" : ""}`}
+      className={`relative block w-full h-44 sm:h-56 md:h-100 ${className} ${colSpan === 2 ? "md:col-span-2 col-span-1" : "col-span-1"} ${isDisabled ? "grayscale opacity-50 cursor-not-allowed" : ""}`}
     >
       <Image
         src={imgSrc}
@@ -55,8 +55,8 @@ export default function ServiceCard({
         sizes="(max-width: 768px) 100vw, 800px"
         className="object-cover rounded-4xl"
       />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2">
-        <h3 className="text-4xl text-white drop-shadow-2xl drop-shadow-black">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <h3 className="text-2xl sm:text-3xl lg:text-4xl text-white drop-shadow-2xl drop-shadow-black">
           {service}
         </h3>
       </div>

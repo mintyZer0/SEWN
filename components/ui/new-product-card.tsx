@@ -39,17 +39,17 @@ export default function NewProductCard({
       </figure>
 
       <div className="flex flex-col items-center px-4 gap-2">
-        <h2 className="card-title text-center text-xl sm:text-3xl pt-4">
+        <h2 className="card-title text-center text-lg sm:text-2xl md:text-3xl pt-4">
           {name}
         </h2>
 
         {sewist && (
-          <p className="text-center text-muted text-lg sm:text-2xl">
+          <p className="text-center text-muted text-sm sm:text-lg md:text-2xl">
             {sewist}
           </p>
         )}
 
-        <p className="text-center font-medium text-base">
+        <p className="text-center font-medium text-sm sm:text-base">
           ₱{price.toFixed(2)}
         </p>
       </div>

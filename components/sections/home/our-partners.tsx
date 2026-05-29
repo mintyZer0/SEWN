@@ -6,37 +6,35 @@ export default function OurPartners() {
     { name: "DOST", logo: "/assets/key-partner-logos/dost-logo.png", isImage: true },
     { name: "DTI", logo: "/assets/key-partner-logos/dti-logo.png", isImage: true },
     { name: "KOICA", logo: "/assets/key-partner-logos/koica-logo.png", isImage: true },
+    { name: "NGO", isImage: false },
     { name: "PCCI", logo: "/assets/key-partner-logos/pcci-logo.png", isImage: true },
     { name: "DICT", logo: "/assets/key-partner-logos/dict-logo.png", isImage: true },
-    { name: "GUITEB", logo: "/assets/key-partner-logos/guiteb.png", isImage: true },
     { name: "Igting", logo: "/assets/key-partner-logos/igting.png", isImage: true },
-    { name: "NGO", isImage: false },
   ];
 
   return (
-    <div className="relative w-full h-auto min-h-[50vh] flex items-center justify-center py-12 overflow-hidden">
-      <div className="relative z-10 flex flex-col items-center gap-8 w-full max-w-7xl px-4 md:px-8">
-        <h2 className="text-4xl md:text-6xl font-bold text-heading text-center">
+    <div className="relative w-full h-auto md:min-h-[50vh] flex items-center justify-center py-10 md:py-12 md:overflow-hidden">
+      <div className="relative z-10 flex flex-col items-center gap-6 md:gap-12 w-full max-w-4xl md:max-w-5xl px-6 md:px-8">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold md:font-normal text-primary md:text-[#7b3b7b] text-center">
           Our Partners
         </h2>
 
-        {/* The Magic Fix: flex-wrap, smaller gap for mobile, smaller padding (px-4 py-6) */}
-        <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8 bg-white/70 backdrop-blur-sm rounded-2xl px-4 py-6 md:px-12 md:py-8 w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-8 sm:gap-x-16 sm:gap-y-10 md:gap-x-20 md:gap-y-16 w-full place-items-center">
           {partners.map((partner) => (
             <div
               key={partner.name}
-              className="relative w-20 h-12 md:w-42 md:h-30 flex items-center justify-center shrink-0"
+              className="relative w-28 h-14 sm:w-32 sm:h-16 md:w-36 md:h-24 flex items-center justify-center"
             >
               {partner.isImage && partner.logo ? (
                 <Image
                   src={partner.logo}
                   alt={partner.name}
                   fill
-                  sizes="(max-width: 768px) 80px, 168px"
+                  sizes="(max-width: 768px) 128px, 144px"
                   className="object-contain"
                 />
               ) : (
-                <span className="text-3xl md:text-6xl font-bold text-gray-700 select-none">
+                <span className="text-2xl sm:text-3xl md:text-5xl font-bold text-blue-700 md:text-[#38628b] select-none">
                   {partner.name}
                 </span>
               )}
