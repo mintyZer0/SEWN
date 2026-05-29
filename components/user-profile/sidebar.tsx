@@ -43,7 +43,7 @@ export default function UserProfileSidebar() {
   ];
 
   return (
-    <aside className="w-64 p-8 border-r border-gray-100 shrink-0">
+    <aside className="hidden md:block w-64 p-8 border-r border-gray-100 shrink-0">
       <nav className="space-y-8">
         {sidebarItems.map((item, idx) => (
           <div key={idx} className="space-y-3">

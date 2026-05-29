@@ -43,39 +43,39 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="relative flex flex-col w-full sm:w-80 bg-primary-light hover:shadow-lg transition-shadow">
+    <div className="relative flex flex-col w-full bg-[#E6D4E6] rounded-sm overflow-hidden hover:shadow-lg transition-all group active:scale-[0.98]">
       <Link href={checkoutHref} className="flex flex-col h-full">
-        <div className="relative w-full aspect-[3/4]">
+        <div className="relative w-full aspect-[4/5] bg-gray-100">
             <Image
             src={getS3PublicUrl(product.img_src)}
             alt={product.name}
             fill
-            sizes="320px"
-            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 320px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <button
             onClick={handleAddToCart}
-            className="absolute top-2 right-2 bg-secondary hover:bg-primary hover:text-white text-heading p-2 rounded-full shadow-lg transition-colors z-10"
+            className="absolute top-2 right-2 bg-white/80 hover:bg-primary hover:text-white text-primary p-2 rounded-full shadow-md transition-all z-10 scale-90 sm:scale-100"
             aria-label="Add to cart"
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={18} />
           </button>
         </div>
-        <div className="flex flex-col py-4">
-          <div className="text-center">
-            <h4 className="text-lg sm:text-2xl font-medium">{product.name}</h4>
-            <h5 className="text-sm sm:text-lg">{product.location || product.type}</h5>
-            <h6 className="text-xs sm:text-md italic text-gray-400">
+        <div className="flex flex-col p-3 sm:p-4">
+          <div className="text-center sm:text-left">
+            <h4 className="text-[15px] sm:text-2xl font-bold text-gray-900 leading-tight truncate">{product.name}</h4>
+            <h5 className="text-[11px] sm:text-lg text-gray-700 mt-0.5 truncate">{product.location || product.type}</h5>
+            <h6 className="text-[11px] sm:text-md italic text-gray-500 mt-1">
               ₱{typeof product.price === "number" ? product.price.toFixed(2) : product.price}
             </h6>
           </div>
-          <div className="flex flex-1 px-4 pt-3 gap-2 items-end justify-between text-xs sm:text-sm">
-            <div className="flex gap-2 items-center">
-              <Star size={16} fill="#7b3b7b" stroke="#7b3b7b" />
-              <span>{product.rating ? product.rating.toFixed(1) : 'N/A'}</span>  
+          <div className="flex px-1 pt-3 gap-2 items-center justify-between text-[10px] sm:text-sm">
+            <div className="flex gap-1 items-center bg-primary/10 px-1.5 py-0.5 rounded-full">
+              <Star size={12} fill="#7b3b7b" stroke="#7b3b7b" className="sm:size-4" />
+              <span className="font-bold text-primary">{product.rating ? product.rating.toFixed(1) : '4.5'}</span>  
             </div>
-            <div>
-              <span>{product.sold || 0} sold</span> 
+            <div className="text-gray-500">
+              <span className="font-medium">{product.sold || 0} sold</span> 
             </div>
           </div>
         </div>

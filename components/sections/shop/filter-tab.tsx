@@ -1,6 +1,7 @@
 "use client";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { X } from 'lucide-react';
 import FilterCollapsibleSection from "@/components/ui/filter-collapsible-section";
 import PriceRange from "@/components/ui/price-range";
 import { MARKETPLACE_FILTERS, SEWIST_FILTERS } from "@/lib/constants";
@@ -88,23 +89,39 @@ export default function FilterTab({ setFilters, type, currentFilters = {} }: Fil
   };
 
   return (
-    <div className="flex flex-col h-auto w-full md:w-60 bg-orchid-vertical-b mx-4 md:mx-10 rounded-2xl">
+    <div className="filter-tab-container hidden md:flex flex-col h-auto w-full md:w-60 bg-orchid-vertical-b md:mx-10 rounded-2xl overflow-y-auto">
+      <div className="flex justify-between items-center p-6 md:hidden bg-primary rounded-t-2xl">
+        <h2 className="text-2xl font-bold text-white">Filters</h2>
+        <button 
+          className="p-2 text-white"
+          onClick={() => {
+            const container = document.querySelector('.filter-tab-container') as HTMLElement;
+            if (container) {
+              container.classList.add('hidden');
+              container.classList.remove('fixed', 'inset-0', 'z-[1100]', 'bg-white', 'm-0', 'rounded-none');
+            }
+          }}
+        >
+          <X size={24} />
+        </button>
+      </div>
 
-      <h2 className="text-2xl sm:text-3xl text-center mt-4 font-semibold text-secondary">
+      <h2 className="hidden md:block text-2xl sm:text-3xl text-center mt-4 font-semibold text-secondary">
         Filter
       </h2>
 
-      <PriceRange onPriceChange={handlePriceChange} />
+      <div className="md:p-0 p-4">
+        <PriceRange onPriceChange={handlePriceChange} />
 
-      {filtersToUse.map((section) => (
-        <FilterCollapsibleSection
-        key={section.label}
-        section={section}
-        onFilterChange={handleFilterChange}
-        selectedValues={currentFilters[section.label] || []}
-      />
-      ))}
-
+        {filtersToUse.map((section) => (
+          <FilterCollapsibleSection
+          key={section.label}
+          section={section}
+          onFilterChange={handleFilterChange}
+          selectedValues={currentFilters[section.label] || []}
+        />
+        ))}
+      </div>
     </div>
   );
 }

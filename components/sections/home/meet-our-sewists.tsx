@@ -32,7 +32,7 @@ export default function MeetOurSewists() {
             <div className="mt-8 flex justify-center">
               <Link
                 href="/browse/sewists"
-                className="z-20000 inline-flex w-full items-center justify-center rounded-[14px] bg-[#B084B0] px-6 py-3.5 text-[15px] font-bold text-white shadow-md transition-all active:scale-95"
+                className="z-20000 inline-flex w-full items-center justify-center rounded-[14px] bg-primary px-6 py-3.5 text-[15px] font-bold text-white shadow-md transition-all active:scale-95"
               >
                 Meet our Sewers
               </Link>
@@ -42,7 +42,7 @@ export default function MeetOurSewists() {
       </div>
 
       <div className="hidden md:flex flex-col md:flex-row w-full">
-        <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-gradient-to-br from-[#7B3B7B] to-[#CBA0CB] text-left justify-start p-6 md:p-8 px-6 md:px-16 text-3xl sm:text-4xl md:text-9xl">
+        <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-gradient-to-br from-primary to-primary-light text-left justify-start p-6 md:p-8 px-6 md:px-16 text-3xl sm:text-4xl md:text-9xl">
           <h2 className="text-secondary font-extralight my-6 md:my-8 mb-6 md:mb-16 tracking-wide">
             a way to <br />
             <span className="font-normal">represent</span>

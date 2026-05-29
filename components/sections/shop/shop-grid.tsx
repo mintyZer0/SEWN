@@ -49,6 +49,12 @@ export default function ShopGrid({ filters, type }: Props) {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState("most-sold");
 
+  // Sync count with parent if mobile element exists
+  useEffect(() => {
+    const el = document.getElementById("product-count-mobile");
+    if (el) el.innerText = `# of ${filteredProducts.length} Products`;
+  }, [filteredProducts.length]);
+
   
   useEffect(() => {
     async function fetchProducts() {
@@ -188,19 +194,35 @@ export default function ShopGrid({ filters, type }: Props) {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-        <span className="text-lg sm:text-2xl mx-2 sm:mx-5 font-bold text-gray-700">
+      <div className="flex flex-row items-center justify-between gap-4 mb-6 sm:mb-8">
+        <span className="hidden md:block text-lg sm:text-2xl mx-2 sm:mx-5 font-bold text-gray-700">
           {filteredProducts.length} Products
         </span>
-        <div className="w-full sm:w-auto">
-          <ProductFilter 
-            onSortChange={setSortBy} 
-            type="products" 
-          />
+        <div className="flex flex-1 md:hidden"></div>
+        <div className="flex items-center gap-4 w-full md:w-auto justify-end px-2">
+          <button 
+            className="md:hidden bg-primary-light text-primary font-semibold px-8 py-1.5 rounded-full shadow-sm active:scale-95 transition-all text-sm"
+            onClick={() => {
+              // Toggle filter modal/tab
+              const filterTab = document.querySelector('.filter-tab-container') as HTMLElement;
+              if (filterTab) {
+                filterTab.classList.remove('hidden');
+                filterTab.classList.add('fixed', 'inset-0', 'z-[1100]', 'bg-white', 'm-0', 'rounded-none');
+              }
+            }}
+          >
+            Filter
+          </button>
+          <div className="hidden md:block">
+            <ProductFilter 
+              onSortChange={setSortBy} 
+              type="products" 
+            />
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 p-2 sm:p-4 justify-items-center">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 p-1 sm:p-4 justify-items-center">
         {filteredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}

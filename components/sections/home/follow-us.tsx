@@ -61,7 +61,7 @@ export default function FollowUs() {
             />
             <button
               type="submit"
-              className="w-auto px-8 py-3 bg-gradient-to-r from-[#FF975E] to-[#FFCFB1] text-[#7B3B7B] font-bold rounded-xl hover:opacity-90 transition-opacity"
+              className="w-auto px-8 py-3 bg-gradient-to-r from-third to-[#FFCFB1] text-primary font-bold rounded-xl hover:opacity-90 transition-opacity"
             >
               Subscribe
             </button>

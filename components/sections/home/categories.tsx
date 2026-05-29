@@ -103,7 +103,7 @@ export default function Categories() {
             ))}
             <Link
               href="/browse/shop"
-              className="relative w-full h-[100px] rounded-[16px] overflow-hidden shadow-sm transition-transform active:scale-95 bg-gradient-to-br from-[#A881AA] to-[#7B3B7B]"
+              className="relative w-full h-[100px] rounded-[16px] overflow-hidden shadow-sm transition-transform active:scale-95 bg-gradient-to-br from-[#A881AA] to-primary"
             >
               <div className="absolute inset-0 flex items-center justify-center">
                 <h3 className="text-2xl text-white drop-shadow-lg">

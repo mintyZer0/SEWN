@@ -15,7 +15,7 @@ export default function OurPartners() {
   return (
     <div className="relative w-full h-auto md:min-h-[50vh] flex items-center justify-center py-10 md:py-12 md:overflow-hidden">
       <div className="relative z-10 flex flex-col items-center gap-6 md:gap-12 w-full max-w-4xl md:max-w-5xl px-6 md:px-8">
-        <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold md:font-normal text-primary md:text-[#7b3b7b] text-center">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-semibold md:font-normal text-primary md:text-primary text-center">
           Our Partners
         </h2>
 

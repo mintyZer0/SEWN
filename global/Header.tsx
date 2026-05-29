@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingBag, User, X, Plus, Minus, Menu } from "react-feather";
+import { Search, ShoppingBag, User, X, Plus, Minus, Menu, Home, Bell, ShoppingCart, Grid } from "react-feather";
 import { useRef, useState, useEffect, use } from "react";
 import { useCart } from "@/context/CartContext";
 import SearchBar from "@/components/ui/search-bar";
@@ -127,207 +127,186 @@ export default function Header({ variant = "default" }: HeaderProps) {
     },
   ];
 
+  const handleCartClick = () => {
+    if (window.innerWidth < 768) {
+      router.push("/cart");
+    } else {
+      setIsCartOpen(!isCartOpen);
+    }
+  };
+
   return (
-    <header className={cn("sticky top-0 left-0 right-0 z-[1001] shadow", bgStyles[variant])}>
-      {/* Desktop Layout: 2 rows */}
-      <div className="hidden md:grid grid-cols-6 grid-rows-2 items-center py-4 px-8 w-full gap-0">
-        {/* Logo: Spans 2 rows */}
-        <div className="col-start-1 col-end-2 row-start-1 row-end-3 flex items-center">
-          <Link href="/">
-            <Image
-              src="/assets/logo.png"
-              alt="SEWN Logo"
-              height={200}
-              width={200}
-              className="w-30 md:w-55 h-auto object-contain"
-            />
-          </Link>
-        </div>
-
-        {/* Navigation: Desktop Row 1 */}
-        <nav className="flex items-center justify-start text-white text-xs sm:text-2xl gap-x-2 sm:gap-x-20 col-start-2 col-end-6 row-start-1 row-end-1">
-          {navLinks.map((link) => (
-            <div key={link.name} className="relative group whitespace-nowrap">
-              <Link href={link.href} className="hover:opacity-70 transition-opacity">
-                {link.name}
-              </Link>
-            </div>
-          ))}
-          <div className="relative group whitespace-nowrap">
-            <button
-              type="button"
-              onClick={handleSewistCenterClick}
-              className="hover:opacity-70 transition-opacity"
-            >
-              Sewist Center
-            </button>
+    <>
+      <header className={cn("sticky top-0 left-0 right-0 z-[1000] shadow", bgStyles[variant])}>
+        {/* Desktop Layout: 2 rows */}
+        <div className="hidden md:grid grid-cols-6 grid-rows-2 items-center py-4 px-8 w-full gap-0">
+          {/* Logo: Spans 2 rows */}
+          <div className="col-start-1 col-end-2 row-start-1 row-end-3 flex items-center">
+            <Link href="/">
+              <Image
+                src="/assets/logo.png"
+                alt="SEWN Logo"
+                height={200}
+                width={200}
+                className="w-30 md:w-55 h-auto object-contain"
+              />
+            </Link>
           </div>
-        </nav>
 
-        {/* Search Bar: Desktop Row 2 */}
-        <div className="col-start-2 col-end-6 row-start-2 row-end-2 px-0 mt-2">
-          <div className = "relative  ">
-            <SearchBar value={searchValue} onChange={handleSearch} />
-
-            {searchValue && (
-              <div className = "absolute top-full left-0 w-full z-[1002]">
-                <FlatListDropDown data={searchData} />
+          {/* Navigation: Desktop Row 1 */}
+          <nav className="flex items-center justify-start text-white text-xs sm:text-2xl gap-x-2 sm:gap-x-20 col-start-2 col-end-6 row-start-1 row-end-1">
+            {navLinks.map((link) => (
+              <div key={link.name} className="relative group whitespace-nowrap">
+                <Link href={link.href} className="hover:opacity-70 transition-opacity">
+                  {link.name}
+                </Link>
               </div>
+            ))}
+            <div className="relative group whitespace-nowrap">
+              <button
+                type="button"
+                onClick={handleSewistCenterClick}
+                className="hover:opacity-70 transition-opacity"
+              >
+                Sewist Center
+              </button>
+            </div>
+          </nav>
+
+          {/* Search Bar: Desktop Row 2 */}
+          <div className="col-start-2 col-end-6 row-start-2 row-end-2 px-0 mt-2">
+            <div className = "relative  ">
+              <SearchBar value={searchValue} onChange={handleSearch} />
+
+              {searchValue && (
+                <div className = "absolute top-full left-0 w-full z-[1002]">
+                  <FlatListDropDown data={searchData} />
+                </div>
+                )}
+            </div>
+          </div>
+
+          {/* Icons: Desktop Col 6 Row 1 */}
+          <div className="col-start-6 col-end-7 row-start-1 row-end-1 flex justify-end items-center gap-x-8">
+            {/* Cart Icon */}
+            <button
+              onClick={handleCartClick}
+              className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
+              aria-label="Cart"
+            >
+              <ShoppingBag size={32} />
+              {getCartCount() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {getCartCount()}
+                </span>
               )}
+            </button>
+
+            {/* Profile / Login */}
+            {isLoggedIn ? (
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
+                aria-label="Profile"
+              >
+                <User size={32} />
+                <div
+                  className={`absolute right-0 mt-2 w-48 bg-secondary rounded-md shadow-lg py-2 z-10 transform transition-all duration-100 ease-out origin-top-right ${
+                    isProfileOpen
+                      ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
+                      : "opacity-0 scale-60 pointer-events-none -translate-y-1"
+                  }`}
+                >
+                  <div className="px-2 text-sm text-black">
+                    <ul className="text-primary text-lg text-left">
+                      <li>
+                        <Link href="/user-profile" className="block px-4 py-2 hover:bg-gray-50">
+                          User Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/auth/logout" className="block px-4 py-2 hover:bg-gray-50">
+                          Logout
+                        </Link>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push("/auth/login")}
+                className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative flex items-center gap-2"
+                aria-label="Profile login"
+              >
+                <User size={28} />
+                <span className="text-lg font-semibold">Login</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Icons: Desktop Col 6 Row 1 */}
-        <div className="col-start-6 col-end-7 row-start-1 row-end-1 flex justify-end items-center gap-x-8">
-          {/* Cart Icon */}
-          <button
-            onClick={() => setIsCartOpen(!isCartOpen)}
-            className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
-            aria-label="Cart"
+        {/* Mobile Layout: Flex Row */}
+        <div className="md:hidden flex items-center justify-between py-3 px-4 w-full gap-3">
+          {/* Logo */}
+          <div className="flex-none">
+            <Link href="/">
+              <Image
+                src="/assets/logo.png"
+                alt="SEWN Logo"
+                height={200}
+                width={200}
+                className="w-16 h-auto object-contain brightness-0"
+                style={{ filter: "brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(700%) hue-rotate(250deg) brightness(80%) contrast(90%)" }}
+              />
+            </Link>
+          </div>
+
+          {/* Search Bar - Grows to fill space between Logo and Menu */}
+          <div className="flex-1">
+            <div className="relative flex items-center bg-white rounded-full px-3 py-1.5 shadow-inner w-full border border-primary/20">
+              <Search size={16} className="text-primary/70 mr-2 shrink-0" />
+              <input
+                type="search"
+                placeholder=""
+                className="bg-transparent border-none outline-none text-sm w-full text-black placeholder:text-gray-400"
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[1000] bg-gradient-to-r from-[#A86BA8] to-[#C99FC9] rounded-t-[20px] shadow-[0_-4px_10px_rgba(0,0,0,0.1)] pb-safe">
+        <div className="flex justify-around items-center px-4 py-4">
+          <Link href="/" className="text-white hover:opacity-80 transition-opacity flex flex-col items-center">
+            <Home size={24} className={cn(pathname === "/" && "fill-white")} />
+          </Link>
+          <Link href="/user-profile/notifications/orders" className="text-white hover:opacity-80 transition-opacity flex flex-col items-center">
+            <Bell size={24} className={cn(pathname.includes("/notifications") && "fill-white")} />
+          </Link>
+          <button 
+            onClick={handleCartClick}
+            className="text-white hover:opacity-80 transition-opacity flex flex-col items-center relative"
           >
-            <ShoppingBag size={32} />
+            <ShoppingCart size={24} className={cn(pathname === "/cart" && "fill-white")} />
             {getCartCount() > 0 && (
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                 {getCartCount()}
               </span>
             )}
           </button>
-
-          {/* Profile / Login */}
-          {isLoggedIn ? (
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative"
-              aria-label="Profile"
-            >
-              <User size={32} />
-              <div
-                className={`absolute right-0 mt-2 w-48 bg-secondary rounded-md shadow-lg py-2 z-10 transform transition-all duration-100 ease-out origin-top-right ${
-                  isProfileOpen
-                    ? "opacity-100 scale-100 pointer-events-auto translate-y-0"
-                    : "opacity-0 scale-60 pointer-events-none -translate-y-1"
-                }`}
-              >
-                <div className="px-2 text-sm text-black">
-                  <ul className="text-primary text-lg text-left">
-                    <li>
-                      <Link href="/user-profile" className="block px-4 py-2 hover:bg-gray-50">
-                        User Profile
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/auth/logout" className="block px-4 py-2 hover:bg-gray-50">
-                        Logout
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </button>
-          ) : (
-            <button
-              onClick={() => router.push("/auth/login")}
-              className="text-white hover:opacity-80 hover:cursor-pointer transition-opacity relative flex items-center gap-2"
-              aria-label="Profile login"
-            >
-              <User size={28} />
-              <span className="text-lg font-semibold">Login</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Layout: Flex Row */}
-      <div className="md:hidden flex items-center justify-between py-3 px-4 w-full gap-3">
-        {/* Logo */}
-        <div className="flex-none">
-          <Link href="/">
-            <Image
-              src="/assets/logo.png"
-              alt="SEWN Logo"
-              height={200}
-              width={200}
-              className="w-16 h-auto object-contain brightness-0"
-              style={{ filter: "brightness(0) saturate(100%) invert(20%) sepia(50%) saturate(700%) hue-rotate(250deg) brightness(80%) contrast(90%)" }}
-            />
+          <Link href="/browse/shop" className="text-white hover:opacity-80 transition-opacity flex flex-col items-center">
+            <Grid size={24} className={cn(pathname.includes("/shop") && "fill-white")} />
+          </Link>
+          <Link href={isLoggedIn ? "/user-profile" : "/auth/login"} className="text-white hover:opacity-80 transition-opacity flex flex-col items-center">
+            <User size={24} className={cn(pathname.includes("/user-profile") && "fill-white")} />
           </Link>
         </div>
-
-        {/* Search Bar - Grows to fill space between Logo and Menu */}
-        <div className={cn("flex-1", isHome ? "pr-0" : "pr-4")}>
-          <div className="relative flex items-center bg-white rounded-full px-3 py-1.5 shadow-inner w-full border border-primary/20">
-            <Search size={16} className="text-primary/70 mr-2 shrink-0" />
-            <input
-              type="search"
-              placeholder=""
-              className="bg-transparent border-none outline-none text-sm w-full text-black placeholder:text-gray-400"
-            />
-          </div>
-        </div>
-
-        {/* Menu */}
-        {!isHome && <div className="flex-none">
-          {/* Hamburger Menu */}
-          <div className="drawer drawer-end w-fit">
-            <input id="mobile-drawer" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content w-fit">
-              <label htmlFor="mobile-drawer" className="drawer-button cursor-pointer text-white">
-                <Menu size={28} />
-              </label>
-            </div>
-            <div className="drawer-side z-[1002]">
-              <label htmlFor="mobile-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-              <ul className="menu min-h-full w-80 p-4 pt-12 text-heading bg-secondary">
-                {navLinks.map((link) => (
-                  <li key={link.name}>
-                    <Link href={link.href}>{link.name}</Link>
-                  </li>
-                ))}
-                <li>
-                  <button type="button" onClick={handleSewistCenterClick}>
-                    Sewist Center
-                  </button>
-                </li>
-                {/* Profile Links for Mobile */}
-                <div className="divider my-2"></div>
-                {isLoggedIn && (
-                  <li>
-                    <Link href="/user-profile">User Profile</Link>
-                  </li>
-                )}
-                <li>
-                  <button 
-                    onClick={() => {
-                      setIsCartOpen(true);
-                      const drawer = document.getElementById("mobile-drawer") as HTMLInputElement;
-                      if (drawer) drawer.checked = false;
-                    }} 
-                    className="flex items-center justify-between w-full"
-                  >
-                    <span>Shopping Cart</span>
-                    {getCartCount() > 0 && (
-                      <span className="bg-primary text-white text-xs rounded-full px-2 py-0.5 ml-2">
-                        {getCartCount()}
-                      </span>
-                    )}
-                  </button>
-                </li>
-                {isLoggedIn ? (
-                  <li>
-                    <Link href="/auth/logout">Logout</Link>
-                  </li>
-                ) : (
-                  <li>
-                    <Link href="/auth/login">Login</Link>
-                  </li>
-                )}
-              </ul>
-            </div>
-          </div>
-        </div>}
       </div>
+
       {isCartOpen && (
-        <div className="fixed inset-0 bg-black/30 z-50" onClick={() => setIsCartOpen(false)}>
+        <div className="fixed inset-0 bg-black/30 z-[1002]" onClick={() => setIsCartOpen(false)}>
           <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-secondary shadow-lg overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
@@ -375,7 +354,7 @@ export default function Header({ variant = "default" }: HeaderProps) {
                       <span className="text-lg font-semibold text-heading">Total:</span>
                       <span className="text-2xl font-bold text-heading">₱{getCartTotal().toFixed(2)}</span>
                     </div>
-                    <Link href="/checkout">
+                    <Link href="/checkout" onClick={() => setIsCartOpen(false)}>
                       <button className="w-full bg-primary text-white py-3 rounded-full font-semibold hover:opacity-90 transition-opacity">
                         Checkout
                       </button>
@@ -393,6 +372,6 @@ export default function Header({ variant = "default" }: HeaderProps) {
         loginHref={sewistLoginHref}
         description="Please login first before opening Sewist Center."
       />
-    </header>
+    </>
   );
 }

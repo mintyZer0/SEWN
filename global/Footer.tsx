@@ -47,41 +47,43 @@ export default function Footer({ variant = "primary" }: FooterProps) {
 
   return (
     <footer className={cn("w-full overflow-hidden", bgStyles[variant])}>
-      <div className="md:hidden px-6 py-10">
-        <div className="relative h-32 w-40 mx-auto">
-          <Image
-            src={logoSrc}
-            fill
-            sizes="160px"
-            alt="logo"
-            className="object-contain"
-          />
-        </div>
-        <div className="mt-8 space-y-4">
-          {footerSections.map((section) => (
-            <details key={section.title} className="group">
-              <summary
-                className={cn(
-                  "flex items-center justify-between cursor-pointer text-lg font-semibold",
-                  textColors
-                )}
-              >
-                {section.title}
-                <ChevronDown className="transition-transform group-open:rotate-180" size={18} />
-              </summary>
-              <div className="mt-3 flex flex-col gap-2">
-                {section.links.map((link) => (
-                  <Link
-                    className={cn("text-sm hover:opacity-80 transition-opacity", textColors)}
-                    key={link.name}
-                    href={link.href}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          ))}
+      <div className="md:hidden px-6 pt-12 pb-6">
+        <div className="flex items-center justify-between gap-2 mb-10">
+          <div className="relative h-32 w-52">
+            <Image
+              src={logoSrc}
+              fill
+              sizes="208px"
+              alt="logo"
+              className="object-contain object-left"
+            />
+          </div>
+          <div className="flex flex-col gap-5 text-right min-w-[140px]">
+            {footerSections.map((section) => (
+              <details key={section.title} className="group">
+                <summary
+                  className={cn(
+                    "flex items-center justify-end cursor-pointer text-xl font-bold tracking-tight",
+                    textColors
+                  )}
+                >
+                  {section.title}
+                  <ChevronDown className="ml-2 transition-transform group-open:rotate-180" size={18} />
+                </summary>
+                <div className="mt-2 flex flex-col gap-1.5 pr-6">
+                  {section.links.map((link) => (
+                    <Link
+                      className={cn("text-sm hover:opacity-80 transition-opacity", textColors)}
+                      key={link.name}
+                      href={link.href}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
         </div>
       </div>
 

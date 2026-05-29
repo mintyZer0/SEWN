@@ -257,7 +257,7 @@ export default function UserProfilePage() {
       description="Manage and protect your account"
     >
       <div className="bg-white rounded-[30px] p-6 sm:p-8 md:p-10 flex flex-col lg:flex-row gap-8 md:gap-12 lg:gap-16 shadow-lg border border-white/20">
-        <div className="flex-1 space-y-8">
+        <div className="flex-1 space-y-6 md:space-y-8">
           <div className="flex justify-between items-center">
             <h2 className="text-third text-2xl font-bold tracking-tight">
               Display Card
@@ -269,8 +269,48 @@ export default function UserProfilePage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] items-center gap-y-6 gap-x-4">
-            <label className="text-xl font-medium text-gray-800">
+          {/* Avatar Section - Shown here on Mobile, hidden on Desktop */}
+          <div className="md:hidden flex flex-col items-start gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-100 shadow-inner relative">
+                {currentPreview ? (
+                  <img
+                    src={currentPreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : null}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  name="profile_image"
+                  accept="image/png, image/jpeg, image/jpg"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </div>
+              <ProfileButton
+                variant="ghost"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={!isEditing}
+                className={cn(
+                  "border border-gray-300 text-gray-600 px-4 py-1.5 rounded-full hover:bg-gray-50 text-sm shadow-sm",
+                  (!isEditing || uploading) && "opacity-50 cursor-not-allowed",
+                )}
+              >
+                {uploading ? "Uploading..." : "Select Image"}
+              </ProfileButton>
+            </div>
+            <div className="w-full h-px bg-gray-300 mt-2"></div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] items-center gap-y-4 sm:gap-y-6 gap-x-4">
+            <label className="text-base sm:text-xl font-medium text-gray-800">
               Username:
             </label>
             <input
@@ -279,44 +319,44 @@ export default function UserProfilePage() {
               value={formData.username}
               onChange={handleChange}
               readOnly={!isEditing}
-              className={`w-full border border-third/30 rounded-xl px-4 py-2.5 text-third focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-gray-100/50 cursor-default" : "bg-gray-50/30"}`}
+              className={`w-full border border-third/50 rounded-xl px-4 py-2 sm:py-2.5 text-third text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-white cursor-default" : "bg-gray-50/30"}`}
             />
 
-            <label className="text-xl font-medium text-gray-800">Name:</label>
+            <label className="text-base sm:text-xl font-medium text-gray-800">Name:</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               readOnly={!isEditing}
-              className={`w-full border border-third/30 rounded-xl px-4 py-2.5 text-third focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-gray-100/50 cursor-default" : "bg-gray-50/30"}`}
+              className={`w-full border border-third/50 rounded-xl px-4 py-2 sm:py-2.5 text-third text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-white cursor-default" : "bg-gray-50/30"}`}
             />
 
-            <label className="text-xl font-medium text-gray-800">Email:</label>
+            <label className="text-base sm:text-xl font-medium text-gray-800">Email:</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               readOnly
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-gray-400 bg-gray-100 cursor-not-allowed"
+              className="w-full border border-third/50 rounded-xl px-4 py-2 sm:py-2.5 text-third text-sm sm:text-base bg-white cursor-not-allowed"
             />
 
-            <label className="text-xl font-medium text-gray-800">Phone:</label>
+            <label className="text-base sm:text-xl font-medium text-gray-800">Phone:</label>
             <input
               type="text"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               readOnly={!isEditing}
-              className={`w-full border border-third/30 rounded-xl px-4 py-2.5 text-third focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-gray-100/50 cursor-default" : "bg-gray-50/30"}`}
+              className={`w-full border border-third/50 rounded-xl px-4 py-2 sm:py-2.5 text-third text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-white cursor-default" : "bg-gray-50/30"}`}
             />
 
-            <label className="text-xl font-medium text-gray-800">Gender:</label>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-8 text-third">
+            <label className="text-base sm:text-xl font-medium text-gray-800">Gender:</label>
+            <div className="flex flex-row flex-wrap gap-3 sm:gap-8 text-gray-600">
               {["Male", "Female", "Other"].map((option) => (
                 <label
                   key={option}
-                  className={`flex items-center gap-2.5 ${isEditing ? "cursor-pointer group" : "cursor-default"}`}
+                  className={`flex items-center gap-1.5 sm:gap-2.5 ${isEditing ? "cursor-pointer group" : "cursor-default"}`}
                 >
                   <input
                     type="radio"
@@ -325,10 +365,10 @@ export default function UserProfilePage() {
                     checked={formData.gender === option.toLowerCase()}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    className="w-5 h-5 accent-third"
+                    className="w-4 h-4 sm:w-5 sm:h-5 accent-gray-600"
                   />
                   <span
-                    className={`text-lg ${isEditing ? "group-hover:text-third/80" : ""} transition-colors`}
+                    className={`text-sm sm:text-lg ${isEditing ? "group-hover:text-gray-800" : ""} transition-colors`}
                   >
                     {option}
                   </span>
@@ -336,7 +376,7 @@ export default function UserProfilePage() {
               ))}
             </div>
 
-            <label className="text-xl font-medium text-gray-800">
+            <label className="text-base sm:text-xl font-medium text-gray-800">
               Date of birth:
             </label>
             <input
@@ -345,19 +385,19 @@ export default function UserProfilePage() {
               value={formData.dob}
               onChange={handleChange}
               readOnly={!isEditing}
-              className={`w-full border border-third/30 rounded-xl px-4 py-2.5 text-third focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-gray-100/50 cursor-default" : "bg-gray-50/30"}`}
+              className={`w-full border border-third/50 rounded-xl px-4 py-2 sm:py-2.5 text-third text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-third/20 transition-all ${!isEditing ? "bg-white cursor-default" : "bg-gray-50/30"}`}
             />
 
-            <label className="text-xl font-medium text-gray-800">
+            <label className="text-base sm:text-xl font-medium text-gray-800">
               Addresses:
             </label>
             <ProfileButton
               variant="orange"
-              size="md"
+              size="sm"
               disabled={!isEditing}
               className={cn(
-                "max-w-60",
-                !isEditing && "opacity-50 cursor-not-allowed",
+                "max-w-[160px] text-sm py-1.5",
+                !isEditing && "opacity-80 cursor-not-allowed",
               )}
             >
               Change Address
@@ -365,8 +405,9 @@ export default function UserProfilePage() {
           </div>
         </div>
 
-        <div className="hidden lg:block w-px bg-gray-200 self-stretch"></div>
-        <div className="flex flex-col items-center justify-center gap-6 sm:gap-8 lg:px-12">
+        <div className="hidden md:block w-px bg-gray-200 self-stretch"></div>
+        {/* Avatar Section - Shown here on Desktop, hidden on Mobile */}
+        <div className="hidden md:flex flex-col items-center justify-center gap-6 sm:gap-8 lg:px-12">
           <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 bg-[#5A5A5A] rounded-full flex items-center justify-center overflow-hidden border-4 border-gray-100 shadow-inner relative">
             {currentPreview ? (
             <>
@@ -409,16 +450,16 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      <div className="flex justify-center sm:justify-end mt-6 pr-0 sm:pr-4">
+      <div className="flex justify-end mt-0 md:mt-6 -mb-6 md:mb-0 mr-4 md:mr-0 z-10 relative">
         <ProfileButton
           variant="white"
           size="xl"
           onClick={handleConfirmChanges}
           disabled={isSaving || !uploadReady}
-          className="flex items-center gap-3"
+          className="flex items-center gap-3 shadow-md rounded-b-xl rounded-tl-xl rounded-tr-none md:rounded-full text-third font-bold text-sm md:text-xl py-3 px-6"
         >
-          {isSaving && <Loader2 className="w-6 h-6 animate-spin" />}
-          {isEditing ? "Confirm Changes" : "Edit Profile"}
+          {isSaving && <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />}
+          {isEditing ? "Confirm Changes" : "Confirm Changes"}
         </ProfileButton>
       </div>
     </ProfileSection>

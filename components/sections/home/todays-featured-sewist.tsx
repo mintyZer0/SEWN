@@ -14,9 +14,9 @@ export default function TodaysFeaturedSewist() {
   };
 
   return (
-    <div className="relative z-20 w-full bg-[#FFE5FF] md:bg-[#FFE5FF] px-0 pb-0 md:pb-10 pt-0 -mt-8 md:mt-0 lg:p-9">
+    <div className="relative z-20 w-full bg-light-pink md:bg-light-pink px-0 pb-0 md:pb-10 pt-0 -mt-8 md:mt-0 lg:p-9">
       <div className="md:hidden">
-        <div className="relative bg-[#FFE5FF] px-8 pb-4 pt-6">
+        <div className="relative bg-light-pink px-8 pb-4 pt-6">
           <div className="relative z-10 flex flex-col items-center">
             
             {/* Title Section */}
@@ -60,7 +60,7 @@ export default function TodaysFeaturedSewist() {
             <div className="mt-6 flex justify-center w-full">
               <Link
                 href={featuredSewist.href}
-                className="inline-flex w-[200px] items-center justify-center rounded-xl bg-[#B084B0] px-6 py-2 text-[15px] font-bold text-white transition-all active:scale-95"
+                className="inline-flex w-[200px] items-center justify-center rounded-xl bg-primary px-6 py-2 text-[15px] font-bold text-white transition-all active:scale-95"
               >
                 About
               </Link>
