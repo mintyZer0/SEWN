@@ -3,14 +3,24 @@ export function getS3PublicUrl(filePath: string | null | undefined): string {
 
   const bucket = process.env.NEXT_PUBLIC_AWS_S3_PUBLIC_BUCKET;
   const region = process.env.NEXT_PUBLIC_AWS_REGION || "ap-southeast-2";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
 
-  if (
-    filePath.startsWith("http://") ||
-    filePath.startsWith("https://") ||
-    filePath.startsWith("/") ||
-    filePath.startsWith("blob:") ||
-    filePath.startsWith("data:")
-  ) {
+  if (filePath.startsWith("http://") || filePath.startsWith("https://")) {
+    if (bucket && supabaseUrl) {
+      const supabasePublicPrefix = `${supabaseUrl}/storage/v1/object/public/`;
+      if (filePath.startsWith(supabasePublicPrefix)) {
+        const objectPath = filePath.slice(supabasePublicPrefix.length).replace(/^\/+/, "");
+        const lowerPath = objectPath.toLowerCase();
+        if (lowerPath === "avatars/default.jpg" || lowerPath === "default.jpg") {
+          return `https://${bucket}.s3.${region}.amazonaws.com/default.jpg`;
+        }
+      }
+    }
+
+    return filePath;
+  }
+
+  if (filePath.startsWith("/") || filePath.startsWith("blob:") || filePath.startsWith("data:")) {
     return filePath;
   }
 
@@ -33,7 +43,6 @@ export function getS3PublicUrl(filePath: string | null | undefined): string {
     return `https://${bucket}.s3.${region}.amazonaws.com/${normalizedPath}`;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
   if (supabaseUrl) {
     return `${supabaseUrl}/storage/v1/object/public/${normalizedPath}`;
   }

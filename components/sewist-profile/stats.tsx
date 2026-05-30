@@ -10,7 +10,7 @@ export default function StatsCard({
   productsSewed,
 }: StatsCardProps) {
   return (
-    <div className="flex w-full bg-secondary-gradient-b py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 justify-center items-center">
+    <div className="flex w-full bg-secondary-gradient-b py-12 sm:py-16 md:py-20 justify-center items-center">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 sm:gap-x-12 md:gap-x-50 gap-y-8 sm:gap-y-12 max-w-4xl">
         <div className="flex flex-col items-center">
           <h3 className="text-base sm:text-lg md:text-2xl text-heading-dark mb-2">
