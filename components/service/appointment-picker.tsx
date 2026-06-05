@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { getAvailableSlots, DayAvailability, TimeSlot } from "@/lib/appointment-actions";
 import { Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatYYYYMMDD, getMonday, addDays } from "@/lib/utils";
 
 interface AppointmentPickerProps {
   sewistId: string;
@@ -13,25 +14,45 @@ interface AppointmentPickerProps {
 export default function AppointmentPicker({ sewistId, onSlotSelected }: AppointmentPickerProps) {
   const [loading, setLoading] = useState(true);
   const [availability, setAvailability] = useState<DayAvailability[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(formatYYYYMMDD(new Date()));
   const [selectedSlot, setSelectedSlot] = useState<string>("");
 
-  const today = new Date();
-  const [currentMonth, setCurrentMonth] = useState({ year: today.getFullYear(), month: today.getMonth() + 1 });
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const mondayOfCurrentWeek = getMonday(addDays(new Date(), weekOffset * 7));
+  const weekDates = Array.from({ length: 7 }).map((_, i) => addDays(mondayOfCurrentWeek, i));
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       try {
-        const data = await getAvailableSlots(sewistId, currentMonth.year, currentMonth.month);
-        setAvailability(data);
+        // Find unique months in the current week view
+        const months = new Set<string>();
+        weekDates.forEach(d => {
+          months.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
+        });
+
+        const fetchPromises = Array.from(months).map(m => {
+          const [year, month] = m.split('-').map(Number);
+          return getAvailableSlots(sewistId, year, month);
+        });
+
+        const results = await Promise.all(fetchPromises);
+        const mergedAvailability = results.flat();
+        
+        // Remove duplicates if any (though getAvailableSlots is month-specific)
+        const uniqueAvailability = mergedAvailability.filter((v, i, a) => 
+          a.findIndex(t => t.date === v.date) === i
+        );
+
+        setAvailability(uniqueAvailability);
       } catch (err) {
         console.error(err);
       }
       setLoading(false);
     }
     load();
-  }, [sewistId, currentMonth]);
+  }, [sewistId, weekOffset]);
 
   const handleDateClick = (dateStr: string) => {
     setSelectedDate(dateStr);
@@ -46,10 +67,9 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
   const availableDates = availability.map(a => a.date);
   const slotsForSelectedDate = availability.find(a => a.date === selectedDate)?.slots || [];
 
-  const daysInMonth = new Date(currentMonth.year, currentMonth.month, 0).getDate();
-  const firstDayOfMonth = new Date(currentMonth.year, currentMonth.month - 1, 1).getDay();
-  
-  const monthName = new Date(currentMonth.year, currentMonth.month - 1).toLocaleString('default', { month: 'long' });
+  // Determine month/year from mondayOfCurrentWeek for display
+  const monthName = mondayOfCurrentWeek.toLocaleString('default', { month: 'long' });
+  const currentYear = mondayOfCurrentWeek.getFullYear();
 
   return (
     <div className="w-full max-w-sm bg-white rounded-3xl border border-primary-light/50 shadow-sm overflow-hidden flex flex-col">
@@ -58,19 +78,19 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-medium text-gray-900">{monthName}</h3>
-            <p className="text-xs text-gray-500">{currentMonth.year}</p>
+            <p className="text-xs text-gray-500">{currentYear}</p>
           </div>
           <div className="flex gap-1">
             <button 
               type="button"
-              onClick={() => setCurrentMonth(prev => prev.month === 1 ? { year: prev.year - 1, month: 12 } : { ...prev, month: prev.month - 1 })}
+              onClick={() => setWeekOffset(prev => prev - 1)}
               className="p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button 
               type="button"
-              onClick={() => setCurrentMonth(prev => prev.month === 12 ? { year: prev.year + 1, month: 1 } : { ...prev, month: prev.month + 1 })}
+              onClick={() => setWeekOffset(prev => prev + 1)}
               className="p-1.5 rounded-full hover:bg-gray-200 transition-colors text-gray-600 active:scale-95"
             >
               <ChevronRight className="w-4 h-4" />
@@ -90,16 +110,11 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
               </div>
             ))}
             
-            {/* Empty slots for start of month */}
-            {Array.from({ length: firstDayOfMonth }).map((_, i) => (
-              <div key={`empty-${i}`} className="aspect-square" />
-            ))}
-
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const dateStr = `${currentMonth.year}-${currentMonth.month.toString().padStart(2, '0')}-${(i + 1).toString().padStart(2, '0')}`;
+            {weekDates.map((date) => {
+              const dateStr = formatYYYYMMDD(date);
               const isAvailable = availableDates.includes(dateStr);
               const isSelected = selectedDate === dateStr;
-              const isToday = dateStr === today.toISOString().split('T')[0];
+              const isToday = dateStr === formatYYYYMMDD(new Date());
 
               return (
                 <button
@@ -117,7 +132,7 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                     }
                   `}
                 >
-                  <span className="relative z-10">{i + 1}</span>
+                  <span className="relative z-10">{date.getDate()}</span>
                   {isToday && !isSelected && (
                     <span className="absolute bottom-1 w-1 h-1 rounded-full bg-third" />
                   )}
