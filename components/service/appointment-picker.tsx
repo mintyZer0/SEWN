@@ -109,39 +109,27 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-y-2 gap-x-1">
-            {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-              <div key={d} className="text-center text-[10px] font-semibold text-gray-400 tracking-wider uppercase mb-1">
-                {d}
-              </div>
-            ))}
-            
+          <div className="flex justify-between items-center mb-6 bg-gray-50 p-2 rounded-2xl relative">
             {weekDates.map((date) => {
               const dateStr = formatYYYYMMDD(date);
-              const isAvailable = availableDates.includes(dateStr);
-              const isSelected = selectedDate === dateStr;
-              const isToday = dateStr === formatYYYYMMDD(new Date());
-
+              const isActive = selectedDate === dateStr;
+              const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+              
               return (
                 <button
                   key={dateStr}
                   type="button"
-                  disabled={!isAvailable}
                   onClick={() => handleDateClick(dateStr)}
-                  className={`
-                    relative aspect-square flex items-center justify-center rounded-xl text-xs font-medium transition-all duration-200
-                    ${isSelected 
-                      ? 'bg-primary text-white shadow-sm' 
-                      : isAvailable 
-                        ? 'bg-white border border-gray-100 text-gray-700 hover:border-primary-light hover:text-primary active:scale-95' 
-                        : 'text-gray-300 opacity-40 cursor-not-allowed'
-                    }
-                  `}
+                  className={`relative z-10 flex-1 py-2 text-xs font-medium transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400'}`}
                 >
-                  <span className="relative z-10">{date.getDate()}</span>
-                  {isToday && !isSelected && (
-                    <span className="absolute bottom-1 w-1 h-1 rounded-full bg-third" />
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-gray-200 rounded-xl -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
                   )}
+                  {dayName}
                 </button>
               );
             })}
