@@ -113,14 +113,15 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
             {weekDates.map((date) => {
               const dateStr = formatYYYYMMDD(date);
               const isActive = selectedDate === dateStr;
-              const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+              const dayName = date.toLocaleDateString(undefined, { weekday: 'short' });
+              const dateNum = date.getDate();
               
               return (
                 <button
                   key={dateStr}
                   type="button"
                   onClick={() => handleDateClick(dateStr)}
-                  className={`relative z-10 flex-1 py-2 text-xs font-medium transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400'}`}
+                  className={`relative z-10 flex-1 py-3 flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400'}`}
                 >
                   {isActive && (
                     <motion.div
@@ -129,7 +130,8 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
-                  {dayName}
+                  <span className="text-[10px] uppercase font-medium tracking-tight leading-none">{dayName}</span>
+                  <span className="text-sm font-bold leading-none">{dateNum}</span>
                 </button>
               );
             })}
@@ -162,7 +164,7 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" />
                   <span className="text-xs font-medium text-gray-900">
-                    {new Date(selectedDate).toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    {new Date(selectedDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
                   </span>
                 </div>
                 {slotsForSelectedDate.length > 0 && (
