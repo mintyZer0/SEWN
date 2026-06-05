@@ -131,7 +131,7 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
                     />
                   )}
                   <span className="text-[10px] uppercase font-medium tracking-tight leading-none">{dayName}</span>
-                  <span className="text-sm font-bold leading-none">{dateNum}</span>
+                  <span className="text-xs font-bold leading-none">{dateNum}</span>
                 </button>
               );
             })}
@@ -155,9 +155,11 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
             </motion.div>
           ) : (
             <motion.div 
-              key="has-date"
+              key={selectedDate}
               initial={{ opacity: 0, y: 10 }} 
               animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
               className="space-y-4"
             >
               <div className="flex items-center justify-between">
