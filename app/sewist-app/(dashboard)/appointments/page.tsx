@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import PrimaryButton from "@/components/ui/primary-button";
 import { Loader2, Calendar, Clock, Users, Save } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const DAYS = [
   { value: 1, label: "Monday" },
@@ -257,87 +257,110 @@ export default function AppointmentsSettingsPage() {
             })}
           </div>
 
-          {DAYS.map((day) => {
-            const isActive = hours[day.value]?.active;
-            return (
-              <div 
-                key={day.value} 
-                className={`
-                  flex flex-col md:flex-row md:items-center gap-4 md:gap-8 p-4 rounded-2xl transition-all duration-200
-                  ${isActive ? 'bg-gray-50 border border-gray-200' : 'bg-white border border-gray-100 opacity-60'}
-                `}
-              >
-                <div className="flex items-center gap-4 min-w-[140px]">
-                  <input 
-                    type="checkbox" 
-                    id={`day-${day.value}`}
-                    checked={!!isActive}
-                    onChange={() => handleDayToggle(day.value)}
-                    className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <label htmlFor={`day-${day.value}`} className="font-medium text-gray-700 cursor-pointer select-none">
-                    {day.label}
-                  </label>
-                </div>
-
-                {isActive ? (
-                  <div className="flex flex-wrap items-center gap-6 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <input 
-                        type="time" 
-                        value={hours[day.value]?.start_time || "09:00"}
-                        onChange={(e) => handleTimeChange(day.value, "start_time", e.target.value)}
-                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
-                      />
-                      <span className="text-gray-400">-</span>
-                      <input 
-                        type="time" 
-                        value={hours[day.value]?.end_time || "17:00"}
-                        onChange={(e) => handleTimeChange(day.value, "end_time", e.target.value)}
-                        className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
-                      />
+          <AnimatePresence mode="wait">
+            {DAYS.filter(d => d.value === activeDay).map((day) => {
+              const isActive = hours[day.value]?.active;
+              return (
+                <motion.div 
+                  key={day.value}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-6"
+                >
+                  {/* Status Toggle Header */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-3">
+                       <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
+                       <span className="font-medium text-gray-900">{day.label} Status</span>
                     </div>
-
-                    <div className="w-px h-6 bg-gray-200 hidden md:block"></div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col">
-                        <label className="text-xs text-gray-500 mb-1">Slot Duration</label>
-                        <select 
-                          value={hours[day.value]?.slot_duration_minutes || 60}
-                          onChange={(e) => handleTimeChange(day.value, "slot_duration_minutes", parseInt(e.target.value))}
-                          className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
-                        >
-                          <option value={30}>30 mins</option>
-                          <option value={45}>45 mins</option>
-                          <option value={60}>1 hour</option>
-                          <option value={90}>1.5 hours</option>
-                          <option value={120}>2 hours</option>
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                          <Users className="w-3 h-3" /> Max per slot
-                        </label>
-                        <input 
-                          type="number" 
-                          min="1"
-                          max="10"
-                          value={hours[day.value]?.max_customers_per_slot || 1}
-                          onChange={(e) => handleTimeChange(day.value, "max_customers_per_slot", parseInt(e.target.value))}
-                          className="w-20 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-light outline-none"
-                        />
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-sm ${isActive ? 'text-primary font-medium' : 'text-gray-400'}`}>
+                        {isActive ? 'Available' : 'Unavailable'}
+                      </span>
+                      <input 
+                        type="checkbox" 
+                        className="toggle toggle-primary" 
+                        checked={!!isActive}
+                        onChange={() => handleDayToggle(day.value)}
+                      />
                     </div>
                   </div>
-                ) : (
-                  <div className="text-sm text-gray-400">Closed</div>
-                )}
-              </div>
-            );
-          })}
+
+                  {isActive ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Time Range Card */}
+                      <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 text-gray-900 font-medium">
+                          <Clock className="w-4 h-4 text-primary" />
+                          <span>Working Hours</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <input 
+                            type="time" 
+                            value={hours[day.value]?.start_time || "09:00"}
+                            onChange={(e) => handleTimeChange(day.value, "start_time", e.target.value)}
+                            className="flex-1 px-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-light outline-none"
+                          />
+                          <span className="text-gray-400 font-light text-xs">TO</span>
+                          <input 
+                            type="time" 
+                            value={hours[day.value]?.end_time || "17:00"}
+                            onChange={(e) => handleTimeChange(day.value, "end_time", e.target.value)}
+                            className="flex-1 px-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-light outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Capacity Card */}
+                      <div className="p-6 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                        <div className="flex items-center gap-2 mb-4 text-gray-900 font-medium">
+                          <Users className="w-4 h-4 text-primary" />
+                          <span>Slot Capacity</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold px-1">Duration</label>
+                            <select 
+                              value={hours[day.value]?.slot_duration_minutes || 60}
+                              onChange={(e) => handleTimeChange(day.value, "slot_duration_minutes", parseInt(e.target.value))}
+                              className="px-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-light outline-none"
+                            >
+                              <option value={30}>30 mins</option>
+                              <option value={45}>45 mins</option>
+                              <option value={60}>1 hour</option>
+                              <option value={90}>1.5 hours</option>
+                              <option value={120}>2 hours</option>
+                            </select>
+                          </div>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold px-1">Max Customers</label>
+                            <input 
+                              type="number" 
+                              min="1"
+                              max="10"
+                              value={hours[day.value]?.max_customers_per_slot || 1}
+                              onChange={(e) => handleTimeChange(day.value, "max_customers_per_slot", parseInt(e.target.value))}
+                              className="px-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary-light outline-none"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-12 flex flex-col items-center justify-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-3">
+                        <Clock className="w-6 h-6 opacity-40" />
+                      </div>
+                      <p className="text-gray-500 font-medium">Closed for appointments</p>
+                      <p className="text-xs text-gray-400 mt-1 text-center max-w-[200px]">You won't receive any bookings on {day.label}s.</p>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
         <div className="p-8 border-t border-gray-100 bg-gray-50 flex justify-end">
