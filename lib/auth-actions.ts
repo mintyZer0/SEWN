@@ -571,3 +571,34 @@ export async function signInWithFacebookSewist(intent: "login" | "signup" = "log
 export async function signInWithTwitterSewist(intent: "login" | "signup" = "login") {
   return signInWithOAuth("twitter", "sewist", intent);
 }
+
+export async function markWelcomeSeen() {
+  const secureHeaders = await enforceServerActionSecurity(
+    "auth-welcome-seen",
+    10,
+    60_000,
+  );
+  if (!secureHeaders) {
+    return { success: false, error: "Invalid request" };
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("users")
+    .update({ has_seen_welcome: true })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Error marking welcome seen:", error);
+    return { success: false, error: "Failed to update" };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
+}
