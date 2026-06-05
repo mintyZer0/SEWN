@@ -5,6 +5,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ChatWidget } from "@/components/messaging/chat-widget";
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
+import { WelcomeModalWrapper } from "@/components/modals/welcome-modal-wrapper";
 
 const jost = Jost({
   variable: "--font-jost",
@@ -49,6 +50,7 @@ export default async function RootLayout({
           <CartProvider>
             {children}
             {!isAdminApp && <ChatWidget />}
+            <WelcomeModalWrapper />
           </CartProvider>
         </GoogleMapsProvider>
       </body>
