@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, User, Bell, ShoppingBag, Save } from "lucide-react";
+import { Menu, User, Bell, ShoppingBag, Save, LogOut } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -95,6 +95,18 @@ export default function UserProfileMobileNav() {
                   </button>
                 );
               })}
+              
+              <div className="border-t border-gray-100 pt-4 mt-2">
+                <form action="/auth/logout" method="post">
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-4 text-xl font-medium tracking-wide transition-colors text-left text-red-500 hover:text-red-600"
+                  >
+                    <LogOut size={24} strokeWidth={2} />
+                    Log out
+                  </button>
+                </form>
+              </div>
             </div>
           )}
         </div>

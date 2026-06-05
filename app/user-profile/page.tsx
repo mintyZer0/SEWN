@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { User, Loader2 } from "lucide-react";
+import { User, Loader2, LogOut } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { getS3PublicUrl } from "@/lib/s3-client";
 import { cn } from "@/lib/utils";
@@ -103,7 +103,7 @@ export default function UserProfilePage() {
               username: data.first_name || "",
               name: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
               email: data.email || user.email || "",
-              phone: data.user_phones.phone || "",
+              phone: data.user_phones?.phone || "",
               gender: data.gender || "male",
               dob: data.birthday || "1999-01-01",
               avatar_url: publicAvatarUrl,
