@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Jost } from "next/font/google";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ChatWidget } from "@/components/messaging/chat-widget";
@@ -50,7 +51,9 @@ export default async function RootLayout({
           <CartProvider>
             {children}
             {!isAdminApp && <ChatWidget />}
-            <WelcomeModalWrapper />
+            <Suspense fallback={null}>
+              <WelcomeModalWrapper />
+            </Suspense>
           </CartProvider>
         </GoogleMapsProvider>
       </body>
