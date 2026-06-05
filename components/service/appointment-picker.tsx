@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { getAvailableSlots, DayAvailability, TimeSlot } from "@/lib/appointment-actions";
 import { Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +19,13 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
 
   const [weekOffset, setWeekOffset] = useState(0);
 
-  const mondayOfCurrentWeek = getMonday(addDays(new Date(), weekOffset * 7));
-  const weekDates = Array.from({ length: 7 }).map((_, i) => addDays(mondayOfCurrentWeek, i));
+  const mondayOfCurrentWeek = useMemo(() => {
+    return getMonday(addDays(new Date(), weekOffset * 7));
+  }, [weekOffset]);
+
+  const weekDates = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, i) => addDays(mondayOfCurrentWeek, i));
+  }, [mondayOfCurrentWeek]);
 
   useEffect(() => {
     async function load() {
@@ -29,7 +34,8 @@ export default function AppointmentPicker({ sewistId, onSlotSelected }: Appointm
         // Find unique months in the current week view
         const months = new Set<string>();
         weekDates.forEach(d => {
-          months.add(`${d.getFullYear()}-${d.getMonth() + 1}`);
+          // Use UTC methods for unique month detection to match getAvailableSlots logic
+          months.add(`${d.getUTCFullYear()}-${d.getUTCMonth() + 1}`);
         });
 
         const fetchPromises = Array.from(months).map(m => {
