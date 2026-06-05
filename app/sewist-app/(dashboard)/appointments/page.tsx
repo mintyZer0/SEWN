@@ -36,6 +36,7 @@ export default function AppointmentsSettingsPage() {
   const [hours, setHours] = useState<Record<number, any>>({});
   const [userId, setUserId] = useState<string>("");
   const [hasHydratedInitialCache, setHasHydratedInitialCache] = useState(false);
+  const [activeDay, setActiveDay] = useState<number>(1); // Default to Monday
 
   const readAppointmentsCache = (nextUserId: string): AppointmentsCachePayload | null => {
     if (typeof window === "undefined") return null;
@@ -231,6 +232,31 @@ export default function AppointmentsSettingsPage() {
         </div>
 
         <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+          {/* Navigation Tabs */}
+          <div className="flex justify-between items-center mb-6 bg-gray-50 p-2 rounded-2xl relative">
+            {DAYS.map((day) => {
+              const isActive = activeDay === day.value;
+              return (
+                <button
+                  key={day.value}
+                  onClick={() => setActiveDay(day.value)}
+                  className={`relative z-10 flex-1 py-3 text-xs font-medium transition-colors ${isActive ? 'text-gray-900' : 'text-gray-400'}`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeDayIndicator"
+                      className="absolute inset-0 bg-gray-200 rounded-xl -z-10"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <div className="flex flex-col items-center">
+                    <span className="uppercase tracking-wider text-[10px] mb-0.5">{day.label.substring(0, 3)}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
           {DAYS.map((day) => {
             const isActive = hours[day.value]?.active;
             return (
