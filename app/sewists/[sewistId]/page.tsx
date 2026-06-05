@@ -98,7 +98,7 @@ export default async function SewistPage({ params }: PageProps) {
   const mobileNumber = user.user_phones?.[0]?.phone || "Phone not listed";
 
   return (
-    <div className="py-8 sm:py-12 px-4 sm:px-8">
+    <div className="py-8 sm:py-12 sm:px-8">
       <SewistHeader
         name={name}
         image={avatar}
@@ -120,7 +120,10 @@ export default async function SewistPage({ params }: PageProps) {
         achievements={achievements}
         tesdaCertified={tesdaCertified}
       />
-      <Map position={mapPosition} />
+    <div className="mx-4">
+        <Map position={mapPosition} />
+
+    </div>
       <ContactSewist
         sewistName={name}
         mobileNumber={mobileNumber}
