@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { markWelcomeSeen } from "@/lib/auth-actions";
 
 interface WelcomeModalProps {
@@ -35,20 +34,20 @@ export function WelcomeModal({ firstName }: WelcomeModalProps) {
            {/* Assuming logo exists at /assets/sewn-logo.png or similar. Update src if needed based on project structure */}
            {/* We use text to simulate logo for now if asset missing, but let's assume an image tag */}
           <div className="flex flex-col items-center">
-            <span className="text-3xl font-black tracking-widest text-[#3b1c4a]">
+            <span className="text-3xl font-black tracking-widest text-primary-dark">
               SEWN
             </span>
           </div>
         </div>
 
         {/* Welcome Text */}
-        <h2 className="mb-1 text-4xl font-black text-[#a65d93]">
+        <h2 className="mb-1 text-4xl font-black text-primary">
           Mabuhay!
         </h2>
-        <h3 className="mb-2 text-2xl font-bold text-[#a65d93]">
+        <h3 className="mb-2 text-2xl font-bold text-primary">
           Welcome to SEWN!
         </h3>
-        <h4 className="mb-6 text-3xl font-black text-[#a65d93]">
+        <h4 className="mb-6 text-3xl font-black text-primary">
           {firstName || "Friend"}
         </h4>
 
@@ -61,7 +60,7 @@ export function WelcomeModal({ firstName }: WelcomeModalProps) {
         <button
           onClick={handleClose}
           disabled={isLoading}
-          className="w-full rounded-2xl bg-gradient-to-r from-[#a65d93] to-[#c786b9] py-4 text-xl font-medium text-white shadow-md transition-transform hover:scale-[0.98] active:scale-95 disabled:opacity-70"
+          className="w-full rounded-2xl bg-primary py-4 text-xl font-medium text-white shadow-md transition-all hover:scale-[0.98] active:scale-95 disabled:opacity-70"
         >
           {isLoading ? "Loading..." : "Let's go"}
         </button>
