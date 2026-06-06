@@ -51,11 +51,6 @@ export function WelcomeModal({ firstName }: WelcomeModalProps) {
           {firstName || "Friend"}
         </h4>
 
-        {/* Change Dialect Link */}
-        <button className="mb-6 text-sm italic text-gray-500 underline hover:text-gray-700">
-          Change Dialect
-        </button>
-
         {/* CTA Button */}
         <button
           onClick={handleClose}
