@@ -5,7 +5,7 @@ export async function WelcomeModalWrapper() {
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (userError) {
+  if (userError && !userError.message?.includes("Auth session missing")) {
     console.error("Error fetching user in WelcomeModalWrapper:", userError);
   }
 
