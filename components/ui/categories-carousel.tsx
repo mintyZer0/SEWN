@@ -51,10 +51,10 @@ export default function CategoriesCarousel({ items }: CategoriesCarouselProps) {
           <Link
             key={item.id}
             href={item.href || "/store?category=" + encodeURIComponent(item.category)}
-            className="relative shrink-0 w-56 sm:w-72 lg:w-155 group cursor-pointer hover:scale-[1,02] transform transition-transform duration-300"
+            className="relative shrink-0 w-56 sm:w-72 lg:w-[450px] group cursor-pointer hover:scale-[1.02] transform transition-transform duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative w-full h-36 sm:h-52 lg:h-96">
+            <div className="relative w-full h-36 sm:h-52 lg:h-80">
               <Image
                 className="w-full h-full object-cover rounded-lg group-hover:scale-102 transform transition-transform duration-500 "
                 src={item.imageSrc}

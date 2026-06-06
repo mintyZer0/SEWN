@@ -14,7 +14,7 @@ export default function TodaysFeaturedSewist() {
   };
 
   return (
-    <div className="relative z-20 w-full bg-light-pink md:bg-light-pink px-0 pb-0 md:pb-10 pt-0 -mt-8 md:mt-0 lg:p-9">
+    <div className="relative z-20 w-full bg-light-pink md:bg-[#FDEDFD] px-0 pb-0 md:pb-10 pt-0 -mt-8 md:mt-0 lg:py-9 lg:pl-9 lg:pr-0 overflow-x-clip">
       <div className="md:hidden">
         <div className="relative bg-light-pink px-8 pb-4 pt-6">
           <div className="relative z-10 flex flex-col items-center">
@@ -69,7 +69,7 @@ export default function TodaysFeaturedSewist() {
         </div>
       </div>
 
-      <div className="hidden md:flex h-auto lg:h-96 flex-col lg:flex-row w-full justify-between overflow-hidden">
+      <div className="hidden md:flex h-auto lg:h-96 flex-col lg:flex-row w-full justify-between">
         <div className="flex w-full lg:w-150 justify-center lg:justify-start text-center lg:text-left">
           <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl p-3 text-heading font-light">
             Today's <br className="hidden lg:block" /> Featured{" "}

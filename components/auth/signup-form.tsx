@@ -133,25 +133,25 @@ export function SignupForm({
       <Card
         {...props}
         className={cn(
-          "h-200 w-170 border-0 shadow-none bg-transparent",
+          "h-auto md:h-200 w-full md:w-170 border-0 shadow-none bg-transparent",
           variants[variant].style,
           className,
         )}
       >
-        <CardHeader className="flex-row justify-center items-baseline gap-4 caret-transparent">
-          <CardTitle className="text-8xl font-normal">Sign Up</CardTitle>
-          <CardDescription className="text-2xl">
+        <CardHeader className="flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4 caret-transparent text-center md:text-left">
+          <CardTitle className="text-5xl md:text-8xl font-normal">Sign Up</CardTitle>
+          <CardDescription className="text-lg md:text-2xl">
             {variants[variant].subtitle}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={openRegisterModal} className="flex flex-col gap-6">
+          <form onSubmit={openRegisterModal} className="flex flex-col gap-4 md:gap-6">
             <div className="grid gap-2">
-              <Label className="text-2xl" htmlFor="username">
+              <Label className="text-lg md:text-2xl" htmlFor="username">
                 Username
               </Label>
               <Input
-                className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                 id="username"
                 name="username"
                 type="text"
@@ -160,11 +160,11 @@ export function SignupForm({
               />
             </div>
             <div className="grid gap-2">
-              <Label className="text-2xl" htmlFor="email">
+              <Label className="text-lg md:text-2xl" htmlFor="email">
                 Email
               </Label>
               <Input
-                className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                 id="email"
                 name="email"
                 type="email"
@@ -173,12 +173,12 @@ export function SignupForm({
               />
             </div>
             <div className="grid gap-2">
-              <Label className="text-2xl" htmlFor="password">
+              <Label className="text-lg md:text-2xl" htmlFor="password">
                 Password
               </Label>
               <div className="relative">
                 <Input
-                  className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                  className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
@@ -194,12 +194,12 @@ export function SignupForm({
               </div>
             </div>
             <div className="grid gap-2">
-              <Label className="text-2xl" htmlFor="confirm-password">
+              <Label className="text-lg md:text-2xl" htmlFor="confirm-password">
                 Confirm Password
               </Label>
               <div className="relative">
                 <Input
-                  className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                  className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                   id="confirm-password"
                   name="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
@@ -226,7 +226,7 @@ export function SignupForm({
             <Button
               type="submit"
               disabled={submitting}
-              className={`w-full h-20 rounded-3xl ${variants[variant].submitButtonClass} text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer disabled:opacity-50`}
+              className={`w-full h-14 md:h-20 rounded-2xl md:rounded-3xl ${variants[variant].submitButtonClass} text-2xl md:text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer disabled:opacity-50 mt-2 md:mt-0`}
             >
               {submitting ? "Registering..." : "Register"}
             </Button>
@@ -252,7 +252,7 @@ export function SignupForm({
             )}
           </form>
 
-          <div className="flex mt-4 text-center text-sm justify-between ">
+          <div className="flex flex-col md:flex-row mt-4 text-center md:text-left text-sm justify-between gap-4 md:gap-0">
             <Link
               href={variant === "sewist" ? "/login" : "/auth/login"}
               className="hover:underline underline-offset-4"

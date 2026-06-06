@@ -19,9 +19,9 @@ export default function SocialSignInButton({
       <button
         type="button"
         onClick={onSignIn}
-        className="size-30 rounded-full border-2 border-white flex items-center justify-center hover:bg-white/10 transition-colors"
+        className="size-20 md:size-30 rounded-full border-2 border-white flex items-center justify-center hover:bg-white/10 transition-colors"
       >
-        <Image src={imageSrc} alt={altText} width={48} height={48} />
+        <Image src={imageSrc} alt={altText} width={48} height={48} className="w-10 h-10 md:w-12 md:h-12" />
       </button>
     </div>
   );

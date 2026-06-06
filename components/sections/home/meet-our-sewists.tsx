@@ -15,9 +15,9 @@ export default function MeetOurSewists() {
           <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/70 via-black/20 to-[#CBA0CB]/90"></div>
           <div className="absolute inset-x-0 bottom-0 z-10 h-32 bg-gradient-to-b from-transparent to-[#FFE5FF]"></div>
           <div className="relative z-20 px-8 pt-12 pb-14 text-white">
-            <h2 className="text-[40px] font-light leading-[1.1] tracking-wide text-[#F9F7E8]">
+            <h2 className="text-[40px] font-normal leading-[1.1] tracking-normal text-secondary">
               a way to <br />
-              <span className="font-semibold tracking-normal text-white">represent</span>
+              <span className="font-medium">represent sewists</span>
             </h2>
             <p className="mt-5 text-[13px] leading-relaxed tracking-wide text-white font-medium">
               Explore a wide variety of skilled local sewers ready to turn your
@@ -42,39 +42,30 @@ export default function MeetOurSewists() {
       </div>
 
       <div className="hidden md:flex flex-col md:flex-row w-full">
-        <div className="flex flex-col w-full md:w-2/3 min-h-[50vh] bg-gradient-to-br from-primary to-primary-light text-left justify-start p-6 md:p-8 px-6 md:px-16 text-3xl sm:text-4xl md:text-9xl">
-          <h2 className="text-secondary font-extralight my-6 md:my-8 mb-6 md:mb-16 tracking-wide">
+        <div className="flex flex-col w-full bg-gradient-to-br from-[#925FA6] to-[#CEA9D0] text-center items-center justify-center px-12 lg:px-24 py-8 lg:py-16">
+          <h2 className="text-secondary text-6xl md:text-8xl lg:text-[130px] font-normal mb-8 lg:mb-12 leading-[1.05] tracking-normal text-left max-w-[1100px] w-full">
             a way to <br />
-            <span className="font-normal">represent</span>
+            <span className="font-medium">represent sewists</span>
           </h2>
-          <div className="py-2 md:p-4 text-lg md:text-2xl text-white">
-            <p className="max-w-3xl leading-relaxed">
-              Explore a wide variety of skilled local sewists ready to turn your
-              ideas into beautiful, handcrafted creations.
-              <br />
-              <br /> We proudly support and showcase women artisans, helping them
-              gain recognition, improve their craft, and access more
-              opportunities, while giving you unique, high-quality pieces made
+          <div className="text-lg md:text-xl lg:text-[26px] text-white max-w-[1100px] space-y-8 font-normal text-left w-full">
+            <p className="leading-relaxed">
+              Explore a wide variety of skilled local sewers ready to turn your ideas into beautiful, <br className="hidden lg:block" />
+              handcrafted creations.
+            </p>
+            <p className="leading-relaxed">
+              We proudly support and showcase women artisans, helping them gain recognition, improve <br className="hidden lg:block" />
+              their craft, and access more opportunities, while giving you unique, high-quality pieces made <br className="hidden lg:block" />
               with care.
             </p>
           </div>
-          <div className="flex flex-1 items-center justify-center lg:justify-start w-full">
+          <div className="mt-16 lg:mt-24 w-full max-w-[1100px] flex justify-center">
             <Link
               href="/browse/sewists"
-              className="text-lg sm:text-xl md:text-3xl text-center w-full md:w-auto text-white bg-primary px-6 sm:px-10 md:px-24 lg:px-60 py-4 rounded-2xl hover:cursor-pointer hover:opacity-90 transition-opacity mt-8 md:mt-10 whitespace-nowrap"
+              className="text-xl lg:text-3xl text-center text-white bg-primary border-[3px] border-white px-28 lg:px-48 py-5 lg:py-6 rounded-full hover:bg-white hover:text-primary transition-all whitespace-nowrap font-medium shadow-md"
             >
               Meet our Sewists
             </Link>
           </div>
-        </div>
-        <div className="relative w-full md:w-1/3 min-h-[40vh] md:min-h-full">
-          <Image
-            src="/assets/meet-our-sewists.png"
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            alt="meet our sewists"
-            className="object-cover object-center md:object-right"
-          ></Image>
         </div>
       </div>
     </>

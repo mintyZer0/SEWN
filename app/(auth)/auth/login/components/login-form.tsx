@@ -25,22 +25,22 @@ export function LoginForm({
       className={cn("flex flex-col gap-6 items-center", className)}
       {...props}
     >
-      <Card className="text-white h-200 w-150 border-0 shadow-none bg-transparent">
-        <CardHeader className="flex-row justify-center items-baseline gap-4">
-          <CardTitle className="text-8xl font-normal">Login</CardTitle>
-          <CardDescription className="text-2xl">
+      <Card className="text-white h-auto md:h-200 w-full md:w-150 border-0 shadow-none bg-transparent">
+        <CardHeader className="flex-col md:flex-row justify-center items-center md:items-baseline gap-2 md:gap-4 text-center md:text-left">
+          <CardTitle className="text-5xl md:text-8xl font-normal">Login</CardTitle>
+          <CardDescription className="text-lg md:text-2xl">
             Please fill in your basic info
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 md:gap-6">
               <div className="grid gap-2">
-                <Label className="text-2xl" htmlFor="email">
+                <Label className="text-lg md:text-2xl" htmlFor="email">
                   Email
                 </Label>
                 <Input
-                  className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                  className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                   id="email"
                   name="email"
                   type="email"
@@ -50,13 +50,13 @@ export function LoginForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label className="text-2xl" htmlFor="password">
+                  <Label className="text-lg md:text-2xl" htmlFor="password">
                     Password
                   </Label>
                 </div>
                 <div className="relative">
                   <Input
-                    className="rounded-2xl text-lg! h-16! px-4! py-4!"
+                    className="rounded-xl md:rounded-2xl text-base md:text-lg! h-12 md:h-16! px-4! py-4!"
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
@@ -72,7 +72,7 @@ export function LoginForm({
                 </div>
                 <a
                   href="#"
-                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  className="ml-auto inline-block text-xs md:text-sm underline-offset-4 hover:underline"
                 >
                   Forgot your password?
                 </a>
@@ -80,7 +80,7 @@ export function LoginForm({
               <Button
                 type="submit"
                 formAction={login}
-                className="w-full h-20 rounded-3xl bg-background text-heading text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer"
+                className="w-full h-14 md:h-20 rounded-2xl md:rounded-3xl bg-background text-heading text-2xl md:text-4xl font-semibold shadow-md hover:bg-background/95 cursor-pointer mt-2 md:mt-0"
               >
                 LOGIN
               </Button>

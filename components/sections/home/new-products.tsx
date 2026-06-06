@@ -107,8 +107,8 @@ export default function NewProducts() {
         )}
       </div>
 
-      <div className="hidden md:flex justify-center h-auto w-auto lg:mx-30 m-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-x-30">
+      <div className="hidden md:flex justify-center h-auto w-auto lg:mx-12 m-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-x-12 w-full max-w-7xl">
           {newProducts.map((product) => (
             <NewProductCard
               key={product.id}

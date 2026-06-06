@@ -18,7 +18,7 @@ export default function Home() {
       <HomeHero />
       <MeetOurSewists />
       <TodaysFeaturedSewist />
-      <Mission className="bg-light-pink" />
+      <Mission className="bg-light-pink md:bg-light-pink" />
       <Browse />
       <OurPurpose/>
       <NewProducts />
